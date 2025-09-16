@@ -1,0 +1,26 @@
+import React from 'react';
+
+interface Props {
+  value: string;
+  onChange: (v: string) => void;
+  disabled?: boolean;
+}
+
+const FontSelector: React.FC<Props> = ({ value, onChange, disabled }) => (
+  <div className="space-y-3">
+    <div>
+      <label className="block text-sm font-medium text-gray-900">Tipografía</label>
+      <p className="text-xs text-gray-500">Fuente de textos para los informes</p>
+    </div>
+    <select value={value} onChange={e=>onChange(e.target.value)} disabled={disabled} className="w-full px-3 py-3 border border-gray-300 rounded-lg disabled:bg-gray-50">
+      <option value="Inter">Inter (Recomendada)</option>
+      <option value="Roboto">Roboto</option>
+      <option value="Open Sans">Open Sans</option>
+      <option value="Montserrat">Montserrat</option>
+      <option value="Lato">Lato</option>
+      <option value="Poppins">Poppins</option>
+    </select>
+  </div>
+);
+
+export default FontSelector; 

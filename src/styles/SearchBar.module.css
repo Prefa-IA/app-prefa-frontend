@@ -1,0 +1,71 @@
+.container {
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.inputContainer {
+  display: flex;
+}
+
+.input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem 0 0 0.5rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: #3b82f6;
+}
+
+.searchButton {
+  background-color: #0369a1;
+  color: white;
+  padding: 0 1rem;
+  border-radius: 0 0.5rem 0.5rem 0;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.searchButton:hover {
+  background-color: #1d4ed8;
+}
+
+.searchButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.suggestionsContainer {
+  position: absolute;
+  z-index: 10;
+  width: 100%;
+  background-color: white;
+  margin-top: 0.25rem;
+  border-radius: 0.375rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  max-height: 15rem;
+  overflow: auto;
+}
+
+.suggestionItem {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.suggestionItem:hover {
+  background-color: #f3f4f6;
+}
+
+.icon {
+  height: 1.5rem;
+  width: 1.5rem;
+} 

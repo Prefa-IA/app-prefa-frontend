@@ -1,0 +1,59 @@
+.container {
+  margin-top: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.header {
+  background-color: white;
+  padding: 2.5rem;
+  border-bottom: 2px solid var(--color-accent, #10B981);
+}
+
+.brandContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.brandPrimary {
+  color: var(--color-primary, #3B82F6);
+  font-weight: 700;
+  font-size: 1.75rem;
+}
+
+.brandSecondary {
+  color: var(--color-secondary, #6B7280);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.compoundLabel {
+  margin-left: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background-color: var(--color-accent, #10B981);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.print-hidden {
+  /* Add your print-hidden styles here */
+}
+
+@media print {
+  .container {
+    margin-top: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+  .page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+} 

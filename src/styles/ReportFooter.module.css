@@ -1,0 +1,133 @@
+.container {
+  background-color: white;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  border-top: 2px solid var(--color-accent, #10B981);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.button {
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.buttonSuccess {
+  background-color: var(--color-accent, #10B981);
+  color: white;
+}
+
+.buttonSuccess:hover {
+  opacity: 0.9;
+}
+
+.buttonPrimary {
+  background-color: var(--color-primary, #3B82F6);
+  color: white;
+}
+
+.buttonPrimary:hover {
+  opacity: 0.9;
+}
+
+.buttonSecondary {
+  background-color: var(--color-secondary, #6B7280);
+  color: white;
+}
+
+.buttonSecondary:hover {
+  opacity: 0.9;
+}
+
+.buttonDanger {
+  background-color: #ef4444;
+  color: white;
+}
+
+.buttonDanger:hover {
+  background-color: #dc2626;
+}
+
+.icon {
+  height: 1.25rem;
+  width: 1.25rem;
+  margin-right: 0.5rem;
+}
+
+.changeLogContainer {
+  background-color: white;
+  padding: 1.5rem;
+  border-top: 2px solid var(--color-accent, #10B981);
+}
+
+.changeLogHeader {
+  background-color: var(--color-light-accent, rgba(16, 185, 129, 0.1));
+  text-align: center;
+  padding: 0.5rem;
+  border: 1px solid var(--color-accent, #10B981);
+  font-weight: 600;
+  margin-bottom: 1rem;
+  border-radius: 0.375rem 0.375rem 0 0;
+  color: var(--color-primary, #3B82F6);
+}
+
+.changeLogTable {
+  width: 100%;
+  border: 1px solid var(--color-accent, #10B981);
+  border-radius: 0 0 0.375rem 0.375rem;
+  overflow-x: auto;
+}
+
+.tableHeader {
+  background-color: var(--color-light-accent, rgba(16, 185, 129, 0.1));
+}
+
+.tableHeaderCell {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--color-accent, #10B981);
+  text-align: left;
+  color: var(--color-primary, #3B82F6);
+  font-weight: 600;
+}
+
+.tableHeaderCell:not(:first-child) {
+  border-left: 1px solid var(--color-accent, #10B981);
+}
+
+.tableRow {
+  background-color: white;
+}
+
+.tableRowAlt {
+  background-color: var(--color-light-accent, rgba(16, 185, 129, 0.05));
+}
+
+.tableCell {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--color-accent, #10B981);
+  color: var(--color-secondary, #6B7280);
+}
+
+.tableCell:not(:first-child) {
+  border-left: 1px solid var(--color-accent, #10B981);
+}
+
+.printHidden {
+  display: block;
+}
+
+@media print {
+  .printHidden {
+    display: none !important;
+  }
+} 

@@ -1,0 +1,42 @@
+.container {
+  background-color: white;
+  padding: 2.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.titleSection {
+  background-color: #0369a1;
+  color: white;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.planoContainer {
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  width: 100%;
+  height: 500px;
+}
+
+.infoSection {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.infoSection p {
+  margin: 0.25rem 0;
+}
+
+.pageNumber {
+  text-align: right;
+  font-size: 0.875rem;
+  margin-top: 2rem;
+} 
