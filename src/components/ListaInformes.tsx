@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Container from './layout/Container';
 import { useAuth } from '../contexts/AuthContext';
 import { prefactibilidad } from '../services/api';
 import { Informe, ListaInformesProps, LISTA_INFORMES_CONFIG } from '../types/enums';
@@ -79,63 +80,65 @@ const ListaInformes: React.FC<ListaInformesProps> = ({ className }) => {
   };
 
   return (
-    <div className={`container mx-auto px-4 py-8 ${className || ''}`}>
-      <ListaInformesHeader />
+    <Container>
+      <div className="py-8">
+        <ListaInformesHeader />
 
-      {/* Formulario de búsqueda responsive */}
-      <form onSubmit={handleSearchSubmit} className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-        <input
-          type="text"
-          value={search}
-          onChange={handleSearchChange}
-          placeholder="Buscá por dirección, barrio o SMP"
-          className="w-full sm:flex-1 border rounded px-3 py-2"
+        {/* Formulario de búsqueda responsive */}
+        <form onSubmit={handleSearchSubmit} className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+          <input
+            type="text"
+            value={search}
+            onChange={handleSearchChange}
+            placeholder="Buscá por dirección, barrio o SMP"
+            className="w-full sm:flex-1 border rounded px-3 py-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+          />
+          <button
+            type="submit"
+            className="w-full sm:w-auto px-4 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600 text-white rounded"
+            disabled={searchCooldown}
+          >
+            Buscar
+          </button>
+        </form>
+
+        <ListaInformesContent 
+          loading={loading}
+          error={error}
+          informes={informes}
+          onDescargar={handleDescargar}
+          downloadingIds={downloadingIds}
+          downloadedIds={downloadedIds}
         />
-        <button
-          type="submit"
-          className="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-          disabled={searchCooldown}
-        >
-          Buscar
-        </button>
-      </form>
 
-      <ListaInformesContent 
-        loading={loading}
-        error={error}
-        informes={informes}
-        onDescargar={handleDescargar}
-        downloadingIds={downloadingIds}
-        downloadedIds={downloadedIds}
-      />
-
-      {totalPages > 1 && (
-        <div className="mt-4 flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4">
-          <button
-            onClick={handlePrevPage}
-            disabled={page === 1}
-            className="w-full sm:w-auto px-3 py-1 border rounded disabled:opacity-50"
-          >
-            Anterior
-          </button>
-          <span className="text-center"> Página {page} de {totalPages} </span>
-          <button
-            onClick={handleNextPage}
-            disabled={page === totalPages}
-            className="w-full sm:w-auto px-3 py-1 border rounded disabled:opacity-50"
-          >
-            Siguiente
-          </button>
-        </div>
-      )}
-    </div>
+        {totalPages > 1 && (
+          <div className="mt-4 flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <button
+              onClick={handlePrevPage}
+              disabled={page === 1}
+              className="w-full sm:w-auto px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Anterior
+            </button>
+            <span className="text-center"> Página {page} de {totalPages} </span>
+            <button
+              onClick={handleNextPage}
+              disabled={page === totalPages}
+              className="w-full sm:w-auto px-3 py-1 border rounded disabled:opacity-50"
+            >
+              Siguiente
+            </button>
+          </div>
+        )}
+      </div>
+    </Container>
   );
 };
 
 const ListaInformesHeader: React.FC = () => (
   <>
-    <h1 className="text-2xl font-semibold mb-6">{LISTA_INFORMES_CONFIG.TITLE}</h1>
-    <p className="text-gray-600 mb-6">
+    <h1 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-gray-100">{LISTA_INFORMES_CONFIG.TITLE}</h1>
+    <p className="text-gray-600 dark:text-gray-300 mb-6">
       {LISTA_INFORMES_CONFIG.SUBTITLE}
     </p>
   </>
@@ -177,12 +180,12 @@ const ErrorState: React.FC<{ error: string }> = ({ error }) => (
 );
 
 const EmptyState: React.FC = () => (
-  <div className="text-center py-12 bg-white rounded-lg shadow">
+  <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow">
     <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
-    <h3 className="mt-2 text-sm font-medium text-gray-900">
+    <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
       {LISTA_INFORMES_CONFIG.EMPTY_STATE.TITLE}
     </h3>
-    <p className="mt-1 text-sm text-gray-500">
+    <p className="mt-1 text-sm text-gray-500 dark:text-gray-300">
       {LISTA_INFORMES_CONFIG.EMPTY_STATE.DESCRIPTION}
     </p>
   </div>
@@ -194,7 +197,7 @@ const InformesList: React.FC<{
   downloadingIds: string[];
   downloadedIds: string[];
 }> = ({ informes, onDescargar, downloadingIds, downloadedIds }) => (
-  <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+  <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg mb-8">
     <ul className="divide-y divide-gray-200">
       {informes.map((informe, index) => (
         <InformeItem 
@@ -217,10 +220,12 @@ const InformeItem: React.FC<{
   downloading: boolean;
   downloaded: boolean;
 }> = ({ informe, index, onDescargar, downloading, downloaded }) => (
-  <li className="hover:bg-gray-50 transition-colors duration-200">
+  <li className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
     <div className="px-4 py-5 sm:px-6">
       <InformeHeader informe={informe} onDescargar={onDescargar} downloading={downloading} downloaded={downloaded} />
       <InformeDetails informe={informe} />
+      {/* Botón móvil */}
+      <DownloadButtonMobile informe={informe} onDescargar={onDescargar} downloading={downloading} downloaded={downloaded} />
     </div>
   </li>
 );
@@ -231,7 +236,7 @@ const InformeHeader: React.FC<{
   downloading: boolean;
   downloaded: boolean;
 }> = ({ informe, onDescargar, downloading, downloaded }) => (
-  <div className="flex items-center justify-between">
+  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
     <InformeTitleSection informe={informe} />
     <DownloadButton informe={informe} onDescargar={onDescargar} downloading={downloading} downloaded={downloaded} />
   </div>
@@ -239,8 +244,8 @@ const InformeHeader: React.FC<{
 
 const InformeTitleSection: React.FC<{ informe: Informe }> = ({ informe }) => (
   <div className="flex items-center">
-    <DocumentTextIcon className="h-5 w-5 text-indigo-500 mr-3" />
-    <h3 className="text-lg font-medium text-indigo-600">
+    <DocumentTextIcon className="h-5 w-5 text-primary-600 dark:text-primary-400 mr-3" />
+    <h3 className="text-lg font-medium text-primary-600 dark:text-primary-400">
       {informe.direccion.direccion}
     </h3>
   </div>
@@ -252,12 +257,12 @@ const DownloadButton: React.FC<{
   downloading: boolean;
   downloaded: boolean;
 }> = ({ informe, onDescargar, downloading, downloaded }) => (
-  <div className="ml-2 flex-shrink-0 flex">
+  <div className="hidden sm:flex mt-2 sm:mt-0 sm:ml-2 flex-shrink-0 w-full sm:w-auto">
     <button
       onClick={() => onDescargar(informe)}
       disabled={downloading || downloaded}
       className={
-        `inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white ${downloading || downloaded ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200`
+        `inline-flex justify-center items-center w-full sm:w-auto px-2 py-1 sm:px-3 sm:py-2 border border-transparent text-xs sm:text-sm leading-4 font-medium rounded-md shadow-sm text-white ${downloading || downloaded ? 'bg-primary-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200`
       }
     >
       <DownloadIcon className="h-4 w-4 mr-1" />
@@ -319,6 +324,19 @@ const DateInfo: React.FC<{ informe: Informe }> = ({ informe }) => (
   <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
     <CalendarIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
     Generado el {formatearFecha(informe.timestamp)}
+  </div>
+);
+
+const DownloadButtonMobile: React.FC<{ informe: Informe; onDescargar: (inf: Informe)=>void; downloading:boolean; downloaded:boolean }> = ({ informe, onDescargar, downloading, downloaded }) => (
+  <div className="sm:hidden mt-4">
+    <button
+      onClick={() => onDescargar(informe)}
+      disabled={downloading || downloaded}
+      className={`w-full inline-flex justify-center items-center px-3 py-2 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white ${downloading || downloaded ? 'bg-primary-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200`}
+    >
+      <DownloadIcon className="h-4 w-4 mr-1" />
+      {LISTA_INFORMES_CONFIG.BUTTON_TEXT}
+    </button>
   </div>
 );
 

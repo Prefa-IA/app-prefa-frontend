@@ -1,4 +1,7 @@
 import React from 'react';
+import ModalBase from '../generales/ModalBase';
+
+interface Props { onClose: () => void; }
 
 /**
  * Componente que muestra los Términos y Condiciones.  
@@ -8,23 +11,33 @@ import React from 'react';
  * bastará con moverlo a `public/tyc/terminosycondiciones.html` y reemplazar
  * el contenido de `dangerouslySetInnerHTML` por un `fetch` al recurso estático.
  */
-const TermsAndConditions: React.FC = () => {
+const TermsAndConditions: React.FC<Props> = ({ onClose }) => {
   return (
+    <ModalBase title="Términos y Condiciones" onClose={onClose} hideConfirm>
     <div className="prose max-w-none">
       {/* Estilos locales para el documento de TyC */}
       <style>{`
         .tyc-container {
           max-width: 800px;
           margin: 0 auto;
-          background: #fff;
-          padding: 20px 30px;
-          border-radius: 8px;
-          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-          color: #333;
+          background: transparent;
+          padding: 0;
+          border-radius: 0;
+          box-shadow: none;
+          color: #111827; /* gray-900 */
+        }
+        html.dark .tyc-container {
+          background: transparent;
+          color: #e5e7eb; /* gray-200 */
+          box-shadow: none;
         }
         .tyc-container h1,
         .tyc-container h2 {
-          color: #2c3e50;
+          color: #0c4a6e; /* primary-900 */
+        }
+        html.dark .tyc-container h1,
+        html.dark .tyc-container h2 {
+          color: #38bdf8; /* primary-400 */
         }
         .tyc-container h1 {
           border-bottom: 2px solid #3498db;
@@ -45,12 +58,10 @@ const TermsAndConditions: React.FC = () => {
           padding-left: 20px;
         }
         .tyc-container a {
-          color: #3498db;
+          color: #0284c7;
           text-decoration: none;
         }
-        .tyc-container a:hover {
-          text-decoration: underline;
-        }
+        .tyc-container a:hover { text-decoration: underline; }
       `}</style>
       <div className="tyc-container">
         <h1>Términos y Condiciones del Servicio</h1>
@@ -230,6 +241,7 @@ const TermsAndConditions: React.FC = () => {
         </p>
       </div>
     </div>
+    </ModalBase>
   );
 };
 

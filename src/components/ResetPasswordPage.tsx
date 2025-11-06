@@ -42,7 +42,7 @@ const ResetPasswordPage: React.FC = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700">Contraseña</label>
             <div className="relative">
-              <input type={showPass? 'text':'password'} value={password} onChange={e=>setPassword(e.target.value)} required className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+              <input placeholder="Contraseña" type={showPass? 'text':'password'} value={password} onChange={e=>setPassword(e.target.value)} required className={`${stylesCont.input} mt-1`} />
               <button type="button" className="absolute inset-y-0 right-3 flex items-center" onClick={()=>setShowPass(!showPass)}>
                 {showPass?<EyeOffIcon className="w-5 h-5 text-gray-500"/>:<EyeIcon className="w-5 h-5 text-gray-500"/>}
               </button>
@@ -51,7 +51,7 @@ const ResetPasswordPage: React.FC = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700">Repetir Contraseña</label>
             <div className="relative">
-              <input type={showRepeat? 'text':'password'} value={repeat} onChange={e=>setRepeat(e.target.value)} required className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+              <input placeholder="Repetir contraseña" type={showRepeat? 'text':'password'} value={repeat} onChange={e=>setRepeat(e.target.value)} required className={`${stylesCont.input} mt-1`} />
               <button type="button" className="absolute inset-y-0 right-3 flex items-center" onClick={()=>setShowRepeat(!showRepeat)}>
                 {showRepeat?<EyeOffIcon className="w-5 h-5 text-gray-500"/>:<EyeIcon className="w-5 h-5 text-gray-500"/>}
               </button>

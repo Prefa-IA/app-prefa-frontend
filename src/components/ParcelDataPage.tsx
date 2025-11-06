@@ -126,7 +126,7 @@ const ParcelDataPage: React.FC<ParcelDataPageProps> = ({
   });
 
   return (
-    <div id="parcel-page-root" className="relative bg-white p-10 border-t border-gray-200">
+    <div id="parcel-page-root" className="relative bg-white p-4 md:p-10 border-t border-gray-200">
       <GeneralConsiderations pageCounter={pageNumbers['consideraciones_generales'] || 2} />
 
       <BasicInformation 

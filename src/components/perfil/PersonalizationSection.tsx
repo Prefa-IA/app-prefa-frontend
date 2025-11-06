@@ -22,17 +22,17 @@ const PersonalizationSection: React.FC<Props> = ({ editMode, personalizacion, on
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h3 className="text-xl font-semibold text-gray-900">Personalizá tus informes</h3>
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">Personalizá tus informes</h3>
         </div>
-        <button onClick={onToggleEdit} className="flex items-center space-x-2 px-4 py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg">
+        <button onClick={onToggleEdit} className="flex items-center space-x-2 px-4 py-2 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-800 rounded-lg">
           <PencilIcon className="w-4 h-4" />
           <span className="font-medium">{editMode ? 'Cancelar' : 'Editar'}</span>
         </button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <div className="space-y-6">
           <ColorPicker label="Fondo principal" description="Color de fondo para encabezados de tablas principales" value={personalizacion.fondoEncabezadosPrincipales} onChange={v=>onPersonalizacionChange('fondoEncabezadosPrincipales',v)} disabled={!editMode} />
           <ColorPicker label="Texto Principal" description="Color de texto para tablas principales" value={personalizacion.colorTextoTablasPrincipales} onChange={v=>onPersonalizacionChange('colorTextoTablasPrincipales',v)} disabled={!editMode} />
@@ -50,7 +50,7 @@ const PersonalizationSection: React.FC<Props> = ({ editMode, personalizacion, on
           <button
             onClick={handleSaveClick}
             disabled={btnDisabled}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-primary-600 dark:bg-primary-700 text-white rounded-lg hover:bg-primary-700 dark:hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Guardar Cambios
           </button>

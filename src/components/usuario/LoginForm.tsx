@@ -8,7 +8,6 @@ import {
   LOGIN_CONFIG 
 } from '../../types/enums';
 import { createFormHandler } from '../../utils/formUtils';
-import Logo from '../generales/Logo';
 import styles from '../../styles/LoginForm.module.css';
 import { EyeIcon, EyeOffIcon } from '@heroicons/react/outline';
 
@@ -38,9 +37,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   const handleChange = createFormHandler(setCredentials);
 
   return (
-    <div className={styles.container}>
-      <div className={`${styles.formContainer} bg-white p-8 rounded shadow`}>
-        <LoginHeader />
+    <div className={`${styles.container} min-h-screen pt-[90px] flex justify-center items-center w-full`}>
+      <div className={`${styles.formContainer} bg-white dark:bg-gray-800 p-4 sm:p-8 rounded shadow w-full sm:w-auto`}>
         <LoginFormComponent
           credentials={credentials}
           onSubmit={handleSubmit}
@@ -52,12 +50,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
     </div>
   );
 };
-
-const LoginHeader: React.FC = () => (
-  <div className={styles.logoContainer}>
-    <Logo width={250} height={40} className={styles.logo} />
-  </div>
-);
 
 interface LoginFormComponentProps {
   credentials: LoginCredentials;
@@ -82,11 +74,11 @@ const LoginFormComponent: React.FC<LoginFormComponentProps> = ({
       </div>
       <SubmitButton />
       <hr />
-      <p className="text-center">¿Todavía no tenés cuenta? <Link to="/registro" className={styles.switchLink}>Registrate</Link></p>
+      <p className="text-center text-gray-900 dark:text-gray-100">¿Todavía no tenés cuenta? <Link to="/registro" className="text-primary-600 dark:text-primary-400 hover:underline">Registrate</Link></p>
       <div className="mt-2 text-sm flex flex-row justify-between">
-        <button type="button" className="text-blue-900 w-1/2 hover:underline" onClick={() => navigate('/forgot-password')}>¿Olvidaste tu contraseña?</button>
+        <button type="button" className="text-primary-600 dark:text-primary-400 w-1/2 hover:underline" onClick={() => navigate('/forgot-password')}>¿Olvidaste tu contraseña?</button>
         <div className="border-l border-gray-400 h-10 mx-4" />
-        <button type="button" className="text-blue-900 w-1/2 hover:underline" onClick={() => navigate('/resend-verification')}>Reenviar correo de verificación</button>
+        <button type="button" className="text-primary-600 dark:text-primary-400 w-1/2 hover:underline" onClick={() => navigate('/resend-verification')}>Reenviar correo de verificación</button>
       </div>
     </form>
   );
@@ -130,7 +122,7 @@ const LoginField: React.FC<ExtendedLoginFieldProps> = ({
   setShowPass
 }) => (
   <div className={styles.fieldContainer}>
-    <label htmlFor={id} className={styles.label}>
+    <label htmlFor={id} className={`${styles.label} dark:text-gray-300`}>
       {label}
     </label>
     <div className="relative">
@@ -139,7 +131,7 @@ const LoginField: React.FC<ExtendedLoginFieldProps> = ({
         name={name}
         type={type === 'password' && showPass ? 'text' : type}
         required={required}
-        className={styles.input}
+        className={`${styles.input} dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100`}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
@@ -156,7 +148,10 @@ const LoginField: React.FC<ExtendedLoginFieldProps> = ({
 
 const SubmitButton: React.FC = () => (
   <div>
-    <button type="submit" className={styles.submitButton}>
+    <button
+      type="submit"
+      className="inline-flex w-full justify-center items-center px-3 py-2 sm:px-4 sm:py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200 shadow-md hover:shadow-lg"
+    >
       {LOGIN_CONFIG.SUBMIT_TEXT}
     </button>
   </div>

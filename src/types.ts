@@ -6,6 +6,7 @@ export interface Usuario {
   nombre: string;
   tipo: 'individual' | 'empresa';
   consultasDisponibles?: number;
+  creditBalance?: number;
   suscripcion?: {
     fechaFin: string;
     tipo: 'mensual' | 'anual' | 'basica';

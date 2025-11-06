@@ -57,7 +57,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('token');
       localStorage.removeItem('userProfile');
       setUsuario(null);
-      toast.error('Sesión expirada. Inicia sesión nuevamente.');
     } finally {
       setLoading(false);
     }

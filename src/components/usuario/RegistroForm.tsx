@@ -6,7 +6,6 @@ import type { RegistrationFormProps, FormFieldsProps, FormFieldProps } from '../
 import { createFormHandler } from '../../utils/formUtils';
 import { REGISTRATION_FORM_FIELDS } from '../../utils/formConfigUtils';
 import styles from '../../styles/RegistroForm.module.css';
-import Logo from '../generales/Logo';
 import { toast } from 'react-toastify';
 import { InputType } from '../../types/enums';
 import { EyeIcon, EyeOffIcon, ArrowLeftIcon } from '@heroicons/react/outline';
@@ -50,7 +49,7 @@ const RegistroForm: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={`${styles.formContainer} bg-white p-8 rounded shadow`}>
+      <div className={`${styles.formContainer} bg-white dark:bg-gray-800 p-4 sm:p-8 rounded shadow w-full sm:w-auto`}>
         <button type="button" onClick={() => navigate('/login')} className="text-gray-500 hover:text-gray-700 flex items-center mb-4">
           <ArrowLeftIcon className="w-5 h-5 mr-1" />
         </button>
@@ -71,11 +70,7 @@ const RegistroForm: React.FC = () => {
   );
 };
 
-const FormHeader: React.FC = () => (
-  <div className="flex justify-center mb-2">
-    <Logo width={150} height={20} />
-  </div>
-);
+const FormHeader: React.FC = () => <></>;
 
 const RegistrationForm: React.FC<RegistrationFormProps & { aceptoTyC: boolean; onToggleTyC: () => void; onOpenTyC: () => void; showPass:boolean; setShowPass:React.Dispatch<React.SetStateAction<boolean>> }> = ({
   datos,
@@ -92,24 +87,24 @@ const RegistrationForm: React.FC<RegistrationFormProps & { aceptoTyC: boolean; o
       <FormFields datos={datos} onChange={onChange} showPass={showPass} setShowPass={setShowPass}/>
     </div>
     {/* Aceptación TyC */}
-    <div className="flex items-center text-sm">
+    <div className="flex items-center text-sm dark:text-gray-300">
       <input
         id="aceptoTyC"
         type="checkbox"
         checked={aceptoTyC}
         onChange={onToggleTyC}
-        className="mr-2"
+        className="mr-2 dark:bg-gray-900 dark:border-gray-600"
       />
       <label htmlFor="aceptoTyC" className="">
         Acepto los{' '}
-        <button type="button" className="text-blue-600 underline" onClick={onOpenTyC}>
+        <button type="button" className="text-primary-600 dark:text-primary-400 underline" onClick={onOpenTyC}>
           Términos y Condiciones
         </button>
       </label>
     </div>
     <SubmitButton disabled={!aceptoTyC} />
     <hr />
-    <p className="text-center">¿Ya tenés cuenta? <Link to="/login" className={styles.switchLink}>Ingresá</Link></p>
+    <p className="text-center text-gray-900 dark:text-gray-100">¿Ya tenés cuenta? <Link to="/login" className="text-primary-600 dark:text-primary-400 hover:underline">Ingresá</Link></p>
   </form>
 );
 
@@ -132,7 +127,7 @@ const FormField: React.FC<FormFieldProps> = ({ field, value, onChange }) => {
   const [show, setShow] = React.useState(false);
   return (
     <div className={styles.fieldContainer}>
-      <label htmlFor={field.id} className={styles.label}>
+      <label htmlFor={field.id} className={`${styles.label} dark:text-gray-300`}>
         {field.label}
       </label>
       <div className="relative">
@@ -141,7 +136,7 @@ const FormField: React.FC<FormFieldProps> = ({ field, value, onChange }) => {
           name={field.name}
           type={field.type===InputType.PASSWORD && show? 'text': field.type}
           required={field.required}
-          className={styles.input}
+          className={`${styles.input} dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100`}
           placeholder={field.placeholder}
           value={value}
           onChange={onChange}
@@ -160,9 +155,9 @@ const FormField: React.FC<FormFieldProps> = ({ field, value, onChange }) => {
 // Modal de Términos y Condiciones
 const TermsModal: React.FC<{ onClose: () => void }> = ({ onClose }) => (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-    <div className="bg-white rounded-xl max-w-3xl w-full max-h-[80vh] overflow-auto">
-      <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Términos y Condiciones</h3>
+    <div className="bg-white dark:bg-gray-900 rounded-xl max-w-3xl w-full max-h-[80vh] overflow-auto">
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Términos y Condiciones</h3>
         <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -170,14 +165,18 @@ const TermsModal: React.FC<{ onClose: () => void }> = ({ onClose }) => (
         </button>
       </div>
       <div className="p-6 space-y-4 text-sm leading-relaxed">
-        <TermsAndConditions />
+        <TermsAndConditions onClose={onClose} />
       </div>
     </div>
   </div>
 );
 
 const SubmitButton: React.FC<{ disabled: boolean }> = ({ disabled }) => (
-  <button type="submit" disabled={disabled} className={styles.submitButton}>
+  <button
+    type="submit"
+    disabled={disabled}
+    className="inline-flex w-full justify-center items-center px-3 py-2 sm:px-4 sm:py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 transition-all duration-200 shadow-md hover:shadow-lg"
+  >
     Crear cuenta
   </button>
 );

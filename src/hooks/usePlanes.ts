@@ -5,8 +5,9 @@ export interface Plan {
   id: string;
   name: string;
   price: number;
-  creditosMes?: number;
-  creditosDia?: number;
+  creditosTotales: number;
+  /*@deprecated*/ creditosMes?: number;
+  /*@deprecated*/ creditosDia?: number;
   permiteCompuestas?: boolean;
   watermarkOrg?: boolean;
   watermarkPrefas?: boolean;
@@ -24,7 +25,9 @@ export interface Plan {
     bgClass: string;
     icon?: string;
   };
+  isOverage?: boolean;
   showDiscountSticker?: boolean;
+  parentPlan?: string | null;
 }
 
 // Cache simple de módulo para evitar llamadas duplicadas entre montajes
@@ -63,3 +66,9 @@ export const usePlanes = () => {
 
   return { planes, loading, error };
 };
+
+export const separatePlanes = (planes: Plan[], userPlanId?: string) => {
+  const normales = planes.filter(p => !p.isOverage);
+  const overages = planes.filter(p => p.isOverage && (!userPlanId || p.parentPlan === userPlanId));
+  return { normales, overages };
+}

@@ -23,14 +23,14 @@ const ProfileCard: React.FC<Props> = ({ logoUrl, onLogoUpload, onLogoDelete }) =
   },[usuario, planes]);
   if (!usuario) return null;
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
       <div className="text-center space-y-6">
         <div className="relative inline-block">
-          <div className="w-32 h-32 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+          <div className="w-32 h-32 rounded-xl bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center overflow-hidden border-4 border-white dark:border-gray-700 shadow-lg">
             {logoUrl ? (
               <img src={logoUrl} alt={`Logo de ${usuario.nombre}`} className="w-full h-full object-cover" />
             ) : (
-              <CameraIcon className="w-12 h-12 text-blue-400" />
+              <CameraIcon className="w-12 h-12 text-primary-400" />
             )}
           </div>
           {/* Botón eliminar (izquierda) */}
@@ -46,14 +46,14 @@ const ProfileCard: React.FC<Props> = ({ logoUrl, onLogoUpload, onLogoDelete }) =
           )}
 
           {/* Botón cargar (derecha) */}
-          <label className="absolute -bottom-2 -right-2 bg-blue-600 text-white p-3 rounded-full cursor-pointer hover:bg-blue-700 transition-all duration-200 shadow-lg">
+          <label className="absolute -bottom-2 -right-2 bg-primary-600 dark:bg-primary-700 text-white p-3 rounded-full cursor-pointer hover:bg-primary-700 dark:hover:bg-primary-600 transition-all duration-200 shadow-lg">
             <CameraIcon className="w-5 h-5" />
             <input type="file" accept="image/*" onChange={onLogoUpload} className="hidden" />
           </label>
         </div>
         <div className="space-y-1">
-          <h3 className="text-xl font-semibold text-gray-900">{usuario.nombre}</h3>
-          <p className="text-gray-500">{usuario.email}</p>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{usuario.nombre}</h3>
+          <p className="text-gray-500 dark:text-gray-300">{usuario.email}</p>
           {usuario.suscripcion?.tipo && (
             <PlanPill plan={usuario.suscripcion.tipo} planObj={planActual}/>
           )}

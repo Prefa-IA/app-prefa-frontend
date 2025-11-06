@@ -57,3 +57,37 @@
     break-after: page;
   }
 } 
+
+/* ----- Mobile adjustments ----- */
+@media (max-width: 640px) {
+  .container {
+    margin-top: 0.75rem;
+  }
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  h3 { font-size: 1rem !important; }
+
+  table {
+    table-layout: fixed;
+    width: 100%;
+    font-size: 0.75rem;
+    border-collapse: collapse;
+  }
+  th, td {
+    padding: 0.4rem 0.3rem;
+    word-break: break-word;
+    line-height: 1.2rem;
+    min-width: 90px;
+  }
+
+  /* Envuelve tablas amplias en scroll horizontal automático */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Ajuste de botones */
+  .btn {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+  }
+} 

@@ -30,7 +30,7 @@ const ReportFooter: React.FC<ReportFooterProps> = ({
 };
 
 const LegalNotice: React.FC = () => (
-  <div className="mx-10 mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 print-hidden">
+  <div className="mx-10 mb-4 mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 print-hidden">
     <div className="font-semibold mb-2 text-yellow-800">AVISO:</div>
     <div className="text-sm text-yellow-700 space-y-1">
       <div>• Los datos presentados son informativos y están sujetos a verificación oficial.</div>
@@ -82,7 +82,7 @@ const FooterActions: React.FC<FooterActionsProps> = ({
             onClick={handleAccept}
             variant={ButtonVariant.SUCCESS}
             icon={<CheckIcon />}
-            text="Aceptar Prefactibilidad"
+            text="Guardar Informe"
             disabled={accepted || accepting}
           />
         </div>

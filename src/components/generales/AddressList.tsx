@@ -32,13 +32,13 @@ const AddressList: React.FC<AddressListProps> = ({
 };
 
 const AddressListHeader: React.FC<{ addressCount: number }> = ({ addressCount }) => (
-  <h2 className="text-lg font-semibold mb-2">
+  <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">
     {ADDRESS_LIST_CONFIG.TITLE} ({addressCount})
   </h2>
 );
 
 const EmptyAddressList: React.FC = () => (
-  <p className="text-gray-500 italic">
+  <p className="text-gray-500 dark:text-gray-400 italic">
     {ADDRESS_LIST_CONFIG.EMPTY_MESSAGE}
   </p>
 );
@@ -48,7 +48,7 @@ const AddressGrid: React.FC<{
   onRemove: (index: number) => void;
   isLoading:boolean;
 }> = ({ addresses, onRemove, isLoading }) => (
-  <ul className="p-3 rounded-lg bg-white">
+  <ul className="p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
     {addresses.map((address, index) => (
       <AddressItem 
         key={index}
@@ -67,14 +67,14 @@ const AddressItem: React.FC<{
   onRemove: (index: number) => void;
   isLoading:boolean;
 }> = ({ address, index, onRemove, isLoading }) => (
-  <li className="flex justify-between items-center py-1 mb-2 bg-gray-100">
+  <li className="flex justify-between items-center py-1 mb-2 bg-gray-100 dark:bg-gray-700">
     <AddressText address={address} />
     <RemoveButton onClick={() => onRemove(index)} disabled={isLoading} />
   </li>
 );
 
 const AddressText: React.FC<{ address: string }> = ({ address }) => (
-  <span className="text-gray-800 text-sm p-2">{address}</span>
+  <span className="text-gray-800 dark:text-gray-100 text-sm p-2">{address}</span>
 );
 
 const RemoveButton: React.FC<{ onClick: () => void; disabled:boolean }> = ({ onClick, disabled }) => (

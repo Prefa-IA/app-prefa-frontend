@@ -146,7 +146,17 @@ export const subscriptions = {
   },
 
   createPaymentPreference: async (planId: string) => {
-    const response = await api.post('/suscripciones/crear-preferencia', { planId });
+    const response = await api.post('/suscripciones/crear-suscripcion', { planId });
+    return response.data;
+  },
+
+  createSubscription: async (planId: string, billingInterval: 'monthly' | 'yearly' = 'monthly') => {
+    const response = await api.post('/suscripciones/crear-suscripcion', { planId, billingInterval });
+    return response.data;
+  },
+
+  purchaseOverage: async (paqueteId: string) => {
+    const response = await api.post('/suscripciones/overages/comprar', { paqueteId });
     return response.data;
   },
 
@@ -274,71 +284,9 @@ export const prefactibilidad = {
   
   obtenerSugerenciasDirecciones,
 
-  evaluateGemini: async (parcela: any) => {
-    try {
-      // Construir objeto minimal según especificación
-      const {
-        direccionesNormalizadas,
-        datosCatastrales,
-        datosUtiles,
-        edificabilidad
-      } = parcela;
-
-      const minimal: any = {};
-
-      if (Array.isArray(direccionesNormalizadas)) {
-        minimal.direccionesNormalizadas = direccionesNormalizadas.map((d: any) => ({
-          direccion: d.direccion,
-          altura: d.altura
-        }));
-      }
-
-      if (datosCatastrales) {
-        minimal.datosCatastrales = {
-          propiedad_horizontal: datosCatastrales.propiedad_horizontal,
-          frente: datosCatastrales.frente,
-          fondo: datosCatastrales.fondo,
-          pisos_bajo_rasante: datosCatastrales.pisos_bajo_rasante,
-          pisos_sobre_rasante: datosCatastrales.pisos_sobre_rasante
-        };
-      }
-
-      if (datosUtiles) {
-        minimal.datosUtiles = {
-          comuna: datosUtiles.comuna,
-          barrio: datosUtiles.barrio
-        };
-      }
-
-      if (edificabilidad) {
-        minimal.edificabilidad = {
-          sup_edificable_planta: edificabilidad.sup_edificable_planta,
-          altura_max: edificabilidad.altura_max,
-          altura_max_plano_limite: edificabilidad.altura_max_plano_limite,
-          unidad_edificabilidad: edificabilidad.unidad_edificabilidad,
-          plusvalia: { distrito_cpu: edificabilidad.plusvalia?.distrito_cpu },
-          fot: edificabilidad.fot,
-          parcelas_linderas: { aph_linderas: edificabilidad.parcelas_linderas?.aph_linderas },
-          catalogacion: {
-            proteccion: edificabilidad.catalogacion?.proteccion,
-            estado: edificabilidad.catalogacion?.estado
-          },
-          manzanas_atipicas: { disposicio: edificabilidad.manzanas_atipicas?.disposicio },
-          irregular: edificabilidad.irregular,
-          superficie_parcela: edificabilidad.superficie_parcela,
-          lfi_disponible: edificabilidad.lfi_disponible,
-          longitud_lfi: edificabilidad.longitud_lfi,
-          afectaciones: edificabilidad.afectaciones,
-          mixtura_uso: edificabilidad.mixtura_uso
-        };
-      }
-
-      const response = await api.post('/prefactibilidad/evaluar-gemini', { parcela: minimal });
-      return response.data;
-    } catch (err: any) {
-      console.error('Error evaluando Gemini:', err);
-      throw err;
-    }
+  calcular: async (parcela: any) => {
+    const { data } = await api.post('/prefactibilidad/calcular', { parcela });
+    return data;
   },
 
   consultarPorSMP: async (smp: string, opts: { prefaCompleta: boolean; compuesta: boolean }) => {

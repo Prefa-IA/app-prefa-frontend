@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Navbar from './components/generales/Navbar';
@@ -13,11 +14,16 @@ import PerfilUsuario from './components/usuario/PerfilUsuario';
 import { useAuth } from './contexts/AuthContext';
 import PrintInforme from './components/PrintInforme';
 import SubscriptionPage from './components/SubscriptionPage';
+import SubscriptionManager from './components/suscripcion/SubscriptionManager';
 import FAQPage from './components/FAQPage';
+import OveragesAdmin from './components/admin/OveragesAdmin';
 import VerifyEmailPage from './components/VerifyEmailPage';
 import ForgotPasswordPage from './components/ForgotPasswordPage';
 import ResendVerificationPage from './components/ResendVerificationPage';
 import ResetPasswordPage from './components/ResetPasswordPage';
+import Footer from './components/generales/Footer';
+import { useTheme } from './contexts/ThemeContext';
+import NotFound from './components/NotFound';
 
 const ProtectedRoute: React.FC<{
   children: React.ReactNode;
@@ -41,10 +47,12 @@ const ProtectedRoute: React.FC<{
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden flex flex-col">
           <Navbar />
+          <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<LoginForm />} />
@@ -82,28 +90,53 @@ const App: React.FC = () => {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/suscripcion"
+              element={
+                <ProtectedRoute>
+                  <SubscriptionManager />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/print/informe/:id" element={<PrintInforme />} />
             <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/resend-verification" element={<ResendVerificationPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route
+              path="/admin/facturacion/overages"
+              element={<ProtectedRoute><OveragesAdmin /></ProtectedRoute>}
+            />
+            <Route path="*" element={<NotFound />} />
           </Routes>
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-          />
+          </main>
+          <Footer />
+          <ThemedToast />
         </div>
       </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </ThemeProvider>
+  );
+};
+
+// Toast container that reads theme inside ThemeProvider context
+const ThemedToast: React.FC = () => {
+  const { theme } = useTheme();
+  return (
+    <ToastContainer
+      position="top-right"
+      autoClose={4000}
+      hideProgressBar={true}
+      newestOnTop
+      closeOnClick
+      rtl={false}
+      limit={3}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme={theme === 'dark' ? 'dark' : 'light'}
+    />
   );
 };
 

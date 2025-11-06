@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Container from './layout/Container';
 import { Disclosure } from '@headlessui/react';
 import { ChevronUpIcon } from '@heroicons/react/solid';
 
@@ -105,30 +106,32 @@ const FAQPage: React.FC = () => {
   const faqs = buildFaqs(openInfo);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Preguntas Frecuentes</h1>
-      <div className="space-y-4">
-        {faqs.map((faq, idx) => (
-          <Disclosure key={idx}>
-            {({ open }) => (
-              <div className="border rounded-lg bg-white shadow-sm">
-                <Disclosure.Button className="flex w-full justify-between items-center px-4 py-3 text-left text-gray-900 font-medium hover:bg-gray-50 focus:outline-none">
-                  <span>{faq.question}</span>
-                  <ChevronUpIcon
-                    className={`${open ? 'transform rotate-180' : ''} h-5 w-5 text-gray-500`}
-                  />
-                </Disclosure.Button>
-                <Disclosure.Panel className="px-4 pb-4 pt-2 text-gray-700 border-t bg-gray-50">
-                  {faq.answer}
-                </Disclosure.Panel>
-              </div>
-            )}
-          </Disclosure>
-        ))}
-      </div>
+    <Container>
+      <div className="w-full py-10">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Preguntas Frecuentes</h1>
+        <div className="space-y-4">
+          {faqs.map((faq, idx) => (
+            <Disclosure key={idx}>
+              {({ open }) => (
+                <div className="border rounded-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm">
+                  <Disclosure.Button className="flex w-full justify-between items-center px-4 py-3 text-left text-gray-900 dark:text-gray-100 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none">
+                    <span>{faq.question}</span>
+                    <ChevronUpIcon
+                      className={`${open ? 'transform rotate-180' : ''} h-5 w-5 text-gray-500 dark:text-gray-400`}
+                    />
+                  </Disclosure.Button>
+                  <Disclosure.Panel className="px-4 pb-4 pt-2 text-gray-700 dark:text-gray-300 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                    {faq.answer}
+                  </Disclosure.Panel>
+                </div>
+              )}
+            </Disclosure>
+          ))}
+        </div>
 
-      {showInfo && <PrefaInfoModal onClose={() => setShowInfo(false)} />}
-    </div>
+        {showInfo && <PrefaInfoModal onClose={() => setShowInfo(false)} />}
+      </div>
+    </Container>
   );
 };
 

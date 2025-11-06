@@ -79,7 +79,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           ref={inputRef}
           type="text"
           placeholder={placeholder}
-          className={styles.input}
+          className={`${styles.input} dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500`}
           onChange={handleInputChange}
           value={value}
           onKeyDown={handleKeyDown('Enter', handleSearchClick)}
@@ -94,13 +94,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
         ):(
         <button
           onClick={handleSearchClick}
-          className={styles.searchButton}
+          className={`${styles.searchButton} dark:bg-primary-700 dark:hover:bg-primary-600`}
           disabled={isLoading||cooldown||disabled}
         >
           {isLoading ? (
             <div className="flex items-center space-x-2">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              {!isCompoundMode && <span className="text-sm">Buscando...</span>}
+              {!isCompoundMode}
             </div>
           ) : (
             isCompoundMode ? 'Agregar dirección' : <SearchIcon className={styles.icon} />
@@ -120,7 +120,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 };
 
 const SuggestionsList: React.FC<SuggestionsListProps> = ({ sugerencias, onSelect }) => (
-  <div className={styles.suggestionsContainer}>
+  <div className={`${styles.suggestionsContainer} dark:bg-gray-800 dark:border-gray-700`}>
     {sugerencias.map((sugerencia, index) => (
       <SuggestionItem
         key={index}
@@ -133,7 +133,7 @@ const SuggestionsList: React.FC<SuggestionsListProps> = ({ sugerencias, onSelect
 
 const SuggestionItem: React.FC<SuggestionItemProps> = ({ sugerencia, onSelect }) => (
   <div
-    className={styles.suggestionItem}
+    className={`${styles.suggestionItem} dark:text-gray-100 dark:hover:bg-gray-700`}
     onClick={() => onSelect(sugerencia.direccion)}
   >
     {sugerencia.direccion}

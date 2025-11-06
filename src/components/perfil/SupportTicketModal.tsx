@@ -96,50 +96,52 @@ const SupportTicketModal: React.FC<Props> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 ">
+      <div className="bg-white dark:bg-gray-800 dark:text-gray-100 rounded-lg shadow-lg w-full max-w-lg p-6 mx-4 sm:mx-0 custom-scrollbar max-h-[90vh] overflow-auto">
         <h2 className="text-xl font-semibold mb-4">Nuevo Ticket de Soporte</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium">Asunto</label>
+            <label className="block text-sm font-medium text-gray-900 dark:text-gray-100">Asunto</label>
             <input
               type="text"
               value={subject}
+              placeholder="Asunto"
               onChange={e => setSubject(e.target.value)}
-              className="mt-1 w-full border rounded-md px-3 py-2"
+              className="mt-1 w-full border rounded-md px-3 py-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium">Descripción</label>
+            <label className="block text-sm font-medium text-gray-900 dark:text-gray-100">Descripción</label>
             <textarea
               value={description}
+              placeholder="Descripción del problema o consulta..."
               onChange={e => setDescription(e.target.value)}
-              className="mt-1 w-full border rounded-md px-3 py-2"
+              className="mt-1 w-full border rounded-md px-3 py-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
               rows={4}
               required
             />
           </div>
           <div>
             <div className="flex items-center justify-between">
-              <label className="block text-sm font-medium">Imágenes (máx 2MB c/u)</label>
+              <label className="block text-sm font-medium text-gray-900 dark:text-gray-100">Imágenes (máx 2MB c/u)</label>
               {previews.length > 0 && (
-                <span className="inline-flex items-center justify-center text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">{previews.length}</span>
+                <span className="inline-flex items-center justify-center text-xs px-2 py-0.5 rounded-full bg-primary-100 text-primary-700">{previews.length}</span>
               )}
             </div>
 
             {/* Dropzone / Selector con color del botón actual (azul) */}
             <div
               className={`mt-2 border-2 border-dashed rounded-md p-4 flex flex-col items-center justify-center cursor-pointer transition-colors ${
-                isDragging ? 'border-blue-600 bg-blue-50' : 'border-gray-300 hover:border-blue-600'
+                isDragging ? 'border-primary-600 bg-primary-50 dark:bg-primary-900' : 'border-gray-300 dark:border-gray-600 hover:border-primary-600'
               } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               onClick={() => !loading && fileInputRef.current?.click()}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
             >
-              <div className="text-sm text-gray-600">
-                <span className="text-blue-600 font-medium">Seleccionar imágenes</span> o arrastrarlas aquí
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                <span className="text-primary-600 dark:text-primary-400 font-medium">Seleccionar imágenes</span> o arrastrarlas aquí
               </div>
               <input
                 ref={fileInputRef}
@@ -154,7 +156,7 @@ const SupportTicketModal: React.FC<Props> = ({ onClose }) => {
             {previews.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-[10px]">
                 {previews.map((src, idx) => (
-                  <div key={idx} className="relative border rounded bg-gray-50 w-24 h-24" style={{overflow: 'visible'}}>
+                  <div key={idx} className="relative border rounded bg-gray-50 dark:bg-gray-700 w-24 h-24" style={{overflow: 'visible'}}>
                     <img src={src} alt={`preview-${idx}`} className="w-full h-full object-cover" />
                     <button
                       type="button"
@@ -176,14 +178,14 @@ const SupportTicketModal: React.FC<Props> = ({ onClose }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-md border"
+              className="px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
               disabled={loading||cooldown}
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-md bg-blue-600 text-white"
+              className="px-4 py-2 rounded-md bg-primary-600 dark:bg-primary-700 text-white hover:bg-primary-700 dark:hover:bg-primary-600"
               disabled={loading||cooldown}
             >
               {loading ? 'Enviando…' : 'Enviar'}

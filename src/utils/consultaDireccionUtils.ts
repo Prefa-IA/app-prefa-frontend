@@ -82,7 +82,7 @@ export const manejarErrorConsulta = (
   const sinCreditosMsg = msgNormalized.includes('creditos') || msgNormalized.includes('consultas');
   const sinCreditos = status403 || sinCreditosMsg;
   if (sinCreditos) {
-    toast.error('No tienes créditos disponibles. Serás redirigido para mejorar tu plan.');
+    toast.error('No tienes créditos suficientes para realizar esta acción. Serás redirigido para mejorar tu plan.');
     setTimeout(() => {
       window.location.href = '/suscripciones';
     }, 3000);

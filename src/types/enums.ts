@@ -21,6 +21,7 @@ export interface Usuario {
   };
 
   // Sistema de créditos
+  creditBalance?: number;
   creditsUsedDay?: number;
   creditsUsedMonth?: number;
   creditsDayReset?: string;
@@ -522,6 +523,7 @@ export const NAVBAR_CONFIG = {
     { name: 'Inicio', href: '/' },
     { name: 'Consultar', href: '/consultar' },
     { name: 'Mis Informes', href: '/informes' },
+    { name: 'Precios', href: '/suscripciones' },
     { name: 'FAQ', href: '/faq' }
   ]
 } as const;
@@ -678,7 +680,7 @@ export const PARCEL_DATA_CONFIG = {
   TABLE_BORDER_CLASS: 'rounded-lg overflow-hidden bg-white',
   TABLE_CONTAINER_CLASS: 'mb-6 bg-white rounded-lg',
   GRID_COLS_2: 'grid grid-cols-2 text-sm',
-  GRID_COLS_3: 'grid grid-cols-3 gap-4 mb-8',
+  GRID_COLS_3: 'grid grid-cols-1 md:grid-cols-3 gap-4 mb-8',
   GRID_COLS_5: 'grid grid-cols-5 text-sm',
   GRID_COLS_6: 'grid grid-cols-6 text-sm',
   TABLE_ROW_CLASS: 'hover:opacity-90 transition-colors duration-200',

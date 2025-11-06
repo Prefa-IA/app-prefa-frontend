@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'react-toastify';
 import { auth as authService } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -10,11 +10,16 @@ import ActionCard from '../perfil/ActionCard';
 import ReportPreviewModal from '../perfil/ReportPreviewModal';
 import SupportTicketModal from '../perfil/SupportTicketModal';
 import ConfirmModal from '../generales/ConfirmModal';
+import ModalBase from '../generales/ModalBase';
+import BillingForm from '../perfil/BillingForm';
+import { getBillingInfo } from '../../services/billing';
 
 const PerfilUsuario: React.FC = () => {
   const { usuario, updateProfile, updatePersonalization, saveTempLogo, getTempLogo, clearTempLogo } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  // Ref para evitar mostrar el toast de facturación múltiples veces
+  const billingToastRef = useRef(false);
   const [editMode, setEditMode] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
@@ -35,6 +40,7 @@ const PerfilUsuario: React.FC = () => {
   const [confirmUpload, setConfirmUpload] = useState(false);
   const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
   const [previewSrc,setPreviewSrc]=useState<string|null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (usuario?.personalizacion) {
@@ -57,6 +63,11 @@ const PerfilUsuario: React.FC = () => {
     const params = new URLSearchParams(location.search);
     if (params.get('subscription') === '1') {
       navigate('/suscripciones');
+    }
+    if (params.get('billing') === '1' && !billingToastRef.current) {
+      billingToastRef.current = true;
+      toast.info('Completá tus datos de facturación para poder comprar un plan');
+      setShowModal(true);
     }
   }, [usuario, location, navigate]);
 
@@ -138,7 +149,7 @@ const PerfilUsuario: React.FC = () => {
   };
 
   const handleSubscriptionClick = () => {
-    navigate('/suscripciones');
+    navigate('/suscripcion');
   };
 
   const handleSupportClick = () => setShowSupport(true);
@@ -241,10 +252,14 @@ const PerfilUsuario: React.FC = () => {
     try {
       // Aquí integrarías con MercadoPago
       const { subscriptions } = await import('../../services/api');
-      const preference = await subscriptions.createPaymentPreference(planId);
+      const preference = await subscriptions.createSubscription(planId);
       
       // Redirigir a MercadoPago
-      window.open(preference.init_point, '_blank');
+      const url = preference?.init_point || preference?.sandbox_init_point;
+      if (!url) {
+        throw new Error('URL de pago no generada');
+      }
+      window.open(url, '_blank');
       
     } catch (error) {
       console.error('Error al procesar pago:', error);
@@ -279,25 +294,26 @@ const PerfilUsuario: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="space-y-8">
           {/* Header */}
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900">Perfil de Usuario</h1>
-            <p className="mt-2 text-lg text-gray-600">Administra la información y apariencia de tu cuenta</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Perfil de Usuario</h1>
+            <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Administra la información y apariencia de tu cuenta</p>
           </div>
 
           {/* Main Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            {/* Información Básica */}
-            <div className="lg:col-span-1">
+            {/* Información Básica + Facturación */}
+            <div className="lg:col-span-1 space-y-6">
               <ProfileCard 
                 logoUrl={logoUrl}
                 onLogoUpload={handleLogoUpload}
                 onLogoDelete={logoUrl ? handleLogoDeleteClick : undefined}
               />
+              <BillingSection />
             </div>
 
             {/* Personalización */}
@@ -364,7 +380,48 @@ const PerfilUsuario: React.FC = () => {
           onConfirm={handleLogoUploadConfirm}
         />
       )}
+      {showModal && (
+        <BillingModal existing={null} onClose={() => { setShowModal(false); }} />
+      )}
     </div>
+  );
+};
+
+/* ===== Billing Section & Modal (top-level components) ===== */
+// (import duplicado eliminado)
+
+export const BillingModal: React.FC<{ existing: any; onClose: () => void }> = ({ existing, onClose }) => (
+  <ModalBase title={existing && existing.cuit ? 'Modificar datos de facturación' : 'Agregar datos de facturación'} onClose={onClose} hideConfirm>
+    <BillingForm onSuccess={onClose} />
+  </ModalBase>
+);
+
+export const BillingSection: React.FC = () => {
+  const [info, setInfo] = React.useState<any | null>(null);
+  const [showModal, setShowModal] = React.useState(false);
+
+  React.useEffect(() => { getBillingInfo().then(setInfo); }, []);
+
+  return (
+    <>
+    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 flex flex-col items-center justify-center text-center flex-1">
+      <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Datos de facturación</h3>
+      {info && info.cuit ? (
+        <div className="space-y-2 text-gray-700 dark:text-gray-300">
+          <p><strong>Razón Social:</strong> {info.razonSocial}</p>
+          <p><strong>CUIT:</strong> {info.cuit}</p>
+          <p><strong>Condición IVA:</strong> {info.condicionIVA}</p>
+        </div>
+      ) : (
+        <p className="text-gray-600 dark:text-gray-400 mb-4">Aún no cargaste tus datos de facturación.</p>
+      )}
+      <button onClick={() => setShowModal(true)} className="btn-primary mt-4">{info && info.cuit ? 'Ver mis datos de facturación' : 'Agregar'}</button>
+    </div>
+
+    {showModal && (
+      <BillingModal existing={info} onClose={() => { setShowModal(false); getBillingInfo().then(setInfo); }} />
+    )}
+    </>
   );
 };
 
