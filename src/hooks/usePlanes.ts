@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 
 export interface Plan {
-  _id?: string;
   id: string;
   name: string;
   price: number;
-  creditosTotales: number;
   /*@deprecated*/ creditosMes?: number;
   /*@deprecated*/ creditosDia?: number;
   permiteCompuestas?: boolean;
@@ -15,11 +13,9 @@ export interface Plan {
   discountPct?: number;
   discountUntil?: string | null;
   features?: string[];
-  prioridad?: number;
   freeTrial?: { frequency: number; frequency_type: string };
   freeCredits?: number;
   tag?: {
-    _id: string;
     slug: string;
     name: string;
     bgClass: string;

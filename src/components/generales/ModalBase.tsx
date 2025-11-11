@@ -1,12 +1,5 @@
 import React from 'react';
-
-interface ModalBaseProps {
-  title: string;
-  onClose: () => void;
-  children: React.ReactNode;
-  hideConfirm?: boolean;
-  confirmText?: string;
-}
+import { ModalBaseProps } from '../../types/components';
 
 const ModalBase: React.FC<ModalBaseProps> = ({ title, onClose, children, hideConfirm = false, confirmText = 'Entendido' }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/60 p-4 select-none">

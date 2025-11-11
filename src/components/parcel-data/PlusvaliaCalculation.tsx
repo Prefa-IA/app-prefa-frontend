@@ -1,5 +1,11 @@
 import React from 'react';
 import { PlusvaliaCalculationProps, PARCEL_DATA_CONFIG } from '../../types/enums';
+import {
+  CapacidadConstructivaTableProps,
+  CalculoA1TableProps,
+  CalculoA2TableProps,
+  PlusvaliaFinalTableProps
+} from '../../types/components';
 import DataTable, { TableRow } from './DataTable';
 import useTablePersonalization from '../../hooks/useTablePersonalization';
 import PageNumber from './PageNumber';
@@ -50,12 +56,7 @@ const PlusvaliaCalculation: React.FC<PlusvaliaCalculationProps> = ({
   );
 };
 
-const CapacidadConstructivaTable: React.FC<{
-  informe: any;
-  calculatedValues: any;
-  informeCompuesto?: any;
-  esInformeCompuesto?: boolean;
-}> = ({ informe, calculatedValues, informeCompuesto, esInformeCompuesto }) => {
+const CapacidadConstructivaTable: React.FC<CapacidadConstructivaTableProps> = ({ informe, calculatedValues, informeCompuesto, esInformeCompuesto }) => {
   const breakdownSuperficie = esInformeCompuesto && informeCompuesto ?
     `(${informeCompuesto.informesIndividuales.map((i: any) => i.edificabilidad?.superficie_parcela || 0).join(' + ')})` : '';
 
@@ -116,10 +117,7 @@ const CapacidadConstructivaTable: React.FC<{
   );
 };
 
-const CalculoA1Table: React.FC<{
-  informe: any;
-  calculatedValues: any;
-}> = ({ informe, calculatedValues }) => (
+const CalculoA1Table: React.FC<CalculoA1TableProps> = ({ informe, calculatedValues }) => (
   <DataTable title="CÁLCULO DE A1">
     <div className="p-2">
       <div className="space-y-2">
@@ -144,10 +142,7 @@ const CalculoA1Table: React.FC<{
   </DataTable>
 );
 
-const CalculoA2Table: React.FC<{
-  informe: any;
-  calculatedValues: any;
-}> = ({ informe, calculatedValues }) => (
+const CalculoA2Table: React.FC<CalculoA2TableProps> = ({ informe, calculatedValues }) => (
   <DataTable title="CÁLCULO DE A2">
     <div className="p-2">
       <div className="space-y-2">
@@ -172,9 +167,7 @@ const CalculoA2Table: React.FC<{
   </DataTable>
 );
 
-const PlusvaliaFinalTable: React.FC<{
-  calculatedValues: any;
-}> = ({ calculatedValues }) => (
+const PlusvaliaFinalTable: React.FC<PlusvaliaFinalTableProps> = ({ calculatedValues }) => (
   <div className="mt-6">
     <DataTable title="CÁLCULO DE PLUSVALÍA">
       <div className="p-4">

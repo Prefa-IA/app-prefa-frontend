@@ -6,6 +6,8 @@ import { Tab } from '@headlessui/react';
 import { useAuth } from '../contexts/AuthContext';
 import PrefaInfoModal from './PrefaInfoModal';
 import Container from './layout/Container';
+import { sanitizePath, sanitizeUrl } from '../utils/urlSanitizer';
+import { subscriptions } from '../services/api';
 
 const SubscriptionPage: React.FC = () => {
     const { planes } = usePlanes();
@@ -22,7 +24,8 @@ const SubscriptionPage: React.FC = () => {
     if (!isOverage) {
       const billing = await getBillingInfo();
       if (!billing || !billing.cuit) {
-        window.location.href = '/perfil?billing=1';
+        const safePath = sanitizePath('/perfil?billing=1');
+        window.location.href = safePath;
         return;
       }
     }
@@ -31,17 +34,19 @@ const SubscriptionPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const { subscriptions } = await import('../services/api');
       const pref = isOverage
         ? await subscriptions.purchaseOverage(plan.id)
         : await subscriptions.createSubscription(plan.id);
-
+      
       const redirectUrl = pref?.init_point || pref?.sandbox_init_point;
       if (redirectUrl) {
-        window.location.href = redirectUrl;
-        return;
+        const safeUrl = sanitizeUrl(redirectUrl);
+        if (safeUrl) {
+          window.location.href = safeUrl;
+          return;
+        }
       }
-
+      
       alert('Error: La URL de pago no fue generada.');
     } catch (e) {
       console.error('Error al iniciar el pago con Mercado Pago:', e);
@@ -53,7 +58,7 @@ const SubscriptionPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-10">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-10" data-tutorial="planes">
       <Container>
         <div className="text-center mb-12">
           <h1 className="text-5xl font-black text-gray-900 dark:text-gray-100 mb-4 tracking-tight">

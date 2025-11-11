@@ -24,6 +24,8 @@ import ResetPasswordPage from './components/ResetPasswordPage';
 import Footer from './components/generales/Footer';
 import { useTheme } from './contexts/ThemeContext';
 import NotFound from './components/NotFound';
+import BuscarDireccionPage from './components/BuscarDireccionPage';
+import { TutorialOnboarding } from './components/tutorial/TutorialOnboarding';
 
 const ProtectedRoute: React.FC<{
   children: React.ReactNode;
@@ -62,6 +64,14 @@ const App: React.FC = () => {
               element={
                 <ProtectedRoute>
                   <ConsultaDireccion />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/buscar"
+              element={
+                <ProtectedRoute>
+                  <BuscarDireccionPage />
                 </ProtectedRoute>
               }
             />
@@ -113,6 +123,7 @@ const App: React.FC = () => {
           </main>
           <Footer />
           <ThemedToast />
+          <TutorialOnboarding />
         </div>
       </Router>
       </AuthProvider>

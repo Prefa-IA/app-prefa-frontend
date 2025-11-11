@@ -1,10 +1,5 @@
 import { Informe, InformeCompuesto } from '../types/enums';
 
-/**
- * Consolida múltiples informes en un solo informe para prefactibilidades compuestas
- * @param informes Lista de informes individuales a consolidar
- * @returns Informe consolidado con datos sumados
- */
 export const consolidarInformes = (informes: Informe[]): Informe => {
   if (informes.length === 0) {
     throw new Error('No hay informes para consolidar');
@@ -19,15 +14,6 @@ export const consolidarInformes = (informes: Informe[]): Informe => {
   const direccionesNormalizadas = informes.flatMap(inf => inf.direccionesNormalizadas || []);
   consolidado.direccionesNormalizadas = direccionesNormalizadas;
   
-  // -------------------------------------------------------------
-  // Validación de encadenamiento por parcelas linderas
-  // -------------------------------------------------------------
-  // Reglas:
-  // 1. Cada SMP seleccionado debe poder alcanzarse a partir del primero
-  //    mediante una secuencia de "parcelas_linderas" incluidas en la selección.
-  // 2. Si algún informe no posee la información de linderas, se considera inválido.
-
-  // Construir mapa de adyacencias (SMP → linderas que forman parte de la selección)
   const smpsSeleccionados = informes.map(inf => inf.datosCatastrales?.smp).filter(Boolean);
 
   type AdyMap = Record<string, Set<string>>;
@@ -43,7 +29,6 @@ export const consolidarInformes = (informes: Informe[]): Informe => {
       ? (inf.edificabilidad?.parcelas_linderas?.smp_linderas as string[])
       : [];
 
-    // Agregar vecinos implícitos por smp_anterior / siguiente
     const extraVecinos: string[] = [];
     const prev = inf.datosCatastrales?.smp_anterior;
     const next = inf.datosCatastrales?.smp_siguiente;
@@ -56,21 +41,14 @@ export const consolidarInformes = (informes: Informe[]): Informe => {
       throw new Error(`El informe para la parcela ${smp} no contiene información de parcelas linderas.`);
     }
 
-    // Solo vecinos dentro de la selección
     const filtradas = vecinosBrutos.filter(v => smpsSeleccionados.includes(v));
     if (!ady[smp]) ady[smp] = new Set();
     filtradas.forEach((l) => {
       ady[smp].add(l);
-      // agregar conexión inversa para considerar relación unidireccional
       if (!ady[l]) ady[l] = new Set();
       ady[l].add(smp);
     });
   }
-
-  // -------------------------------------------------------------
-  // Nueva validación: cada par consecutivo del listado debe ser lindero
-  // usando primero smp_siguiente / smp_anterior; fallback a parcelas_linderas
-  // -------------------------------------------------------------
 
   for (let i = 0; i < smpsSeleccionados.length - 1; i++) {
     const aSmp = smpsSeleccionados[i]!;
@@ -88,12 +66,10 @@ export const consolidarInformes = (informes: Informe[]): Informe => {
     const bNext = infB.datosCatastrales?.smp_siguiente;
 
     let sonVecinos = false;
-    // Primer criterio: anterior / siguiente
     if (aNext === bSmp || aPrev === bSmp || bNext === aSmp || bPrev === aSmp) {
       sonVecinos = true;
     }
 
-    // Fallback: parcelas_linderas en cualquiera de los dos
     if (!sonVecinos) {
       const lindA: string[] = Array.isArray(infA.edificabilidad?.parcelas_linderas?.smp_linderas)
         ? (infA.edificabilidad?.parcelas_linderas?.smp_linderas as string[])
@@ -189,7 +165,6 @@ export const consolidarInformes = (informes: Informe[]): Informe => {
     }
   }
   
-  // Combinar geometrías de parcelas
   if (consolidado.geometria && consolidado.geometria.features) {
     const combinedFeatures = [] as any[];
     informes.forEach(inf => {
@@ -200,7 +175,6 @@ export const consolidarInformes = (informes: Informe[]): Informe => {
     consolidado.geometria.features = combinedFeatures;
   }
   
-  // Recalcular centro aproximado como promedio simple de coordenadas
   if (informes.every(inf => inf.googleMaps)) {
     const avgLat = informes.reduce((sum, i) => sum + parseFloat(i.googleMaps.lat), 0) / informes.length;
     const avgLon = informes.reduce((sum, i) => sum + parseFloat(i.googleMaps.lon), 0) / informes.length;
@@ -211,10 +185,6 @@ export const consolidarInformes = (informes: Informe[]): Informe => {
   return consolidado;
 };
 
-/**
- * @param direcciones Lista de direcciones consultadas
- * @param informes Lista de informes individuales
- */
 export const crearInformeCompuesto = (direcciones: string[], informes: Informe[]): InformeCompuesto => {
   const informeConsolidado = consolidarInformes(informes);
   
@@ -225,9 +195,6 @@ export const crearInformeCompuesto = (direcciones: string[], informes: Informe[]
   };
 };
 
-/**
- * @param informes Lista de informes individuales
- */
 export const obtenerDocumentosVisuales = (informes: Informe[]) => {
   const documentos = {
     croquis: [] as string[],
@@ -240,7 +207,6 @@ export const obtenerDocumentosVisuales = (informes: Informe[]) => {
       documentos.croquis.push(informe.edificabilidad.link_imagen.croquis_parcela);
     }
 
-    // Perímetro de manzana y plano índice sólo deben incluirse una vez
     if (informes.length > 1) {
       if (informe.edificabilidad?.link_imagen?.perimetro_manzana && documentos.perimetros.length === 0) {
         documentos.perimetros.push(informe.edificabilidad.link_imagen.perimetro_manzana);

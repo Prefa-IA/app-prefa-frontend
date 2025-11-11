@@ -2,24 +2,11 @@ import React from 'react';
 import ColorPicker from './ColorPicker';
 import FontSelector from './FontSelector';
 import { PencilIcon } from '@heroicons/react/outline';
+import { PersonalizationSectionProps } from '../../types/components';
+import { useButtonCooldown } from '../../utils/buttonUtils';
 
-interface Props {
-  editMode: boolean;
-  personalizacion: any;
-  onPersonalizacionChange: (field: string, value: string) => void;
-  onToggleEdit: () => void;
-  onSave: () => void;
-}
-
-const PersonalizationSection: React.FC<Props> = ({ editMode, personalizacion, onPersonalizacionChange, onToggleEdit, onSave }) => {
-  const [btnDisabled, setBtnDisabled] = React.useState(false);
-
-  const handleSaveClick = () => {
-    if (btnDisabled) return; // seguridad extra
-    onSave();
-    setBtnDisabled(true);
-    setTimeout(() => setBtnDisabled(false), 1500);
-  };
+const PersonalizationSection: React.FC<PersonalizationSectionProps> = ({ editMode, personalizacion, onPersonalizacionChange, onToggleEdit, onSave }) => {
+  const { cooldown, handleClick } = useButtonCooldown(1500);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
@@ -48,8 +35,8 @@ const PersonalizationSection: React.FC<Props> = ({ editMode, personalizacion, on
       {editMode && (
         <div className="flex justify-end">
           <button
-            onClick={handleSaveClick}
-            disabled={btnDisabled}
+            onClick={() => handleClick(onSave)}
+            disabled={cooldown}
             className="px-6 py-3 bg-primary-600 dark:bg-primary-700 text-white rounded-lg hover:bg-primary-700 dark:hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Guardar Cambios

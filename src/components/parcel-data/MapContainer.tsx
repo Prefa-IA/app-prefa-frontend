@@ -1,11 +1,6 @@
 import React from 'react';
+import { MapContainerProps } from '../../types/components';
 
-interface MapContainerProps {
-  center: { lat: number; lng: number };
-  showMarker?: boolean;
-}
-
-// Placeholder MapContainer until original implementation is restored
 const MapContainer: React.FC<MapContainerProps> = () => {
   return null;
 };

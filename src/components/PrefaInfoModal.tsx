@@ -1,11 +1,8 @@
 import React from 'react';
 import ModalBase from './generales/ModalBase';
+import { PrefaInfoModalProps } from '../types/components';
 
-interface Props {
-  onClose: () => void;
-}
-
-const PrefaInfoModal: React.FC<Props> = ({ onClose }) => (
+const PrefaInfoModal: React.FC<PrefaInfoModalProps> = ({ onClose }) => (
   <ModalBase title="Elegí el tipo de informe que necesitás." onClose={onClose}>
     <div className="space-y-2 text-sm">
       <p><strong>Prefactibilidad Simple</strong> (100 créditos)</p>

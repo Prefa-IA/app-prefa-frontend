@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Container from './layout/Container';
-import { useAuth } from '../contexts/AuthContext';
 import { prefactibilidad } from '../services/api';
 import { Informe, ListaInformesProps, LISTA_INFORMES_CONFIG } from '../types/enums';
 import { DocumentTextIcon, DownloadIcon, CalendarIcon, LocationMarkerIcon, OfficeBuildingIcon, TagIcon } from '@heroicons/react/outline';
 import { CurrencyDollarIcon } from '@heroicons/react/solid';
 import { formatearFecha } from '../utils/dateUtils';
 import { downloadBlob } from '../utils/downloadUtils';
+import MisDirecciones from './registros/MisDirecciones';
+
+const TAB_STORAGE_KEY = 'listaInformes_activeTab';
 
 const ListaInformes: React.FC<ListaInformesProps> = ({ className }) => {
-  const { usuario } = useAuth();
   const [informes, setInformes] = useState<Informe[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,12 +20,17 @@ const ListaInformes: React.FC<ListaInformesProps> = ({ className }) => {
   const [downloadingIds, setDownloadingIds] = useState<string[]>([]);
   const [downloadedIds, setDownloadedIds] = useState<string[]>([]);
   const [searchCooldown,setSearchCooldown]=useState(false);
+  const [tab, setTab] = useState<'informes' | 'direcciones'>(() => {
+    const saved = localStorage.getItem(TAB_STORAGE_KEY);
+    return (saved === 'informes' || saved === 'direcciones') ? saved : 'informes';
+  });
 
-  useEffect(() => {
-    cargarInformes();
-  }, [page, search]);
+  const handleTabChange = (newTab: 'informes' | 'direcciones') => {
+    setTab(newTab);
+    localStorage.setItem(TAB_STORAGE_KEY, newTab);
+  };
 
-  const cargarInformes = async () => {
+  const cargarInformes = useCallback(async () => {
     try {
       setLoading(true);
       const data = await prefactibilidad.obtenerInformes(page, search);
@@ -36,7 +42,11 @@ const ListaInformes: React.FC<ListaInformesProps> = ({ className }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, search]);
+
+  useEffect(() => {
+    cargarInformes();
+  }, [cargarInformes]);
 
   const handleDescargar = async (informe: Informe) => {
     const id = informe._id as string;
@@ -45,7 +55,6 @@ const ListaInformes: React.FC<ListaInformesProps> = ({ className }) => {
     try {
       const blob = await prefactibilidad.descargarPDF(id);
       downloadBlob(blob, `informe-${informe.direccion.direccion}.pdf`);
-      // Rehabilitar el botón a los 2s post click
       setTimeout(() => {
         setDownloadedIds(prev => prev.filter(did => did !== id));
       }, 2000);
@@ -81,10 +90,12 @@ const ListaInformes: React.FC<ListaInformesProps> = ({ className }) => {
 
   return (
     <Container>
-      <div className="py-8">
+      <div className="py-8" data-tutorial="registros">
         <ListaInformesHeader />
 
-        {/* Formulario de búsqueda responsive */}
+        <Tabs active={tab} onChange={handleTabChange} />
+
+        {tab === 'informes' && (
         <form onSubmit={handleSearchSubmit} className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
           <input
             type="text"
@@ -101,15 +112,20 @@ const ListaInformes: React.FC<ListaInformesProps> = ({ className }) => {
             Buscar
           </button>
         </form>
+        )}
 
-        <ListaInformesContent 
-          loading={loading}
-          error={error}
-          informes={informes}
-          onDescargar={handleDescargar}
-          downloadingIds={downloadingIds}
-          downloadedIds={downloadedIds}
-        />
+        {tab === 'informes' ? (
+          <ListaInformesContent 
+            loading={loading}
+            error={error}
+            informes={informes}
+            onDescargar={handleDescargar}
+            downloadingIds={downloadingIds}
+            downloadedIds={downloadedIds}
+          />
+        ) : (
+          <MisDirecciones />
+        )}
 
         {totalPages > 1 && (
           <div className="mt-4 flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4">
@@ -142,6 +158,33 @@ const ListaInformesHeader: React.FC = () => (
       {LISTA_INFORMES_CONFIG.SUBTITLE}
     </p>
   </>
+);
+
+const Tabs: React.FC<{ active: 'informes' | 'direcciones'; onChange: (t:'informes'|'direcciones')=>void }> = ({ active, onChange }) => (
+  <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
+    <nav className="-mb-px flex space-x-6" aria-label="Tabs">
+      <button
+        onClick={() => onChange('informes')}
+        className={`whitespace-nowrap py-2 px-1 border-b-2 text-sm font-medium ${
+          active === 'informes'
+            ? 'border-primary-600 text-primary-600 dark:text-primary-400'
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100'
+        }`}
+      >
+        Mis informes
+      </button>
+      <button
+        onClick={() => onChange('direcciones')}
+        className={`whitespace-nowrap py-2 px-1 border-b-2 text-sm font-medium ${
+          active === 'direcciones'
+            ? 'border-primary-600 text-primary-600 dark:text-primary-400'
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-300 dark:hover:text-gray-100'
+        }`}
+      >
+        Mis direcciones
+      </button>
+    </nav>
+  </div>
 );
 
 const ListaInformesContent: React.FC<{

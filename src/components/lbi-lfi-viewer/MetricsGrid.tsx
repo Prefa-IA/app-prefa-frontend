@@ -1,5 +1,7 @@
 import React from 'react';
 import { MetricsGridProps } from '../../types/enums';
+import { MetricCardProps, TronerasMetricCardProps } from '../../types/components';
+import { getTronerasDescription } from '../../utils/tronerasUtils';
 
 const MetricsGrid: React.FC<MetricsGridProps> = ({ mediciones }) => {
   return (
@@ -59,27 +61,14 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({ mediciones }) => {
   );
 };
 
-const MetricCard: React.FC<{
-  label: string;
-  value: string;
-  borderColor: string;
-}> = ({ label, value, borderColor }) => (
+const MetricCard: React.FC<MetricCardProps> = ({ label, value, borderColor }) => (
   <div className={`bg-white p-3 rounded shadow-sm border ${borderColor}`}>
     <div className="text-sm text-gray-500">{label}</div>
     <div className="text-lg font-medium">{value}</div>
   </div>
 );
 
-const TronerasMetricCard: React.FC<{ totalTroneras: number }> = ({ totalTroneras }) => {
-  const getTronerasDescription = (count: number): { text: string; color: string } => {
-    if (count === 0) return { text: 'Sin troneras aplicables', color: 'text-gray-400' };
-    if (count === 1) return { text: 'Caso especial: 1 tronera', color: 'text-blue-500' };
-    if (count === 2) return { text: 'Caso especial: 2 troneras', color: 'text-blue-500' };
-    if (count === 3) return { text: 'Manzana triangular', color: 'text-orange-500' };
-    if (count === 4) return { text: 'Manzana típica', color: 'text-green-500' };
-    return { text: 'Manzana irregular', color: 'text-purple-500' };
-  };
-
+const TronerasMetricCard: React.FC<TronerasMetricCardProps> = ({ totalTroneras }) => {
   const description = getTronerasDescription(totalTroneras);
 
   return (

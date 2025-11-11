@@ -1,7 +1,10 @@
 import { prefactibilidad } from '../services/api';
 import { DireccionSugerida, CONSULTA_DIRECCION_CONFIG } from '../types/enums';
-import { getCoordinatesFromAddress, Coordinates } from './mapUtils';
+import { Coordinates } from './mapUtils';
+import React from 'react';
 import { toast } from 'react-toastify';
+import { PROCESSING_CONFIG } from '../types/consultaDireccion';
+import { sanitizePath } from './urlSanitizer';
 
 export const obtenerSugerenciasDireccion = async (
   valor: string,
@@ -24,7 +27,6 @@ export const obtenerSugerenciasDireccion = async (
       setError(null);
     }
   } catch (error: any) {
-    // No mostrar error si fue cancelado intencionalmente
     if (error.name !== 'AbortError') {
       console.error('Error al obtener sugerencias:', error);
       setSugerencias([]);
@@ -84,7 +86,8 @@ export const manejarErrorConsulta = (
   if (sinCreditos) {
     toast.error('No tienes créditos suficientes para realizar esta acción. Serás redirigido para mejorar tu plan.');
     setTimeout(() => {
-      window.location.href = '/suscripciones';
+      const safePath = sanitizePath('/suscripciones');
+      window.location.href = safePath;
     }, 3000);
     return;
   }
@@ -106,3 +109,56 @@ export const manejarErrorGuardado = (
   console.error('Error al guardar informe:', error);
   setError(CONSULTA_DIRECCION_CONFIG.MESSAGES.ERROR_SAVE);
 }; 
+
+export const isValidProcessingResponse = (response: any): boolean => {
+  const valores = PROCESSING_CONFIG.CRITICAL_FIELDS.map((key) => response?.[key]);
+  return !valores.every((v) => {
+    if (v === undefined || v === null) return true;
+    const s = String(v).trim();
+    return s === '0' || s === '0.00' || s === '0.00 m2';
+  });
+};
+
+export const confirmarToast = (mensaje: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    let toastId: React.ReactText;
+    const handleClose = () => {
+      toast.dismiss(toastId);
+      resolve(false);
+    };
+    const handleConfirm = () => {
+      toast.dismiss(toastId);
+      resolve(true);
+    };
+    const content = React.createElement(
+      'div',
+      null,
+      React.createElement('p', { className: 'mb-3' }, mensaje),
+      React.createElement(
+        'div',
+        { className: 'flex justify-end space-x-2' },
+        React.createElement(
+          'button',
+          {
+            onClick: () => handleClose(),
+            className: 'px-3 py-1 bg-gray-300 rounded hover:bg-gray-400',
+          },
+          'Cancelar'
+        ),
+        React.createElement(
+          'button',
+          {
+            onClick: () => handleConfirm(),
+            className: 'px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700',
+          },
+          'Sobrescribir'
+        )
+      )
+    );
+    toastId = toast.info(content, {
+      closeButton: false,
+      autoClose: false,
+      position: 'top-center',
+    });
+  });
+};

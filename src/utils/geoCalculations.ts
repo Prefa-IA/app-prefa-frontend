@@ -36,7 +36,6 @@ export const calcularMetricas = (features: {
       }
     }
 
-    // Cálculos para LFI
     if (features.lfi && features.lfi.length > 0) {
       let lfiPolygon;
 

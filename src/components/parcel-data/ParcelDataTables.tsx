@@ -13,11 +13,9 @@ const ParcelDataTables: React.FC<ParcelDataTablesProps & { pageCounter?: number 
   const informeAMostrar = informe;
   const { parentTableStyle } = useTablePersonalization();
 
-  // Superficie total (terreno) – usar superficie_total si está disponible
   const supTotalValor = parseFloat((informe.datosCatastrales?.superficie_total as any) || calculatedValues.superficieParcela || 0);
   let superficieTerrenoDisplay = supTotalValor ? `${supTotalValor.toFixed(2)} m²` : 'N/A';
 
-  // Superficie cubierta (si existe)
   const supCubValor = informe.datosCatastrales?.superficie_cubierta ? parseFloat(informe.datosCatastrales.superficie_cubierta as any) : undefined;
   let superficieCubiertaDisplay = supCubValor !== undefined ? `${supCubValor.toFixed(2)} m²` : 'N/A';
 

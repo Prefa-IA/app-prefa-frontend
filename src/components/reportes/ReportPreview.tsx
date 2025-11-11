@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ReportPreviewProps, ChangeLogEntry, REPORT_CONFIG } from '../../types/enums';
+import { ReportPreviewProps, ChangeLogEntry, DocumentosVisuales } from '../../types/enums';
 import { useAuth } from '../../contexts/AuthContext';
 import { getReportData } from '../../utils/reportUtils';
 import { obtenerDocumentosVisuales } from '../../services/consolidacionInformes';
@@ -24,11 +24,7 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
   const { usuario } = useAuth();
   const [changeLog, setChangeLog] = useState<ChangeLogEntry[]>([]);
   const [fachadaImages, setFachadaImages] = useState<string[]>([]);
-  const [documentosVisuales, setDocumentosVisuales] = useState<{
-    croquis: string[];
-    perimetros: string[];
-    planosIndice: string[];
-  }>({
+  const [documentosVisuales, setDocumentosVisuales] = useState<DocumentosVisuales>({
     croquis: [],
     perimetros: [],
     planosIndice: []
@@ -38,13 +34,11 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
     setChangeLog(newChangeLog);
   };
 
-  // Cargar documentos visuales
   useEffect(() => {
     if (isCompoundMode && informeCompuesto) {
       const documentos = obtenerDocumentosVisuales(informeCompuesto.informesIndividuales);
       setDocumentosVisuales(documentos);
     } else if (informe && informe.edificabilidad?.link_imagen) {
-      // Para informes simples, extraer documentos del link_imagen
       const linkImagen = informe.edificabilidad.link_imagen;
       setDocumentosVisuales({
         croquis: linkImagen.croquis_parcela ? [linkImagen.croquis_parcela] : [],
@@ -54,7 +48,6 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
     }
   }, [isCompoundMode, informeCompuesto, informe]);
 
-  // Cargar imágenes de fachada
   useEffect(() => {
     const loadImages = async () => {
       const reportData = getReportData(isCompoundMode, informe, informeCompuesto);
@@ -88,7 +81,6 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
 
   const reportData = getReportData(isCompoundMode, informe, informeCompuesto);
   
-  // Obtener personalización del usuario
   const personalizacion = usuario?.personalizacion || {};
   const colores = {
     fondoEncabezadosPrincipales: personalizacion.fondoEncabezadosPrincipales || '#3B82F6',
@@ -106,7 +98,6 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
                      tipografia === 'Poppins' ? 'Poppins, sans-serif' :
                      'Inter, system-ui, sans-serif';
 
-  // Estilos personalizados para aplicar al reporte
   const customStyles = {
     fontFamily,
     '--color-primary': colores.fondoEncabezadosPrincipales,
@@ -125,7 +116,6 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
 
       <div className={styles.pageBreak}></div>
 
-      {/* Renderizar índice solo para Prefa2 */}
       {tipoPrefa === 'prefa2' && (
         <>
           <ReportIndex 
@@ -140,7 +130,6 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
         </>
       )}
 
-      {/* Resumen IA */}
       {informe && (informe as any).iaResumen && (
         <div className="border rounded p-4 mb-6 bg-white shadow space-y-4">
           <h2 className="text-lg font-semibold text-[#0369A1]">Resumen IA (Capacidad Constructiva)</h2>

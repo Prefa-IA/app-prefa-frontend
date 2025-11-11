@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-
-interface UvaInputModalProps {
-  defaultValue: number;
-  onConfirm: (value: number) => void;
-  onCancel: () => void;
-}
+import { UvaInputModalProps } from '../types/components';
 
 const UvaInputModal: React.FC<UvaInputModalProps> = ({ defaultValue, onConfirm, onCancel }) => {
   const [valor, setValor] = useState<string>(defaultValue.toString());

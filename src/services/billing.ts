@@ -1,8 +1,6 @@
 import { BillingInfo } from '../types/billing';
 import api from './api';
 
-// Centralizar la lógica en el cliente axios que ya gestiona el token JWT.
-
 export const getBillingInfo = async (): Promise<BillingInfo | null> => {
   try {
     const { data } = await api.get<BillingInfo>('/auth/perfil/billing');

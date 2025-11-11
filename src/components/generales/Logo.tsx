@@ -1,11 +1,6 @@
 import React from 'react';
 import logo from '../../assets/images/logo.png';
-
-interface LogoProps {
-  className?: string;
-  width?: number;
-  height?: number;
-}
+import { LogoProps } from '../../types/components';
 
 const Logo: React.FC<LogoProps> = ({ 
   className = '', 

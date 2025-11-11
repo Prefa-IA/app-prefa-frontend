@@ -1,5 +1,6 @@
 import React from 'react';
 import { BasicInformationProps, PARCEL_DATA_CONFIG } from '../../types/enums';
+import { DirectionsSectionProps } from '../../types/components';
 import DataTable, { GridTableHeader, GridTableRow, TableRow } from './DataTable';
 import useTablePersonalization from '../../hooks/useTablePersonalization';
 import { calculateAllValues } from '../../utils/parcelCalculations';
@@ -26,12 +27,10 @@ const BasicInformation: React.FC<BasicInformationProps> = ({
     return null;
   };
 
-  // Métricas pre-calculadas (capacidad, plusvalía) provistas por cálculo detallado
   const metrics = (informeAMostrar as any)?.edificabilidad?.metrics || {};
 
   const basicInfoColumns = ['Dirección', 'Barrio', 'Nomenclador', 'Capacidad Constructiva Máx.', 'Plusvalía (estimada)'];
   
-  // Construir valores individuales para desglose si es compuesto
   let capacityBreakdown = '';
   let plusvaliaBreakdown = '';
 
@@ -74,51 +73,33 @@ const BasicInformation: React.FC<BasicInformationProps> = ({
     </div>
   ];
 
-  /********************
-   * PARÁMETROS NORMATIVOS
-   ********************/
-  // APH propio
   const esAPH = (informeAMostrar as any)?.shp_assets_info?.aph?.contexto?.protegido ||
                 !!(informeAMostrar.edificabilidad?.catalogacion?.proteccion);
 
-  // APH Lindero
   const aphLindero = informeAMostrar.edificabilidad?.parcelas_linderas?.aph_linderas;
 
-  // Manzana típica
   const manzanaTipica = informeAMostrar.edificabilidad?.tipica || 'N/A';
 
-  // Riesgo hídrico
   const riesgoHidrico = informeAMostrar.edificabilidad?.afectaciones?.riesgo_hidrico;
 
-  // LEP / Ensanche y Apertura
   const lep = informeAMostrar.edificabilidad?.afectaciones?.lep;
   const ensanche = informeAMostrar.edificabilidad?.afectaciones?.ensanche;
   const apertura = informeAMostrar.edificabilidad?.afectaciones?.apertura;
 
-  // Banda mínima edificable (flag si hay features)
   const bandaMinima = (informeAMostrar as any)?.shp_assets_info?.banda_minima?.features > 0;
 
-  // Rivolta
   const rivolta = informeAMostrar.edificabilidad?.rivolta;
 
-  // Tronera irregular (consolidado invadiendo LFI)
   const troneraIrregular = informeAMostrar.edificabilidad?.irregular;
 
-  // Zona especial (primer distrito específico no vacío)
   const zonaEspecial = (informeAMostrar.edificabilidad?.distrito_especial as any)?.find((d: any) => d.distrito_especifico)?.distrito_especifico || 'N/A';
 
-  // Enrase
   const enrase = (informeAMostrar.edificabilidad as any)?.enrase;
 
-  // Mixtura de uso (primer valor)
   const mixturaUso = (informeAMostrar.edificabilidad as any)?.mixtura_uso;
 
-  // Cinturón Digital ya no se muestra
-
-  // Afección LFI (si existe porcentaje)
   const lfiAfeccionPercent = (informeAMostrar.edificabilidad as any)?.lfi_afeccion_percent;
 
-  // Recalcular APH incluyendo flag extra
   const aphExtra = (informeAMostrar.edificabilidad as any)?.aph_extra;
   const esAPHFinal = esAPH || aphExtra;
 
@@ -182,7 +163,7 @@ const BasicInformation: React.FC<BasicInformationProps> = ({
   );
 };
 
-const DirectionsSection: React.FC<{ direcciones: string[] }> = ({ direcciones }) => (
+const DirectionsSection: React.FC<DirectionsSectionProps> = ({ direcciones }) => (
   <div className="mb-4 p-2 border bg-orange-50">
     <div className="font-semibold mb-2">Direcciones incluidas en este informe:</div>
     <ul className="list-disc pl-5">

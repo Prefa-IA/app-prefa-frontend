@@ -1,18 +1,12 @@
 import React from 'react';
 import { useUsigMap } from '../../hooks/useUsigMap';
-
-interface UsigMapContainerProps {
-  center: { lat: number; lng: number };
-  showMarker?: boolean;
-  className?: string;
-}
+import { UsigMapContainerProps } from '../../types/components';
 
 const UsigMapContainer: React.FC<UsigMapContainerProps> = ({ 
   center, 
   showMarker = true,
   className = "" 
 }) => {
-  // Crear un ID estable que no cambie en cada render
   const mapId = React.useMemo(() => `mapa-usig-${Date.now()}`, []);
   const { mapRef, isLoaded } = useUsigMap({ center, showMarker });
 

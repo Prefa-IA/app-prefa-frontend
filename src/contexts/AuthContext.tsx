@@ -22,6 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
+  const loadingRef = React.useRef(false);
 
   const isTokenExpired = (token: string): boolean => {
     try {
@@ -43,8 +44,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
       return;
     }
+    
+    if (loadingRef.current) return;
+    loadingRef.current = true;
     cargarUsuario();
   }, []);
+
+  useEffect(() => {
+    // Migrar historial de direcciones del localStorage a la DB si es necesario
+    if (usuario?.id) {
+      const migrateAddressHistory = async () => {
+        try {
+          const { migrateAddressHistoryFromLocalStorage } = await import('../utils/migrateAddressHistory');
+          await migrateAddressHistoryFromLocalStorage(usuario.id);
+        } catch (error) {
+          console.error('Error en migración de historial:', error);
+        }
+      };
+      migrateAddressHistory();
+    }
+  }, [usuario?.id]);
 
   const cargarUsuario = async () => {
     try {
@@ -59,6 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUsuario(null);
     } finally {
       setLoading(false);
+      loadingRef.current = false;
     }
   };
 

@@ -1,9 +1,8 @@
 import React from 'react';
 import ModalBase from '../generales/ModalBase';
+import { PrivacyPolicyProps } from '../../types/components';
 
-interface Props { onClose: () => void; }
-
-const PrivacyPolicy: React.FC<Props> = ({ onClose }) => (
+const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onClose }) => (
   <ModalBase title="Política de Privacidad" onClose={onClose} hideConfirm>
     <div className="prose max-w-none">
       <h1>Política de Privacidad</h1>

@@ -7,7 +7,8 @@ export const REGISTRATION_FORM_FIELDS: FormField[] = [
     type: InputType.TEXT,
     label: 'Nombre de la empresa',
     placeholder: 'Ej: Estudio Arquitectura XYZ',
-    required: true
+    required: true,
+    maxLength: 26
   },
   {
     id: 'email',

@@ -27,6 +27,7 @@ export interface Usuario {
   creditsDayReset?: string;
   creditsMonthReset?: string;
   promoCreditsLeft?: number;
+  tutorialStatus?: 'finish' | 'omit' | null;
 }
 
 export interface LoginCredentials {
@@ -40,7 +41,7 @@ export interface RegistroData {
   nombre: string;
   repeatPassword?: string;
   acceptedTerms: boolean;
-  // Eliminamos referencia a logo en el registro inicial, ahora podrá cargarse posteriormente en la personalización del perfil
+  recaptchaToken?: string;
 }
 
 export interface Coordenadas {
@@ -232,6 +233,7 @@ export interface SearchBarProps {
   hasResult?: boolean;
   onClear?: () => void;
   disabled?: boolean;
+  singleModeIcon?: boolean;
 }
 
 export interface Sugerencia {
@@ -347,6 +349,7 @@ export interface FormField {
   placeholder: string;
   required: boolean;
   autoComplete?: string;
+  maxLength?: number;
 }
 
 export interface RegistrationFormProps {
@@ -521,10 +524,10 @@ export const NAVBAR_CONFIG = {
   BRAND_NAME: 'PreFactibilidad BA',
   NAVIGATION: [
     { name: 'Inicio', href: '/' },
-    { name: 'Consultar', href: '/consultar' },
-    { name: 'Mis Informes', href: '/informes' },
+    { name: 'Generar informe', href: '/consultar' },
+    { name: 'Buscar dirección', href: '/buscar' },
+    { name: 'Registros', href: '/informes' },
     { name: 'Precios', href: '/suscripciones' },
-    { name: 'FAQ', href: '/faq' }
   ]
 } as const;
 
@@ -659,7 +662,12 @@ export interface TableRowProps {
   isAlternate?: boolean;
 }
 
-// Document Viewer Interfaces
+export interface DocumentosVisuales {
+  croquis: string[];
+  perimetros: string[];
+  planosIndice: string[];
+}
+
 export interface DocumentItemProps {
   url: string;
   title: string;
@@ -787,6 +795,7 @@ export interface SearchSectionProps {
   hasResult?: boolean;
   onClear?: () => void;
   disabled?: boolean;
+  singleModeIcon?: boolean;
 }
 
 export interface AddressManagementProps {
@@ -838,8 +847,8 @@ export interface SearchButtonProps {
 
 // Configuration Constants for Components
 export const LISTA_INFORMES_CONFIG = {
-  TITLE: 'Mis Informes',
-  SUBTITLE: 'Historial de tus consultas. Descargá tus informes en PDF cuando quieras.',
+  TITLE: 'Registros',
+  SUBTITLE: 'Consultá tus informes y direcciones guardadas.',
   EMPTY_STATE: {
     TITLE: 'No hay informes',
     DESCRIPTION: 'Aún no has generado ningún informe de prefactibilidad.'
@@ -1071,11 +1080,7 @@ export interface DynamicReportIndexProps {
   informeCompuesto?: InformeCompuesto;
   esInformeCompuesto?: boolean;
   fachadaImages?: string[];
-  documentosVisuales?: {
-    croquis: string[];
-    perimetros: string[];
-    planosIndice: string[];
-  };
+  documentosVisuales?: DocumentosVisuales;
 }
 
 export interface DynamicIndexListProps {
@@ -1098,11 +1103,7 @@ export interface IndexGenerationContext {
   esInformeCompuesto: boolean;
   informeCompuesto?: InformeCompuesto;
   fachadaImages: string[];
-  documentosVisuales: {
-    croquis: string[];
-    perimetros: string[];
-    planosIndice: string[];
-  };
+  documentosVisuales: DocumentosVisuales;
   hasEdificabilidad: boolean;
   hasGeometria: boolean;
   hasEntorno: boolean;

@@ -1,5 +1,10 @@
 import React from 'react';
 import { MetricsDisplayProps, LBI_LFI_CONFIG } from '../../types/enums';
+import {
+  MetricsContentProps,
+  TronerasSectionProps,
+  TronerasHeaderProps
+} from '../../types/components';
 import MetricsGrid from './MetricsGrid';
 import TronerasTable from './TronerasTable';
 
@@ -38,10 +43,7 @@ const CalculatingMetrics: React.FC = () => (
   </div>
 );
 
-const MetricsContent: React.FC<{
-  mediciones: any;
-  geoJSONData: any;
-}> = ({ mediciones, geoJSONData }) => (
+const MetricsContent: React.FC<MetricsContentProps> = ({ mediciones, geoJSONData }) => (
   <>
     <h3 className="text-lg font-medium text-blue-800 mb-4">Mediciones</h3>
     
@@ -53,7 +55,7 @@ const MetricsContent: React.FC<{
   </>
 );
 
-const TronerasSection: React.FC<{ troneras: any[] }> = ({ troneras }) => (
+const TronerasSection: React.FC<TronerasSectionProps> = ({ troneras }) => (
   <div className="mt-6">
     <TronerasHeader tronerasCount={troneras.length} />
     
@@ -65,7 +67,7 @@ const TronerasSection: React.FC<{ troneras: any[] }> = ({ troneras }) => (
   </div>
 );
 
-const TronerasHeader: React.FC<{ tronerasCount: number }> = ({ tronerasCount }) => (
+const TronerasHeader: React.FC<TronerasHeaderProps> = ({ tronerasCount }) => (
   <h4 className="text-md font-medium text-green-800 mb-3 flex items-center">
     <span className="w-3 h-3 bg-green-500 rounded-sm mr-2"></span>
     Detalle de Troneras ({tronerasCount})

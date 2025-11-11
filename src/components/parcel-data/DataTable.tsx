@@ -1,13 +1,9 @@
 import React from 'react';
 import { DataTableProps, TableRowProps, PARCEL_DATA_CONFIG } from '../../types/enums';
+import { DataTableExtraProps, GridTableHeaderProps, GridTableRowProps } from '../../types/components';
 import useTablePersonalization from '../../hooks/useTablePersonalization';
 
-interface ExtraProps {
-  useParentHeader?: boolean;
-  bodyClassName?: string;
-}
-
-const DataTable: React.FC<DataTableProps & ExtraProps> = ({ 
+const DataTable: React.FC<DataTableProps & DataTableExtraProps> = ({ 
   title, 
   children, 
   className, 
@@ -66,11 +62,6 @@ const TableRow: React.FC<TableRowProps> = ({ label, value, isAlternate = false }
 
 
 
-interface GridTableHeaderProps {
-  columns: string[];
-  gridClass: string;
-}
-
 const GridTableHeader: React.FC<GridTableHeaderProps> = ({ columns, gridClass }) => {
   const { colores } = useTablePersonalization();
 
@@ -92,11 +83,6 @@ const GridTableHeader: React.FC<GridTableHeaderProps> = ({ columns, gridClass })
     </div>
   );
 };
-
-interface GridTableRowProps {
-  values: (string | number | React.ReactNode)[];
-  gridClass: string;
-}
 
 const GridTableRow: React.FC<GridTableRowProps> = ({ values, gridClass }) => {
   const { colores } = useTablePersonalization();

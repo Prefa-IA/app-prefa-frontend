@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { BillingInfo } from '../../types/billing';
 import { getBillingInfo, saveBillingInfo } from '../../services/billing';
 import { useNavigate } from 'react-router-dom';
-
-interface Props { onSuccess?: () => void }
+import { toast } from 'react-toastify';
+import { BillingFormProps } from '../../types/components';
+import { PROVINCIAS, PAISES } from '../../types/constants';
+import { validateBillingInfo } from '../../utils/billingUtils';
 
 const empty: BillingInfo = {
   nombreCompleto: '',
@@ -17,36 +19,7 @@ const empty: BillingInfo = {
   pais: 'Argentina',
 };
 
-const PROVINCIAS = [
-  'Buenos Aires',
-  'Ciudad Autónoma de Buenos Aires',
-  'Catamarca',
-  'Chaco',
-  'Chubut',
-  'Córdoba',
-  'Corrientes',
-  'Entre Ríos',
-  'Formosa',
-  'Jujuy',
-  'La Pampa',
-  'La Rioja',
-  'Mendoza',
-  'Misiones',
-  'Neuquén',
-  'Río Negro',
-  'Salta',
-  'San Juan',
-  'San Luis',
-  'Santa Cruz',
-  'Santa Fe',
-  'Santiago del Estero',
-  'Tierra del Fuego',
-  'Tucumán',
-];
-
-const PAISES = ['Argentina'];
-
-const BillingForm: React.FC<Props> = ({ onSuccess }) => {
+const BillingForm: React.FC<BillingFormProps> = ({ onSuccess }) => {
   const { usuario } = require('../../contexts/AuthContext').useAuth();
   const [form, setForm] = useState<BillingInfo>({ ...empty, nombreCompleto: usuario?.nombre || '' });
   const [loading, setLoading] = useState(false);
@@ -66,33 +39,32 @@ const BillingForm: React.FC<Props> = ({ onSuccess }) => {
     setForm(prev => ({ ...prev, [name]: value } as BillingInfo));
   };
 
-  const validate = () => {
-    for (const key of ['nombreCompleto','condicionIVA','cuit','calle','altura','localidad','provincia','codigoPostal','pais']) {
-      // @ts-ignore
-      if (!form[key]) return 'Completa todos los campos';
-    }
-    if (!/^[0-9]{11}$/.test(form.cuit)) return 'CUIT inválido';
-    return null;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('DEBUG-form', form); 
-    const v = validate();
-    if (v) { setError(v); return; }
+    const v = validateBillingInfo(form);
+    if (v) {
+      setError(v);
+      toast.error(v);
+      return;
+    }
     setLoading(true);
     const ok = await saveBillingInfo(form);
     setLoading(false);
     if (ok) {
+      toast.success('Datos de facturación guardados');
+      try { localStorage.setItem('billingInfo', JSON.stringify(form)); } catch {}
+      try { window.dispatchEvent(new CustomEvent('billingInfoUpdated', { detail: form })); } catch {}
       onSuccess ? onSuccess() : navigate('/perfil');
     } else {
-      setError('No se pudo guardar');
+      const msg = 'No se pudo guardar los datos de facturación';
+      setError(msg);
+      toast.error(msg);
     }
   };
 
   return (
     <div className="max-w-lg mx-auto py-10">
-      {error && <p className="text-red-600 mb-4 text-center">{error}</p>}
+      <div className="sr-only" aria-live="polite">{error || ''}</div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1">Nombre y apellido completos</label>

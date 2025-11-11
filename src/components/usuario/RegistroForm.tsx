@@ -1,56 +1,45 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { RegistroData } from '../../types/enums';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import type { RegistrationFormProps, FormFieldsProps, FormFieldProps } from '../../types/enums';
+import { TermsModalProps } from '../../types/components';
 import { createFormHandler } from '../../utils/formUtils';
 import { REGISTRATION_FORM_FIELDS } from '../../utils/formConfigUtils';
 import styles from '../../styles/RegistroForm.module.css';
-import { toast } from 'react-toastify';
 import { InputType } from '../../types/enums';
 import { EyeIcon, EyeOffIcon, ArrowLeftIcon } from '@heroicons/react/outline';
 import TermsAndConditions from './TermsAndConditions';
+import { Recaptcha } from '../common/Recaptcha';
+import { sanitizePath } from '../../utils/urlSanitizer';
+import { useRegistrationForm } from '../../hooks/useRegistrationForm';
+import { useNavigate } from 'react-router-dom';
 
 const RegistroForm: React.FC = () => {
   const navigate = useNavigate();
-  const { registro } = useAuth();
-  const [datos, setDatos] = useState<RegistroData>({
-    email: '',
-    password: '',
-    repeatPassword: '',
-    nombre: '',
-    acceptedTerms: false
-  });
-  const [showPass,setShowPass]=useState(false);
-
-  const [aceptoTyC, setAceptoTyC] = useState(false);
-  const [mostrarTyC, setMostrarTyC] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if(datos.password!==datos.repeatPassword){toast.error('Las contraseñas no coinciden');return;}
-    const strong=/^(?=.*[A-Z])(?=.*\d).{6,}$/;
-    if(!strong.test(datos.password)){toast.error('La contraseña debe tener al menos 6 caracteres, una mayúscula y un número');return;}
-    try {
-      const {repeatPassword, ...send}=datos;
-      await registro({ ...send, acceptedTerms: aceptoTyC });
-      navigate('/login');
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const {
+    datos,
+    setDatos,
+    showPass,
+    setShowPass,
+    aceptoTyC,
+    mostrarTyC,
+    showCaptcha,
+    captchaToken,
+    isSubmitting,
+    recaptchaWidgetIdRef,
+    handleSubmit,
+    handleCaptchaVerify,
+    handleCaptchaError,
+    toggleTyC,
+    openModal,
+    closeModal,
+  } = useRegistrationForm();
 
   const handleChange = createFormHandler(setDatos);
-
-  const toggleTyC = () => setAceptoTyC(prev => !prev);
-
-  const openModal = () => setMostrarTyC(true);
-  const closeModal = () => setMostrarTyC(false);
 
   return (
     <div className={styles.container}>
       <div className={`${styles.formContainer} bg-white dark:bg-gray-800 p-4 sm:p-8 rounded shadow w-full sm:w-auto`}>
-        <button type="button" onClick={() => navigate('/login')} className="text-gray-500 hover:text-gray-700 flex items-center mb-4">
+        <button type="button" onClick={() => navigate(sanitizePath('/login'))} className="text-gray-500 hover:text-gray-700 flex items-center mb-4">
           <ArrowLeftIcon className="w-5 h-5 mr-1" />
         </button>
         <FormHeader />
@@ -63,6 +52,12 @@ const RegistroForm: React.FC = () => {
           onOpenTyC={openModal}
           showPass={showPass}
           setShowPass={setShowPass}
+          showCaptcha={showCaptcha}
+          captchaToken={captchaToken}
+          onCaptchaVerify={handleCaptchaVerify}
+          onCaptchaError={handleCaptchaError}
+          recaptchaWidgetIdRef={recaptchaWidgetIdRef}
+          isSubmitting={isSubmitting}
         />
         {mostrarTyC && <TermsModal onClose={closeModal} />}
       </div>
@@ -72,7 +67,19 @@ const RegistroForm: React.FC = () => {
 
 const FormHeader: React.FC = () => <></>;
 
-const RegistrationForm: React.FC<RegistrationFormProps & { aceptoTyC: boolean; onToggleTyC: () => void; onOpenTyC: () => void; showPass:boolean; setShowPass:React.Dispatch<React.SetStateAction<boolean>> }> = ({
+const RegistrationForm: React.FC<RegistrationFormProps & { 
+  aceptoTyC: boolean; 
+  onToggleTyC: () => void; 
+  onOpenTyC: () => void; 
+  showPass:boolean; 
+  setShowPass:React.Dispatch<React.SetStateAction<boolean>>;
+  showCaptcha: boolean;
+  captchaToken: string | null;
+  onCaptchaVerify: (token: string) => void;
+  onCaptchaError: () => void;
+  recaptchaWidgetIdRef: React.MutableRefObject<number | null>;
+  isSubmitting: boolean;
+}> = ({
   datos,
   onSubmit,
   onChange,
@@ -80,33 +87,54 @@ const RegistrationForm: React.FC<RegistrationFormProps & { aceptoTyC: boolean; o
   onToggleTyC,
   onOpenTyC,
   showPass,
-  setShowPass
-}) => (
-  <form className={styles.form} onSubmit={onSubmit}>
-    <div className={styles.inputGroup}>
-      <FormFields datos={datos} onChange={onChange} showPass={showPass} setShowPass={setShowPass}/>
-    </div>
-    {/* Aceptación TyC */}
-    <div className="flex items-center text-sm dark:text-gray-300">
-      <input
-        id="aceptoTyC"
-        type="checkbox"
-        checked={aceptoTyC}
-        onChange={onToggleTyC}
-        className="mr-2 dark:bg-gray-900 dark:border-gray-600"
-      />
-      <label htmlFor="aceptoTyC" className="">
-        Acepto los{' '}
-        <button type="button" className="text-primary-600 dark:text-primary-400 underline" onClick={onOpenTyC}>
-          Términos y Condiciones
-        </button>
-      </label>
-    </div>
-    <SubmitButton disabled={!aceptoTyC} />
-    <hr />
-    <p className="text-center text-gray-900 dark:text-gray-100">¿Ya tenés cuenta? <Link to="/login" className="text-primary-600 dark:text-primary-400 hover:underline">Ingresá</Link></p>
-  </form>
-);
+  setShowPass,
+  showCaptcha,
+  captchaToken,
+  onCaptchaVerify,
+  onCaptchaError,
+  recaptchaWidgetIdRef,
+  isSubmitting
+}) => {
+  const recaptchaSiteKey = process.env.REACT_APP_RECAPTCHA_SITE_KEY || '';
+  
+  return (
+    <form className={styles.form} onSubmit={onSubmit}>
+      <div className={styles.inputGroup}>
+        <FormFields datos={datos} onChange={onChange} showPass={showPass} setShowPass={setShowPass}/>
+      </div>
+      <div className="flex items-center text-sm dark:text-gray-300">
+        <input
+          id="aceptoTyC"
+          type="checkbox"
+          checked={aceptoTyC}
+          onChange={onToggleTyC}
+          className="mr-2 dark:bg-gray-900 dark:border-gray-600"
+        />
+        <label htmlFor="aceptoTyC" className="">
+          Acepto los{' '}
+          <button type="button" className="text-primary-600 dark:text-primary-400 underline" onClick={onOpenTyC}>
+            Términos y Condiciones
+          </button>
+        </label>
+      </div>
+      {showCaptcha && recaptchaSiteKey && (
+        <div className="flex justify-center my-4">
+          <Recaptcha
+            siteKey={recaptchaSiteKey}
+            onVerify={(token) => {
+              onCaptchaVerify(token);
+            }}
+            onError={onCaptchaError}
+            widgetIdRef={recaptchaWidgetIdRef}
+          />
+        </div>
+      )}
+      <SubmitButton disabled={!aceptoTyC || (showCaptcha && !captchaToken) || isSubmitting} />
+      <hr />
+      <p className="text-center text-gray-900 dark:text-gray-100">¿Ya tenés cuenta? <Link to={sanitizePath('/login')} className="text-primary-600 dark:text-primary-400 hover:underline">Ingresá</Link></p>
+    </form>
+  );
+};
 
 const FormFields: React.FC<FormFieldsProps> = ({ datos, onChange,showPass,setShowPass }) => (
   <>
@@ -141,6 +169,7 @@ const FormField: React.FC<FormFieldProps> = ({ field, value, onChange }) => {
           value={value}
           onChange={onChange}
           autoComplete={field.autoComplete}
+          maxLength={field.maxLength}
         />
         {field.type===InputType.PASSWORD && (
           <button type="button" className="absolute inset-y-0 right-3 flex items-center" onClick={()=>setShow(!show)}>
@@ -152,8 +181,7 @@ const FormField: React.FC<FormFieldProps> = ({ field, value, onChange }) => {
   );
 };
 
-// Modal de Términos y Condiciones
-const TermsModal: React.FC<{ onClose: () => void }> = ({ onClose }) => (
+const TermsModal: React.FC<TermsModalProps> = ({ onClose }) => (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
     <div className="bg-white dark:bg-gray-900 rounded-xl max-w-3xl w-full max-h-[80vh] overflow-auto">
       <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">

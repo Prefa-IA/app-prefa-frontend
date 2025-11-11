@@ -4,12 +4,13 @@ import { useAuth } from '../../contexts/AuthContext';
 import { 
   LoginCredentials, 
   LoginFormProps, 
-  LoginFieldProps,
   LOGIN_CONFIG 
 } from '../../types/enums';
+import { LoginFormComponentProps, LoginFieldsProps, ExtendedLoginFieldProps } from '../../types/components';
 import { createFormHandler } from '../../utils/formUtils';
 import styles from '../../styles/LoginForm.module.css';
 import { EyeIcon, EyeOffIcon } from '@heroicons/react/outline';
+import GoogleLoginButton from './GoogleLoginButton';
 
 const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   const navigate = useNavigate();
@@ -51,14 +52,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   );
 };
 
-interface LoginFormComponentProps {
-  credentials: LoginCredentials;
-  onSubmit: (e: React.FormEvent) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  showPass: boolean;
-  setShowPass: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
 const LoginFormComponent: React.FC<LoginFormComponentProps> = ({
   credentials,
   onSubmit,
@@ -73,6 +66,15 @@ const LoginFormComponent: React.FC<LoginFormComponentProps> = ({
         <LoginFields credentials={credentials} onChange={onChange} showPass={showPass} setShowPass={setShowPass} />
       </div>
       <SubmitButton />
+      <div className="my-0 flex items-center">
+        <div className="flex-grow border-t border-gray-300 dark:border-gray-700" />
+        <span className="px-3 text-xs text-gray-500">o</span>
+        <div className="flex-grow border-t border-gray-300 dark:border-gray-700" />
+      </div>
+      <GoogleLoginButton
+        className="flex justify-center mb-1"
+        onSuccessNavigate="/consultar"
+      />
       <hr />
       <p className="text-center text-gray-900 dark:text-gray-100">¿Todavía no tenés cuenta? <Link to="/registro" className="text-primary-600 dark:text-primary-400 hover:underline">Registrate</Link></p>
       <div className="mt-2 text-sm flex flex-row justify-between">
@@ -83,13 +85,6 @@ const LoginFormComponent: React.FC<LoginFormComponentProps> = ({
     </form>
   );
 };
-
-interface LoginFieldsProps {
-  credentials: LoginCredentials;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  showPass: boolean;
-  setShowPass: React.Dispatch<React.SetStateAction<boolean>>;
-}
 
 const LoginFields: React.FC<LoginFieldsProps> = ({ credentials, onChange, showPass, setShowPass }) => (
   <>
@@ -105,8 +100,6 @@ const LoginFields: React.FC<LoginFieldsProps> = ({ credentials, onChange, showPa
     ))}
   </>
 );
-
-type ExtendedLoginFieldProps = LoginFieldProps & { showPass:boolean; setShowPass:React.Dispatch<React.SetStateAction<boolean>> };
 
 const LoginField: React.FC<ExtendedLoginFieldProps> = ({
   id,

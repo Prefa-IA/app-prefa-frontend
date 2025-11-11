@@ -1,13 +1,7 @@
 import React from 'react';
+import { ActionCardProps } from '../../types/components';
 
-interface Props {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  onClick: () => void;
-}
-
-const ActionCard: React.FC<Props> = ({ icon, title, description, onClick }) => (
+const ActionCard: React.FC<ActionCardProps> = ({ icon, title, description, onClick }) => (
   <button onClick={onClick} className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:border-primary-200 dark:hover:border-primary-400 transition-all text-left group">
     <div className="flex items-start space-x-4">
       <div className="flex-shrink-0 p-3 bg-primary-50 dark:bg-primary-900 rounded-lg group-hover:bg-primary-100 dark:group-hover:bg-primary-800 transition-colors">

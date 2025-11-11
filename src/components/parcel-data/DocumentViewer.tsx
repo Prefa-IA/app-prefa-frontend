@@ -1,5 +1,15 @@
 import React from 'react';
 import { DocumentViewerProps, DocumentItemProps, PdfViewerProps, PARCEL_DATA_CONFIG } from '../../types/enums';
+import {
+  CroquisSectionProps,
+  PerimetroSectionProps,
+  PlanoIndiceSectionProps,
+  CompoundCroquisSectionProps,
+  CompoundPerimetrosSectionProps,
+  CompoundPlanosIndiceSectionProps,
+  ImageViewerProps,
+  LbiLfiSectionProps
+} from '../../types/components';
 import { isPDF, getPdfViewerUrl } from '../../utils/parcelCalculations';
 import LbiLfiViewerMapLibre from '../lbi-lfi-viewer/LbiLfiViewerMapLibre';
 import useTablePersonalization from '../../hooks/useTablePersonalization';
@@ -72,7 +82,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
   );
 };
 
-const CroquisSection: React.FC<{ croquis?: string; pageCounter: number }> = ({ croquis, pageCounter }) => {
+const CroquisSection: React.FC<CroquisSectionProps> = ({ croquis, pageCounter }) => {
   const { parentTableStyle } = useTablePersonalization();
   
   if (!croquis) return null;
@@ -95,12 +105,7 @@ const CroquisSection: React.FC<{ croquis?: string; pageCounter: number }> = ({ c
   );
 };
 
-const PerimetroSection: React.FC<{ 
-  perimetro?: string; 
-  informe: any; 
-  pageCounter: number;
-  lbiLfiPageCounter?: number;
-}> = ({ perimetro, informe, pageCounter, lbiLfiPageCounter }) => {
+const PerimetroSection: React.FC<PerimetroSectionProps> = ({ perimetro, informe, pageCounter, lbiLfiPageCounter }) => {
   const { parentTableStyle } = useTablePersonalization();
   
   if (!perimetro) return null;
@@ -133,7 +138,7 @@ const PerimetroSection: React.FC<{
   );
 };
 
-const PlanoIndiceSection: React.FC<{ planoIndice?: string; pageCounter: number }> = ({ planoIndice, pageCounter }) => {
+const PlanoIndiceSection: React.FC<PlanoIndiceSectionProps> = ({ planoIndice, pageCounter }) => {
   const { parentTableStyle } = useTablePersonalization();
   
   if (!planoIndice) return null;
@@ -156,7 +161,7 @@ const PlanoIndiceSection: React.FC<{ planoIndice?: string; pageCounter: number }
   );
 };
 
-const CompoundCroquisSection: React.FC<{ croquis: string[]; pageCounter: number }> = ({ croquis, pageCounter }) => {
+const CompoundCroquisSection: React.FC<CompoundCroquisSectionProps> = ({ croquis, pageCounter }) => {
   const { parentTableStyle } = useTablePersonalization();
   
   if (croquis.length === 0) return null;
@@ -190,7 +195,7 @@ const CompoundCroquisSection: React.FC<{ croquis: string[]; pageCounter: number 
   );
 };
 
-const CompoundPerimetrosSection: React.FC<{ perimetros: string[]; pageCounter: number }> = ({ perimetros, pageCounter }) => {
+const CompoundPerimetrosSection: React.FC<CompoundPerimetrosSectionProps> = ({ perimetros, pageCounter }) => {
   const { parentTableStyle } = useTablePersonalization();
   
   if (perimetros.length === 0) return null;
@@ -224,7 +229,7 @@ const CompoundPerimetrosSection: React.FC<{ perimetros: string[]; pageCounter: n
   );
 };
 
-const CompoundPlanosIndiceSection: React.FC<{ planosIndice: string[]; pageCounter: number }> = ({ planosIndice, pageCounter }) => {
+const CompoundPlanosIndiceSection: React.FC<CompoundPlanosIndiceSectionProps> = ({ planosIndice, pageCounter }) => {
   const { parentTableStyle } = useTablePersonalization();
   
   if (planosIndice.length === 0) return null;
@@ -268,11 +273,7 @@ const DocumentItem: React.FC<DocumentItemProps> = ({ url, title, defaultImageUrl
   </div>
 );
 
-const ImageViewer: React.FC<{ url: string; title: string; defaultImageUrl: string }> = ({ 
-  url, 
-  title, 
-  defaultImageUrl 
-}) => (
+const ImageViewer: React.FC<ImageViewerProps> = ({ url, title, defaultImageUrl }) => (
   <img 
     src={url} 
     alt={title} 
@@ -318,12 +319,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ url, title, className = "min-h-[8
   </div>
 );
 
-const LbiLfiSection: React.FC<{ 
-  informe: any;
-  informesIndividuales?: any[];
-  esCompuesto?: boolean;
-  pageCounter?: number;
-}> = ({ informe, informesIndividuales = [], esCompuesto = false, pageCounter }) => {
+const LbiLfiSection: React.FC<LbiLfiSectionProps> = ({ informe, informesIndividuales = [], esCompuesto = false, pageCounter }) => {
   const { parentTableStyle } = useTablePersonalization();
   
   const lbiLfiData = {

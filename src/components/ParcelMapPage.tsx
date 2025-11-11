@@ -5,6 +5,7 @@ import {
   ParcelInfoProps,
   PARCEL_MAP_CONFIG 
 } from '../types/enums';
+import { PlanoSectionProps, ParcelInfoItemProps } from '../types/components';
 import ParcelaPlano from './ParcelaPlano';
 import styles from '../styles/ParcelMapPage.module.css';
 
@@ -24,10 +25,6 @@ const TitleSection: React.FC = () => (
     <h2 className={styles.title}>{PARCEL_MAP_CONFIG.TITLE}</h2>
   </div>
 );
-
-interface PlanoSectionProps {
-  informe: ParcelMapPageProps['informe'];
-}
 
 const PlanoSection: React.FC<PlanoSectionProps> = ({ informe }) => {
   const coordinates = informe.geometria?.features?.[0]?.geometry?.coordinates?.[0]?.[0];
@@ -71,11 +68,6 @@ const ParcelInfo: React.FC<ParcelInfoProps> = ({ geometria }) => {
     </div>
   );
 };
-
-interface ParcelInfoItemProps {
-  label: string;
-  value: string;
-}
 
 const ParcelInfoItem: React.FC<ParcelInfoItemProps> = ({ label, value }) => (
   <p>{label}: {value}</p>

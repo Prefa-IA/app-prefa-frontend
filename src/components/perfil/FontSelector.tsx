@@ -1,12 +1,7 @@
 import React from 'react';
+import { FontSelectorProps } from '../../types/components';
 
-interface Props {
-  value: string;
-  onChange: (v: string) => void;
-  disabled?: boolean;
-}
-
-const FontSelector: React.FC<Props> = ({ value, onChange, disabled }) => (
+const FontSelector: React.FC<FontSelectorProps> = ({ value, onChange, disabled }) => (
   <div className="space-y-3">
     <div>
       <label className="block text-sm font-medium text-gray-900 dark:text-gray-100">Tipografía</label>

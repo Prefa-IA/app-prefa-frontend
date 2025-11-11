@@ -1,63 +1,10 @@
 import React from 'react';
 import { Plan as PlanType } from '../../hooks/usePlanes';
+import { PlanCardProps } from '../../types/components';
+import { PLAN_COLOR_MAP } from '../../types/constants';
 
-interface Props {
-  plan: PlanType;
-  loading?: boolean;
-  onSelect?: () => void;
-}
+const PlanCard: React.FC<PlanCardProps> = ({ plan, loading = false, onSelect }) => {
 
-const colorMap: Record<number, { 
-  border: string; 
-  bg: string; 
-  button: string; 
-  hover: string;
-  featured: boolean;
-  accent: string;
-  hex: string;
-}> = {
-  1: { 
-    border: 'border-emerald-400', 
-    bg: 'from-emerald-50 via-white to-emerald-50', 
-    button: 'bg-gradient-to-r from-emerald-600 to-emerald-700', 
-    hover: 'from-emerald-700 to-emerald-800',
-    featured: true,
-    accent: 'emerald',
-    hex: '#34d399'
-  },
-  2: { 
-    border: 'border-violet-400', 
-    bg: 'from-violet-50 via-white to-violet-50', 
-    button: 'bg-gradient-to-r from-violet-600 to-violet-700', 
-    hover: 'from-violet-700 to-violet-800',
-    featured: false,
-    accent: 'violet',
-    hex: '#8b5cf6'
-  },
-  3: { 
-    border: 'border-rose-400', 
-    bg: 'from-rose-50 via-white to-rose-50', 
-    button: 'bg-gradient-to-r from-rose-600 to-rose-700', 
-    hover: 'from-rose-700 to-rose-800',
-    featured: false,
-    accent: 'rose',
-    hex: '#fb7185'
-  },
-  4: { 
-    border: 'border-blue-400', 
-    bg: 'from-blue-50 via-white to-blue-50', 
-    button: 'bg-gradient-to-r from-blue-600 to-blue-700', 
-    hover: 'from-blue-700 to-blue-800',
-    featured: false,
-    accent: 'blue',
-    hex: '#60a5fa'
-  },
-};
-
-const PlanCard: React.FC<Props> = ({ plan, loading = false, onSelect }) => {
-  const p = plan.prioridad ?? 4;
-
-  // Badge logic basado exclusivamente en plan.tag
   let badge: string | undefined;
   let badgeClasses = '';
   if (plan.tag) {
@@ -87,11 +34,10 @@ const PlanCard: React.FC<Props> = ({ plan, loading = false, onSelect }) => {
     ? Math.round(plan.price * (1 - (plan.discountPct || 0) / 100))
     : plan.price;
 
-  const totalCredits = (plan.creditosTotales ?? 0) + (plan.freeCredits ?? 0);
+  const freeCreditsDisplay = plan.freeCredits ? `${plan.freeCredits.toLocaleString()} créditos gratis` : null;
 
   return (
     <div className="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-600 rounded-lg shadow-sm p-6 flex flex-col transition-all duration-300 hover:cursor-pointer">      
-      {/* Badges superiores */}
       {badge && (
         <span className={`absolute -top-3 left-4 px-2 py-1 text-xs font-semibold rounded ${badgeClasses}`}>{badge}</span>
       )}
@@ -113,7 +59,7 @@ const PlanCard: React.FC<Props> = ({ plan, loading = false, onSelect }) => {
       {/* Lista de beneficios */}
       <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300 mb-6 flex-1">
         {[
-          `${totalCredits.toLocaleString()} créditos incluidos`,
+          freeCreditsDisplay,
           plan.permiteCompuestas ? 'Análisis de múltiples lotes linderos' : null,
           plan.watermarkOrg ? 'Informes con marca de agua de tu empresa' : null,
           plan.watermarkPrefas ? 'Informes con marca de agua de Prefa-IA' : null,

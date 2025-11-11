@@ -28,7 +28,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onSeleccionarSugerencia,
   hasResult=false,
   onClear,
-  disabled
+  disabled,
+  singleModeIcon
 }) => {
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
   const [cooldown,setCooldown]=useState(false);
@@ -103,7 +104,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               {!isCompoundMode}
             </div>
           ) : (
-            isCompoundMode ? 'Agregar dirección' : <SearchIcon className={styles.icon} />
+            isCompoundMode ? 'Agregar dirección' : (singleModeIcon ? <SearchIcon className={styles.icon} /> : 'Generar')
           )}
         </button>
         )}

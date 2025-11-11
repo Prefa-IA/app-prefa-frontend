@@ -4,14 +4,9 @@ import { usePlanes, Plan } from '../../hooks/usePlanes';
 import PlanCard from '../perfil/PlanCard';
 import { subscriptionService } from '../../services/subscriptionService';
 import { toast } from 'react-toastify';
+import { ChangePlanModalProps } from '../../types/components';
 
-interface Props {
-  onClose: () => void;
-  currentPlanId: string | null;
-  onChanged?: () => void;
-}
-
-const ChangePlanModal: React.FC<Props> = ({ onClose, currentPlanId, onChanged }) => {
+const ChangePlanModal: React.FC<ChangePlanModalProps> = ({ onClose, currentPlanId, onChanged }) => {
   const { planes, loading } = usePlanes();
   const normales = planes.filter(p => !p.isOverage);
   const currentPlan = normales.find(p => p.id === currentPlanId) || null;

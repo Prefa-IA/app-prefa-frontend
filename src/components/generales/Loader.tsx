@@ -1,8 +1,5 @@
 import React from 'react';
-
-interface LoaderProps {
-  message?: string;
-}
+import { LoaderProps } from '../../types/components';
 
 const Loader: React.FC<LoaderProps> = ({ message = 'Procesando solicitud...' }) => {
   return (

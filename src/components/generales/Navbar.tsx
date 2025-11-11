@@ -13,16 +13,19 @@ import {
   NAVBAR_CONFIG,
   SubscriptionPlan
 } from '../../types/enums';
+import {
+  MobileMenuProps,
+  NavigationLinkProps,
+  UserMenuButtonProps,
+  UserNameAndPlanProps,
+  UserMenuItemsProps,
+  MobileMenuButtonProps,
+  MobileNavigationProps,
+  MobileNavigationLinkProps,
+  PlanPillSectionProps
+} from '../../types/components';
 import Logo from './Logo';
-// import { subscriptions } from '../../services/api';
 import { usePlanes } from '../../hooks/usePlanes';
-
-interface MobileMenuProps {
-  navigation: NavigationItem[];
-  usuario: any;
-  planObj: SubscriptionPlan | null;
-  onLogout: () => void;
-}
 
 const Navbar: React.FC = () => {
   const { usuario, logout } = useAuth();
@@ -30,7 +33,6 @@ const Navbar: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const { planes } = usePlanes();
 
-  // Estado para créditos restantes
   const [planActual, setPlanActual] = useState<any | null>(null);
 
   useEffect(() => {
@@ -38,10 +40,9 @@ const Navbar: React.FC = () => {
       if (!usuario) return;
       try {
         const planActual = (planes as any[]).find((p:any) => {
-          const matchesId = usuario?.suscripcion?.plan && p._id === usuario.suscripcion.plan;
           const matchesTipo = usuario?.suscripcion?.tipo && p.id.toLowerCase() === usuario.suscripcion.tipo.toLowerCase();
           const matchesNombre = usuario?.suscripcion?.nombrePlan && p.name.toLowerCase() === usuario.suscripcion.nombrePlan.toLowerCase();
-          return matchesId || matchesTipo || matchesNombre;
+          return matchesTipo || matchesNombre;
         }) || null;
         if (planActual) setPlanActual(planActual);
       } catch (error) {
@@ -66,7 +67,6 @@ const Navbar: React.FC = () => {
               </div>
 
               <div className="flex ml-auto sm:ml-6 items-center space-x-4 sm:space-x-6 mr-2">
-                {/* Menú de usuario o botones auth */}
                 {usuario && (
                   <CreditsPill saldo={(status?.balance ?? usuario.creditBalance) || 0} />
                 )}
@@ -79,7 +79,6 @@ const Navbar: React.FC = () => {
                   <AuthButtons />
                 )}
 
-                {/* Toggle Tema al extremo derecho */}
                 <button
                   onClick={toggleTheme}
                   className="p-2 rounded-md focus:outline-none"
@@ -120,10 +119,6 @@ const DesktopNavigation: React.FC = () => (
   </div>
 );
 
-interface NavigationLinkProps {
-  item: NavigationItem;
-}
-
 const NavigationLink: React.FC<NavigationLinkProps> = ({ item }) => {
   const { pathname } = useLocation();
   const active = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -133,15 +128,24 @@ const NavigationLink: React.FC<NavigationLinkProps> = ({ item }) => {
   const color = active
     ? 'text-primary-600 dark:text-primary-400'
     : 'text-gray-900 dark:text-gray-100 hover:text-primary-600';
-  // subrayado animado mediante ::after
   const underline =
     'after:content-[""] after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-primary-600 after:transform after:transition-transform after:duration-300 after:origin-left ' +
     (active ? 'after:scale-x-100' : 'after:scale-x-0 hover:after:scale-x-100');
 
   const hoverColor = active ? '' : 'hover:text-primary-600';
  
+  // Mapear rutas a atributos data-tutorial
+  const tutorialMap: Record<string, string> = {
+    '/consultar': 'analisis-prefactibilidad',
+    '/buscar': 'buscar-direccion',
+    '/informes': 'registros',
+    '/suscripciones': 'planes',
+  };
+  
+  const tutorialAttr = tutorialMap[item.href] ? { 'data-tutorial': tutorialMap[item.href] } : {};
+ 
   return (
-    <Link to={item.href} className={`${base} ${color} ${hoverColor} ${underline}`}> {item.name} </Link>
+    <Link to={item.href} className={`${base} ${color} ${hoverColor} ${underline}`} {...tutorialAttr}> {item.name} </Link>
   );
 };
 
@@ -151,8 +155,6 @@ const UserMenu: React.FC<UserMenuProps & { planObj: SubscriptionPlan|null }> = (
     <UserMenuItems onLogout={onLogout} />
   </Menu>
 );
-
-interface UserMenuButtonProps { usuario: UserMenuProps['usuario']; planObj: SubscriptionPlan|null; }
 
 const UserMenuButton: React.FC<UserMenuButtonProps> = ({ usuario, planObj }) => (
   <Menu.Button className="flex items-center text-sm rounded-full focus:outline-none">
@@ -174,8 +176,6 @@ const UserMenuButton: React.FC<UserMenuButtonProps> = ({ usuario, planObj }) => 
   </Menu.Button>
 );
 
-interface UserNameAndPlanProps {   nombre: string;   plan?: string;   planObj: SubscriptionPlan|null; }
-
 const accentMap: Record<number,string> = {1:'emerald',2:'violet',3:'rose',4:'blue'};
 
 const UserNameAndPlan: React.FC<UserNameAndPlanProps> = ({ nombre, plan, planObj }) => {
@@ -187,8 +187,7 @@ const UserNameAndPlan: React.FC<UserNameAndPlanProps> = ({ nombre, plan, planObj
      const solid = m ? `bg-${m[1]}-${m[2]}` : 'bg-blue-600';
      pillClasses += solid + ' text-white';
   } else {
-     const accent = accentMap[planObj?.prioridad ?? 4] || 'blue';
-     pillClasses += `bg-${accent}-100 text-${accent}-800`;
+     pillClasses += 'bg-blue-100 text-blue-800';
   }
   return (
     <>
@@ -196,10 +195,6 @@ const UserNameAndPlan: React.FC<UserNameAndPlanProps> = ({ nombre, plan, planObj
       <span className={pillClasses}>{planDisplay}</span>
     </>
   );
-}
-
-interface UserMenuItemsProps {
-  onLogout: () => void;
 }
 
 const UserMenuItems: React.FC<UserMenuItemsProps> = ({ onLogout }) => (
@@ -216,6 +211,7 @@ const UserMenuItems: React.FC<UserMenuItemsProps> = ({ onLogout }) => (
                           {({ active }) => (
                             <Link
                               to="/perfil"
+                              data-tutorial="mi-perfil"
                               className={`${
                                 active ? 'bg-gray-100' : ''
                               } block px-4 py-2 text-sm text-gray-700`}
@@ -257,10 +253,6 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({ className = "flex space-x-2 s
                   </div>
 );
 
-interface MobileMenuButtonProps {
-  open: boolean;
-}
-
 const MobileMenuButton: React.FC<MobileMenuButtonProps> = ({ open }) => (
               <div className="-mr-2 flex items-center lg:hidden">
                 <Disclosure.Button className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500">
@@ -280,7 +272,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ navigation, usuario, planObj, o
     <Disclosure.Panel className="lg:hidden pt-4 flex flex-col h-full">
       {usuario && <PlanPillSection planObj={planObj} className="block sm:hidden" />}
       {usuario && (
-        <Link to="/perfil" className="block sm:hidden pl-3 pr-4 py-2 border-l-4 text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300">
+        <Link to="/perfil" className="block sm:hidden pl-3 pr-4 py-2 border-l-4 text-base font-medium text-gray-600 dark:text-white hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500">
           Mi Perfil
         </Link>
       )}
@@ -288,7 +280,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ navigation, usuario, planObj, o
       {usuario && (
         <button
           onClick={onLogout}
-          className="mt-auto w-full text-left px-4 py-3 border-t border-gray-200 text-sm font-medium text-red-600 hover:bg-red-50 block sm:hidden"
+          className="mt-auto w-full text-left px-4 py-3 border-t border-gray-200 dark:border-gray-700 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 block sm:hidden"
         >
           Cerrar Sesión
         </button>
@@ -297,7 +289,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ navigation, usuario, planObj, o
   );
 };
 
-const PlanPillSection: React.FC<{ planObj: SubscriptionPlan|null; className?: string }> = ({ planObj, className='' }) => {
+const PlanPillSection: React.FC<PlanPillSectionProps> = ({ planObj, className='' }) => {
   if (!planObj) return null;
   const accentMap: Record<number,string> = {1:'emerald',2:'violet',3:'rose',4:'blue'};
   const planDisplay = planObj.tag?.name || planObj.name;
@@ -308,15 +300,10 @@ const PlanPillSection: React.FC<{ planObj: SubscriptionPlan|null; className?: st
      const solid = m ? `bg-${m[1]}-600` : 'bg-blue-600';
      pillClasses += solid + ' text-white';
   } else {
-     const accent = accentMap[planObj?.prioridad ?? 4] || 'blue';
-     pillClasses += `bg-${accent}-100 text-${accent}-800`;
+     pillClasses += 'bg-blue-100 text-blue-800';
   }
   return <span className={`${pillClasses} ${className}`}>{planDisplay}</span>;
 };
-
-interface MobileNavigationProps {
-  navigation: NavigationItem[];
-}
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({ navigation }) => (
             <div className="pt-2 pb-3 space-y-1">
@@ -326,14 +313,10 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ navigation }) => (
   </div>
 );
 
-interface MobileNavigationLinkProps {
-  item: NavigationItem;
-}
-
 const MobileNavigationLink: React.FC<MobileNavigationLinkProps> = ({ item }) => (
                 <Link
                   to={item.href}
-                  className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300"
+                  className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-gray-600 dark:text-white hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500"
                 >
                   {item.name}
                 </Link>

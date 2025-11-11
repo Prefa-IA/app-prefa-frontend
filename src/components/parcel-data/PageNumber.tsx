@@ -1,9 +1,5 @@
 import React from 'react';
-
-interface PageNumberProps {
-  pageNumber: number;
-  className?: string;
-}
+import { PageNumberProps } from '../../types/components';
 
 const PageNumber: React.FC<PageNumberProps> = ({ pageNumber, className = '' }) => {
   return (

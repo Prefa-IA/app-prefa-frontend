@@ -19,7 +19,7 @@ const VerifyEmailPage: React.FC = () => {
         return;
       }
       try {
-        const { message } = await authService.verifyEmail(token);
+        await authService.verifyEmail(token);
         setStatus('success');
         setMessage('¡Cuenta verificada con éxito!');
       } catch (err: any) {
@@ -41,15 +41,15 @@ const VerifyEmailPage: React.FC = () => {
   },[status,seconds]);
 
   return (
-    <div className={stylesCont.container}>
-      <div className={`${stylesCont.formContainer} bg-white p-8 rounded shadow text-center`}>
+    <div className={`${stylesCont.container} bg-gray-50 dark:bg-gray-900`}>
+      <div className={`${stylesCont.formContainer} bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-8 rounded shadow text-center text-gray-800 dark:text-gray-100`}>
         <div className="flex justify-center mb-2"><Logo width={150} height={40} /></div>
         {status === 'pending' && (
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-4" />
         )}
-        <h2 className="text-xl font-medium text-gray-600 mb-4">{message}</h2>
+        <h2 className="text-xl font-medium text-gray-700 dark:text-gray-100 mb-4">{message}</h2>
         {status==='success' && (
-          <p className="text-sm text-gray-500">Redirigiendo en {seconds}…</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Redirigiendo en {seconds}…</p>
         )}
         {status !== 'pending' && (
           <Link

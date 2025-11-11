@@ -13,12 +13,13 @@ import ConfirmModal from '../generales/ConfirmModal';
 import ModalBase from '../generales/ModalBase';
 import BillingForm from '../perfil/BillingForm';
 import { getBillingInfo } from '../../services/billing';
+import { BillingModalProps, BillingSectionProps } from '../../types/components';
+import { validateLogo } from '../../utils/logoValidationUtils';
 
 const PerfilUsuario: React.FC = () => {
   const { usuario, updateProfile, updatePersonalization, saveTempLogo, getTempLogo, clearTempLogo } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  // Ref para evitar mostrar el toast de facturación múltiples veces
   const billingToastRef = useRef(false);
   const [editMode, setEditMode] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -53,13 +54,11 @@ const PerfilUsuario: React.FC = () => {
       });
     }
     
-    // Cargar logo desde personalización
     const logoPersonalizado = getTempLogo();
     if (logoPersonalizado) {
       setLogoUrl(logoPersonalizado);
     }
 
-    // Abrir modal de planes si viene marcado en la URL
     const params = new URLSearchParams(location.search);
     if (params.get('subscription') === '1') {
       navigate('/suscripciones');
@@ -131,10 +130,9 @@ const PerfilUsuario: React.FC = () => {
   const handleSavePersonalization = async () => {
     setLoading(true);
     try {
-      // Preservar el logo existente al guardar la personalización
       const personalizacionCompleta = {
         ...personalizacion,
-        logo: logoUrl || usuario?.personalizacion?.logo // Usar nuevo logo si existe
+        logo: logoUrl || usuario?.personalizacion?.logo
       };
       await updatePersonalization(personalizacionCompleta);
       setEditMode(false);
@@ -154,50 +152,6 @@ const PerfilUsuario: React.FC = () => {
 
   const handleSupportClick = () => setShowSupport(true);
 
-  const validateLogo = (file: File): Promise<{ isValid: boolean; error?: string; dimensions?: { width: number; height: number } }> => {
-    return new Promise((resolve) => {
-      // Validar tamaño del archivo (2MB máximo)
-      const maxSize = 2 * 1024 * 1024; // 2MB en bytes
-      if (file.size > maxSize) {
-        resolve({ isValid: false, error: 'El archivo debe ser menor a 2MB' });
-        return;
-      }
-
-      // Validar tipo de archivo
-      if (!file.type.startsWith('image/')) {
-        resolve({ isValid: false, error: 'El archivo debe ser una imagen' });
-        return;
-      }
-
-      // Validar dimensiones
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        
-        if (img.width > 500 || img.height > 500) {
-          resolve({ 
-            isValid: false, 
-            error: 'Las dimensiones máximas son 500px x 500px',
-            dimensions: { width: img.width, height: img.height }
-          });
-        } else {
-          resolve({ 
-            isValid: true,
-            dimensions: { width: img.width, height: img.height }
-          });
-        }
-      };
-      
-      img.onerror = () => {
-        URL.revokeObjectURL(url);
-        resolve({ isValid: false, error: 'No se pudo procesar la imagen' });
-      };
-      
-      img.src = url;
-    });
-  };
 
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -215,7 +169,6 @@ const PerfilUsuario: React.FC = () => {
         return;
       }
 
-      // Convertir a base64 y guardar temporalmente
       const base64Logo = await saveTempLogo(file);
       setLogoUrl(base64Logo);
       
@@ -250,11 +203,9 @@ const PerfilUsuario: React.FC = () => {
     setSelectedPlan(planId);
     
     try {
-      // Aquí integrarías con MercadoPago
       const { subscriptions } = await import('../../services/api');
       const preference = await subscriptions.createSubscription(planId);
       
-      // Redirigir a MercadoPago
       const url = preference?.init_point || preference?.sandbox_init_point;
       if (!url) {
         throw new Error('URL de pago no generada');
@@ -282,7 +233,7 @@ const PerfilUsuario: React.FC = () => {
 
   const handleLogoDeleteConfirm = async () => {
     try {
-      await clearTempLogo(); // clearTempLogo internamente actualiza la personalización
+      await clearTempLogo();
       setLogoUrl(null);
     } catch (e: any) {
       console.error('Error eliminando logo en backend', e);
@@ -294,7 +245,7 @@ const PerfilUsuario: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8" data-tutorial="mi-perfil">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="space-y-8">
           {/* Header */}
@@ -387,39 +338,82 @@ const PerfilUsuario: React.FC = () => {
   );
 };
 
-/* ===== Billing Section & Modal (top-level components) ===== */
-// (import duplicado eliminado)
-
-export const BillingModal: React.FC<{ existing: any; onClose: () => void }> = ({ existing, onClose }) => (
+export const BillingModal: React.FC<BillingModalProps> = ({ existing, onClose }) => (
   <ModalBase title={existing && existing.cuit ? 'Modificar datos de facturación' : 'Agregar datos de facturación'} onClose={onClose} hideConfirm>
     <BillingForm onSuccess={onClose} />
   </ModalBase>
 );
 
-export const BillingSection: React.FC = () => {
+export const BillingSection: React.FC<BillingSectionProps> = () => {
   const [info, setInfo] = React.useState<any | null>(null);
   const [showModal, setShowModal] = React.useState(false);
+  const cacheRef = React.useRef<any | null>(null);
 
-  React.useEffect(() => { getBillingInfo().then(setInfo); }, []);
+  React.useEffect(() => {
+    try {
+      if (!cacheRef.current) {
+        const raw = localStorage.getItem('billingInfo');
+        if (raw) {
+          cacheRef.current = JSON.parse(raw);
+        }
+      }
+    } catch {}
+
+    if (cacheRef.current) setInfo(cacheRef.current);
+
+    getBillingInfo().then((data) => {
+      setInfo(data);
+      cacheRef.current = data;
+      try { localStorage.setItem('billingInfo', JSON.stringify(data || {})); } catch {}
+    });
+  }, []);
+
+  React.useEffect(() => {
+    const handler = (e: any) => {
+      const data = e.detail;
+      setInfo(data);
+      cacheRef.current = data;
+    };
+    window.addEventListener('billingInfoUpdated', handler);
+    return () => window.removeEventListener('billingInfoUpdated', handler);
+  }, []);
 
   return (
     <>
     <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 flex flex-col items-center justify-center text-center flex-1">
       <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Datos de facturación</h3>
-      {info && info.cuit ? (
-        <div className="space-y-2 text-gray-700 dark:text-gray-300">
-          <p><strong>Razón Social:</strong> {info.razonSocial}</p>
-          <p><strong>CUIT:</strong> {info.cuit}</p>
-          <p><strong>Condición IVA:</strong> {info.condicionIVA}</p>
-        </div>
-      ) : (
-        <p className="text-gray-600 dark:text-gray-400 mb-4">Aún no cargaste tus datos de facturación.</p>
-      )}
+      <div className="w-full min-h-[96px] flex items-center justify-center">
+        {info && info.cuit ? (
+          <div className="space-y-2 text-gray-700 dark:text-gray-300">
+            <p><strong>Razón Social:</strong> {info.razonSocial}</p>
+            <p><strong>CUIT:</strong> {info.cuit}</p>
+            <p><strong>Condición IVA:</strong> {info.condicionIVA}</p>
+          </div>
+        ) : cacheRef.current === null ? (
+          <div className="w-full space-y-2 animate-pulse">
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mx-auto" />
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mx-auto" />
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mx-auto" />
+          </div>
+        ) : (
+          <p className="text-gray-600 dark:text-gray-400">Aún no cargaste tus datos de facturación.</p>
+        )}
+      </div>
       <button onClick={() => setShowModal(true)} className="btn-primary mt-4">{info && info.cuit ? 'Ver mis datos de facturación' : 'Agregar'}</button>
     </div>
 
     {showModal && (
-      <BillingModal existing={info} onClose={() => { setShowModal(false); getBillingInfo().then(setInfo); }} />
+      <BillingModal
+        existing={info}
+        onClose={() => {
+          setShowModal(false);
+          getBillingInfo().then((data)=>{
+            setInfo(data);
+            cacheRef.current = data;
+            try { localStorage.setItem('billingInfo', JSON.stringify(data || {})); } catch {}
+          });
+        }}
+      />
     )}
     </>
   );

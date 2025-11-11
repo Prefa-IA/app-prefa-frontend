@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { adminPlansService, OveragePlanPayload } from '../../services/adminPlansService';
 import ModalBase from '../generales/ModalBase';
 import { toast } from 'react-toastify';
+import { OverageFormProps } from '../../types/components';
 
 const OveragesAdmin: React.FC = () => {
   const [plans, setPlans] = useState<any[]>([]);
@@ -53,7 +54,7 @@ const OveragesAdmin: React.FC = () => {
   );
 };
 
-const OverageForm: React.FC<{ data: OveragePlanPayload; onSave: (d: OveragePlanPayload)=>void; onClose:()=>void }> = ({ data, onSave, onClose }) => {
+const OverageForm: React.FC<OverageFormProps> = ({ data, onSave, onClose }) => {
   const [form, setForm] = useState(data);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [e.target.name]: e.target.value });
   return (

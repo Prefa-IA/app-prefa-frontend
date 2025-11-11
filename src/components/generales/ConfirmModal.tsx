@@ -1,15 +1,7 @@
 import React from 'react';
+import { ConfirmModalProps } from '../../types/components';
 
-interface Props {
-  title?: string;
-  message: React.ReactNode;
-  confirmText?: string;
-  cancelText?: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-}
-
-const ConfirmModal: React.FC<Props> = ({
+const ConfirmModal: React.FC<ConfirmModalProps> = ({
   title = 'Confirmación',
   message,
   confirmText = 'Confirmar',

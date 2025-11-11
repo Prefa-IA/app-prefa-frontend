@@ -1,12 +1,26 @@
 import axios, { InternalAxiosRequestConfig } from 'axios';
-import bcrypt from 'bcryptjs';
 import { Usuario, LoginCredentials, RegistroData, Informe, SubscriptionPlan, PaymentData } from '../types/enums';
+import { sanitizePath } from '../utils/urlSanitizer';
 
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || 'http://localhost:4000/api',
 });
 
 const googleMapsKey = 'AIzaSyB8PJ9MnZL1Di8qU7zkuiqMqr_rc4C8PpM';
+const GOOGLE_LOGIN_URI = process.env.REACT_APP_GOOGLE_LOGIN_URI || '/auth/google';
+
+async function sha256Hex(input: string): Promise<string> {
+  const cryptoApi: SubtleCrypto | undefined =
+    (typeof globalThis !== 'undefined' && (globalThis as any).crypto?.subtle) ||
+    (typeof window !== 'undefined' && (window as any).crypto?.subtle);
+  if (!cryptoApi) {
+    throw new Error('Crypto API no disponible en este entorno');
+  }
+  const enc = new TextEncoder().encode(input);
+  const buf = await cryptoApi.digest('SHA-256', enc);
+  const bytes = Array.from(new Uint8Array(buf));
+  return bytes.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = localStorage.getItem('token');
@@ -16,7 +30,6 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
-// Interceptor para manejar expiración o invalidez del token
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -24,7 +37,6 @@ api.interceptors.response.use(
       error.code = 'PREFA_IN_PROGRESS';
     }
     if (error.response && error.response.status === 401) {
-      // Mensajes típicos del backend
       const msg = error.response.data?.error || '';
       if (msg.includes('Token') || msg.includes('autenticación')) {
         import('react-toastify').then(({ toast }) => {
@@ -32,7 +44,8 @@ api.interceptors.response.use(
         });
         localStorage.removeItem('token');
         localStorage.removeItem('userProfile');
-        window.location.href = '/login';
+        const safePath = sanitizePath('/login');
+        window.location.href = safePath;
       }
     }
     return Promise.reject(error);
@@ -60,14 +73,19 @@ const obtenerCoordenadas = async (direccion: string) => {
 
 export const auth = {
   login: async (credentials: LoginCredentials) => {
-    const response = await api.post<{ token: string; usuario: Usuario }>('/auth/login', credentials);
+    const payload = { ...credentials } as any;
+    payload.password = await sha256Hex(credentials.password);
+    const response = await api.post<{ token: string; usuario: Usuario }>('/auth/login', payload);
+    return response.data;
+  },
+  loginWithGoogleIdToken: async (idToken: string) => {
+    const response = await api.post<{ token: string; usuario: Usuario }>(GOOGLE_LOGIN_URI, { token: idToken });
     return response.data;
   },
   
   registro: async (datos: RegistroData) => {
-    const SALT_ROUNDS = 10;
-    const hashed = await bcrypt.hash(datos.password, SALT_ROUNDS);
-    const payload = { ...datos, password: hashed } as any;
+    const payload = { ...datos } as any;
+    payload.password = await sha256Hex(datos.password);
     delete payload.repeatPassword;
     const response = await api.post<{ message: string }>('/auth/registro', payload);
     return response.data;
@@ -98,9 +116,24 @@ export const auth = {
     return response.data;
   },
   forgotPassword: async (email:string)=>{return api.post('/auth/forgot-password',{email});},
-  resetPassword:async({token,password}:{token:string,password:string})=>{return api.post('/auth/reset-password',{token,password});},
+  resetPassword:async({token,password}:{token:string,password:string})=>{
+    const passSha = await sha256Hex(password);
+    return api.post('/auth/reset-password',{token,password: passSha});
+  },
   getLogoRemaining: async () => {
     const response = await api.get<{ restantes: number }>('/auth/logo-remaining');
+    return response.data;
+  },
+  getAddressHistory: async () => {
+    const response = await api.get<Array<{ address: string; timestamp: number }>>('/auth/address-history');
+    return response.data;
+  },
+  addAddressToHistory: async (address: string) => {
+    const response = await api.post<{ ok: boolean; historial: Array<{ address: string; timestamp: number }> }>('/auth/address-history', { address });
+    return response.data;
+  },
+  updateTutorialStatus: async (status: 'finish' | 'omit') => {
+    const response = await api.put<{ ok: boolean; tutorialStatus: string }>('/auth/tutorial-status', { status });
     return response.data;
   },
 };
@@ -150,8 +183,10 @@ export const subscriptions = {
     return response.data;
   },
 
-  createSubscription: async (planId: string, billingInterval: 'monthly' | 'yearly' = 'monthly') => {
-    const response = await api.post('/suscripciones/crear-suscripcion', { planId, billingInterval });
+  createSubscription: async (planId: string, payerEmail?: string) => {
+    const payload: any = { planId };
+    if (payerEmail) payload.payerEmail = payerEmail;
+    const response = await api.post('/suscripciones/crear-suscripcion', payload);
     return response.data;
   },
 
@@ -170,7 +205,7 @@ export const subscriptions = {
     return response.data;
   },
 
-  validateUsage: async (opts: { prefaCompleta: boolean; compuesta: boolean }) => {
+  validateUsage: async (opts: { prefaCompleta: boolean; compuesta: boolean; basicSearch?: boolean }) => {
     try {
       const response = await api.post('/suscripciones/validar-uso', opts);
       return response.data;
@@ -233,9 +268,11 @@ const obtenerSugerenciasDirecciones = async (
 };
 
 export const prefactibilidad = {
-  consultarDireccion: async (direccion: string, opts: { prefaCompleta: boolean; compuesta: boolean }) => {
+  consultarDireccion: async (direccion: string, opts: { prefaCompleta: boolean; compuesta: boolean; basicSearch?: boolean; skipCredits?: boolean }) => {
     try {
-      await subscriptions.validateUsage(opts);
+      if (!opts.skipCredits) {
+        await subscriptions.validateUsage(opts as any);
+      }
       const coordenadas = await obtenerCoordenadas(direccion);
 
       const response = await api.post<Informe>('/prefactibilidad/consultar', { 
@@ -289,9 +326,9 @@ export const prefactibilidad = {
     return data;
   },
 
-  consultarPorSMP: async (smp: string, opts: { prefaCompleta: boolean; compuesta: boolean }) => {
+  consultarPorSMP: async (smp: string, opts: { prefaCompleta: boolean; compuesta: boolean; basicSearch?: boolean }) => {
     try {
-      await subscriptions.validateUsage(opts);
+      await subscriptions.validateUsage(opts as any);
       const cleaned = smp.trim();
       const response = await api.get<Informe>(`/prefactibilidad/consultar-smp/${encodeURIComponent(cleaned)}`);
       return response.data;

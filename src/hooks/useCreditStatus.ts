@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import api from '../services/api';
 
 export interface CreditStatus {
@@ -10,8 +10,12 @@ export interface CreditStatus {
 export const useCreditStatus = () => {
   const [status, setStatus] = useState<CreditStatus | null>(null);
   const [loading, setLoading] = useState(true);
+  const fetchingRef = useRef(false);
 
   const fetchStatus = useCallback(async () => {
+    if (fetchingRef.current) return;
+    
+    fetchingRef.current = true;
     try {
       const { data } = await api.get<{ balance: number; creditsUsedDay: number; creditsUsedMonth: number; limitDay?: number }>('/auth/creditos/resumen');
       setStatus({
@@ -23,10 +27,13 @@ export const useCreditStatus = () => {
       setStatus(null);
     } finally {
       setLoading(false);
+      fetchingRef.current = false;
     }
   }, []);
 
-  useEffect(() => { fetchStatus(); }, [fetchStatus]);
+  useEffect(() => { 
+    fetchStatus(); 
+  }, [fetchStatus]);
 
   return { status, loading, refresh: fetchStatus };
 };

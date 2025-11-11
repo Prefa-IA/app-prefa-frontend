@@ -3,7 +3,6 @@ import Container from './layout/Container';
 import { Disclosure } from '@headlessui/react';
 import { ChevronUpIcon } from '@heroicons/react/solid';
 
-// Imágenes para los tutoriales
 import Paso1 from '../assets/images/paso0.png';
 import Paso2 from '../assets/images/paso2.png';
 import Paso3 from '../assets/images/paso3.png';
@@ -23,13 +22,11 @@ const buildFaqs = (openInfo: (e: React.MouseEvent) => void) => [
     question: '¿Cómo hago una consulta de prefactibilidad?',
     answer: (
       <div className="space-y-6">
-        {/* Paso 0: Ir a Consultar */}
         <div className="space-y-2">
           <p><strong>Paso 1:</strong> Ingresa a la pestaña <em>Consultar</em> desde la barra de navegación.</p>
           <img src={Paso1} alt="Paso 1" className="rounded-lg shadow border" />
         </div>
 
-        {/* Paso 1-7 */}
         {[Paso2, Paso3, Paso4, Paso5, Paso6, Paso7].map((src, idx) => (
           <div key={idx} className="space-y-2">
             <p><strong>Paso {idx + 1}:</strong> {[
@@ -60,10 +57,8 @@ const buildFaqs = (openInfo: (e: React.MouseEvent) => void) => [
           </ul>
         </div>
 
-        {/* Imagen de la pantalla de personalización */}
         <img src={PersonalizacionInforme} alt="Pantalla de personalización" className="rounded-lg shadow border" />
 
-        {/* Vista previa de un informe con los colores aplicados */}
         <img src={VistaPreviaInforme} alt="Vista previa del informe" className="rounded-lg shadow border" />
       </div>
     ),

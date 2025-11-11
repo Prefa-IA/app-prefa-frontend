@@ -1,24 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { CameraIcon, TrashIcon } from '@heroicons/react/outline';
 import { useAuth } from '../../contexts/AuthContext';
-// import { subscriptions } from '../../services/api';
 import { usePlanes } from '../../hooks/usePlanes';
 import { SubscriptionPlan } from '../../types/enums';
+import { ProfileCardProps } from '../../types/components';
 
-interface Props {
-  logoUrl: string | null;
-  onLogoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onLogoDelete?: () => void;
-}
-
-const ProfileCard: React.FC<Props> = ({ logoUrl, onLogoUpload, onLogoDelete }) => {
+const ProfileCard: React.FC<ProfileCardProps> = ({ logoUrl, onLogoUpload, onLogoDelete }) => {
   const { usuario } = useAuth();
   const { planes } = usePlanes();
   const [planActual,setPlanActual]=useState<SubscriptionPlan|null>(null);
 
   useEffect(()=>{
     if(!usuario) return;
-    const p=planes.find((pl:any)=>pl._id===usuario?.suscripcion?.plan||pl.id?.toLowerCase()===usuario?.suscripcion?.tipo?.toLowerCase()||pl.name?.toLowerCase()===usuario?.suscripcion?.nombrePlan?.toLowerCase());
+    const p=planes.find((pl:any)=>pl.id?.toLowerCase()===usuario?.suscripcion?.tipo?.toLowerCase()||pl.name?.toLowerCase()===usuario?.suscripcion?.nombrePlan?.toLowerCase());
     setPlanActual((p as any)||null);
   },[usuario, planes]);
   if (!usuario) return null;
@@ -33,7 +27,6 @@ const ProfileCard: React.FC<Props> = ({ logoUrl, onLogoUpload, onLogoDelete }) =
               <CameraIcon className="w-12 h-12 text-primary-400" />
             )}
           </div>
-          {/* Botón eliminar (izquierda) */}
           {logoUrl && onLogoDelete && (
             <button
               type="button"
@@ -45,7 +38,6 @@ const ProfileCard: React.FC<Props> = ({ logoUrl, onLogoUpload, onLogoDelete }) =
             </button>
           )}
 
-          {/* Botón cargar (derecha) */}
           <label className="absolute -bottom-2 -right-2 bg-primary-600 dark:bg-primary-700 text-white p-3 rounded-full cursor-pointer hover:bg-primary-700 dark:hover:bg-primary-600 transition-all duration-200 shadow-lg">
             <CameraIcon className="w-5 h-5" />
             <input type="file" accept="image/*" onChange={onLogoUpload} className="hidden" />
@@ -63,19 +55,10 @@ const ProfileCard: React.FC<Props> = ({ logoUrl, onLogoUpload, onLogoDelete }) =
   );
 };
 
-// const colorFor: Record<string, string> = {
-//   bronze: 'bg-blue-600',
-//   silver: 'bg-purple-600',
-//   gold: 'bg-green-600'
-// };
-
 const PlanPill: React.FC<{ plan: string; planObj: SubscriptionPlan|null }> = ({ plan, planObj }) => {
   let colorClass='bg-blue-600';
   if(planObj?.tag?.bgClass){
      colorClass=planObj.tag.bgClass;
-  } else if(planObj?.prioridad){
-     const map:{[k:number]:string}={1:'bg-emerald-600',2:'bg-violet-600',3:'bg-rose-600',4:'bg-blue-600'};
-     colorClass=map[planObj.prioridad]||'bg-blue-600';
   }
   return (
     <span className={`inline-flex items-center space-x-1 text-white px-3 py-1 rounded-full text-xs font-medium ${colorClass}`}>

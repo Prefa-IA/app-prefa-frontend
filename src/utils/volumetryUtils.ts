@@ -5,14 +5,8 @@ export interface FloorProfile {
   retreat: number; // porcentaje de retiro lateral 0..1
 }
 
-const FLOOR_HEIGHT = 3.2; // m
+const FLOOR_HEIGHT = 3.2;
 
-/**
- * Genera un arreglo de pisos con retiros escalonados simples.
- * Estrategia simplificada: si la parte superior del piso
- * supera ciertos umbrales (12 m, 16.5 m, 20 m) se agrega un
- * retiro del 10 % de la fachada por cada umbral superado.
- */
 export const getVolumetryProfile = (alturaMax: number): FloorProfile[] => {
   const thresholds = [12, 16.5, 20];
   const floors: FloorProfile[] = [];
@@ -21,7 +15,7 @@ export const getVolumetryProfile = (alturaMax: number): FloorProfile[] => {
     const hStart = i * FLOOR_HEIGHT;
     const hEnd = Math.min((i + 1) * FLOOR_HEIGHT, alturaMax);
     let retreatsCrossed = thresholds.filter(t => hEnd > t).length;
-    const retreatPercent = retreatsCrossed * 0.1; // 10 % por escalón
+    const retreatPercent = retreatsCrossed * 0.1;
     floors.push({ level: i, heightStart: hStart, heightEnd: hEnd, retreat: retreatPercent });
   }
   return floors;

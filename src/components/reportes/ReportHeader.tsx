@@ -4,15 +4,10 @@ import {
   ReportTitlesProps, 
   ReportAddressProps 
 } from '../../types/enums';
+import { REPORT_TITLES } from '../../types/constants';
 import { getReportTitle } from '../../utils/reportUtils';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from '../../styles/ReportHeader.module.css';
-
-const REPORT_TITLES = [
-  'INFORME DE',
-  'FACTIBILIDAD',
-  'CONSTRUCTIVA'
-];
 
 const ReportHeader: React.FC<ReportHeaderProps> = ({ 
   informe, 

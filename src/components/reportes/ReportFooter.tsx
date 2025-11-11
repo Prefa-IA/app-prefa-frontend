@@ -7,6 +7,7 @@ import {
   ChangeLogTableProps, 
   ChangeLogTableBodyProps 
 } from '../../types/enums';
+import { getButtonClass } from '../../utils/reportFooterUtils';
 import styles from '../../styles/ReportFooter.module.css';
 
 const ReportFooter: React.FC<ReportFooterProps> = ({ 
@@ -100,26 +101,12 @@ const FooterActions: React.FC<FooterActionsProps> = ({
 };
 
 const ActionButton: React.FC<ActionButtonProps> = ({ onClick, variant, icon, text, disabled }) => {
-  const getButtonClass = (variant: ButtonVariant) => {
-    const baseClass = styles.button;
-    switch (variant) {
-      case ButtonVariant.SUCCESS:
-        return `${baseClass} ${styles.buttonSuccess}`;
-      case ButtonVariant.PRIMARY:
-        return `${baseClass} ${styles.buttonPrimary}`;
-      case ButtonVariant.SECONDARY:
-        return `${baseClass} ${styles.buttonSecondary}`;
-      case ButtonVariant.DANGER:
-        return `${baseClass} ${styles.buttonDanger}`;
-      default:
-        return baseClass;
-    }
-  };
+  const buttonClass = getButtonClass(styles.button, variant, styles);
 
   return (
     <button
       onClick={onClick}
-      className={getButtonClass(variant)}
+      className={buttonClass}
       disabled={disabled}
       style={disabled ? { opacity: 0.6, cursor: 'not-allowed' } : {}}
     >

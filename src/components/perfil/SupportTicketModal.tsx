@@ -1,12 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { support } from '../../services/api';
+import { SupportTicketModalProps } from '../../types/components';
+import { processImageFiles } from '../../utils/fileUtils';
 
-interface Props {
-  onClose: () => void;
-}
-
-const SupportTicketModal: React.FC<Props> = ({ onClose }) => {
+const SupportTicketModal: React.FC<SupportTicketModalProps> = ({ onClose }) => {
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
   const [images, setImages] = useState<File[]>([]);
@@ -17,31 +15,9 @@ const SupportTicketModal: React.FC<Props> = ({ onClose }) => {
   const [cooldown,setCooldown]=useState(false);
 
   const processFiles = (fileList: FileList | File[]) => {
-    const files = Array.from(fileList);
-    const valid: File[] = [];
-    files.forEach(file => {
-      if (file.size > 2 * 1024 * 1024) {
-        toast.warn(`El archivo ${file.name} excede los 2MB y se omitirá.`);
-      } else if (!file.type.startsWith('image/')) {
-        toast.warn(`El archivo ${file.name} no es una imagen y se omitirá.`);
-      } else {
-        valid.push(file);
-      }
-    });
-    // Combinar con existentes y limitar a 3
-    const combined = [...images, ...valid];
-    if (combined.length > 3) {
-      toast.info('Puedes adjuntar hasta 3 imágenes');
-    }
-    const limited = combined.slice(0, 3);
-    setImages(limited);
-    // Generar previews (recrear todas)
-    const readers = limited.map(file => new Promise<string>((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.readAsDataURL(file);
-    }));
-    Promise.all(readers).then(setPreviews);
+    const { valid, previews: previewPromises } = processImageFiles(fileList, images);
+    setImages(valid);
+    previewPromises.then(setPreviews);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

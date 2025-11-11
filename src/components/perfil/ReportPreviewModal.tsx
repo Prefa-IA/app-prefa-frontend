@@ -1,8 +1,7 @@
 import React from 'react';
+import { ReportPreviewModalProps } from '../../types/components';
 
-interface Props { onClose: () => void; personalizacion: any; nombreInmobiliaria: string }
-
-const ReportPreviewModal: React.FC<Props> = ({ onClose, personalizacion, nombreInmobiliaria }) => (
+const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({ onClose, personalizacion, nombreInmobiliaria }) => (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
     <div className="bg-white dark:bg-gray-800 dark:text-gray-100 rounded-xl max-w-4xl w-full max-h-[80vh] overflow-auto custom-scrollbar">
       <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">

@@ -1,21 +1,11 @@
 import React from 'react';
 import ModalBase from '../generales/ModalBase';
+import { TermsAndConditionsProps } from '../../types/components';
 
-interface Props { onClose: () => void; }
-
-/**
- * Componente que muestra los Términos y Condiciones.  
- * La versión HTML proporcionada por el equipo se incrusta directamente
- * mediante JSX para evitar problemas de importación de assets en runtime.
- * Si en el futuro se necesita mantener el archivo HTML por separado,
- * bastará con moverlo a `public/tyc/terminosycondiciones.html` y reemplazar
- * el contenido de `dangerouslySetInnerHTML` por un `fetch` al recurso estático.
- */
-const TermsAndConditions: React.FC<Props> = ({ onClose }) => {
+const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({ onClose }) => {
   return (
     <ModalBase title="Términos y Condiciones" onClose={onClose} hideConfirm>
     <div className="prose max-w-none">
-      {/* Estilos locales para el documento de TyC */}
       <style>{`
         .tyc-container {
           max-width: 800px;

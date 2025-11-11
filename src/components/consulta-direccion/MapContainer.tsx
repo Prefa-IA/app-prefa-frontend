@@ -1,12 +1,8 @@
 import React from 'react';
 import UsigMapContainer from './UsigMapContainer';
+import { ConsultaMapContainerProps } from '../../types/components';
 
-interface MapContainerProps {
-  center: { lat: number; lng: number };
-  showMarker?: boolean;
-}
-
-const MapContainer: React.FC<MapContainerProps> = ({ center, showMarker = false }) => {
+const MapContainer: React.FC<ConsultaMapContainerProps> = ({ center, showMarker = false }) => {
   return (
     <div className="mt-6 mb-6 overflow-hidden rounded-lg border border-gray-200 relative" style={{ zIndex: 1 }}>
       <UsigMapContainer 

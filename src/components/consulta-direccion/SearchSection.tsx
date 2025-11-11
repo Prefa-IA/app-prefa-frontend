@@ -15,7 +15,8 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   onToggleConsultarPorSMP,
   hasResult,
   onClear,
-  disabled
+  disabled,
+  singleModeIcon
 }) => {
   return (
     <div className="space-y-2">
@@ -32,6 +33,7 @@ const SearchSection: React.FC<SearchSectionProps> = ({
         hasResult={hasResult}
         onClear={onClear}
         disabled={disabled}
+        singleModeIcon={singleModeIcon}
       />
 
       {/* Mostrar checkbox sólo si se provee handler */}

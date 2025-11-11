@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ParcelDataPageProps, ChangeLogEntry } from '../types/enums';
+import { ParcelDataPageProps, ChangeLogEntry, DocumentosVisuales } from '../types/enums';
 import { obtenerDocumentosVisuales } from '../services/consolidacionInformes';
 import { calculateAllValues, generateFachadaUrl, checkImageExists } from '../utils/parcelCalculations';
 import { generateIndexContext } from '../utils/indexUtils';
@@ -30,11 +30,7 @@ const ParcelDataPage: React.FC<ParcelDataPageProps> = ({
   
   const calculatedValues = calculateAllValues(informeAMostrar, {});
   
-  const [documentosVisuales, setDocumentosVisuales] = useState<{
-    croquis: string[];
-    perimetros: string[];
-    planosIndice: string[];
-  }>({
+  const [documentosVisuales, setDocumentosVisuales] = useState<DocumentosVisuales>({
     croquis: [],
     perimetros: [],
     planosIndice: []
@@ -45,7 +41,7 @@ const ParcelDataPage: React.FC<ParcelDataPageProps> = ({
   useEffect(() => {
     if (!usuario || planes.length === 0) return;
 
-    const plan = planes.find(p => p.id === usuario.suscripcion?.tipo || (p as any)._id === usuario.suscripcion?.plan || p.name === usuario.suscripcion?.nombrePlan);
+    const plan = planes.find(p => p.id === usuario.suscripcion?.tipo || p.name === usuario.suscripcion?.nombrePlan);
 
     const usarOrg = plan?.watermarkOrg;
     const usarPrefa = plan?.watermarkPrefas;
@@ -113,8 +109,7 @@ const ParcelDataPage: React.FC<ParcelDataPageProps> = ({
     documentosVisuales
   );
 
-  // Calcular páginas dinámicamente basándose en las secciones incluidas
-  let currentPage = 2; // Página 2 después del índice (página 1)
+  let currentPage = 2;
   const pageNumbers: { [key: string]: number } = {};
 
   DYNAMIC_INDEX_CONFIG.BASE_SECTIONS.forEach(section => {
@@ -153,15 +148,12 @@ const ParcelDataPage: React.FC<ParcelDataPageProps> = ({
         pageCounter={pageNumbers['datos_parcela'] || 3}
       />
 
-      {/* Para Prefa1 ocultamos entorno/fachada */}
       {tipoPrefa === 'prefa2' && (context.hasEntorno || fachadaImages.length > 0) && (
         <FacadeImages 
           fachadaImages={fachadaImages}
           pageCounter={pageNumbers['entorno_fachada'] || 4}
         />
       )}
-
-      {/* Volumetría eliminada */}
 
       {tipoPrefa === 'prefa2' && (
         <DocumentViewer 
@@ -179,7 +171,6 @@ const ParcelDataPage: React.FC<ParcelDataPageProps> = ({
         />
       )}
 
-      {/* Mostrar cálculo de plusvalía siempre que existan datos de plusvalía */}
       {informeAMostrar.edificabilidad?.plusvalia && (
         <PlusvaliaCalculation 
           informe={informeAMostrar}

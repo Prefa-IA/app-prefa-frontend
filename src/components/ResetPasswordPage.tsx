@@ -34,24 +34,24 @@ const ResetPasswordPage: React.FC = () => {
   };
 
   return(
-    <div className={stylesCont.container}>
-      <div className={`${stylesCont.formContainer} bg-white p-8 rounded shadow`}>
+    <div className={`${stylesCont.container} bg-gray-50 dark:bg-gray-900`}>
+      <div className={`${stylesCont.formContainer} bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-8 rounded shadow text-gray-800 dark:text-gray-100`}>
         <div className="flex justify-center mb-2"><Logo width={150} height={40} /></div>
-        <h2 className="text-xl font-medium text-gray-600 text-center mb-6">Nueva contraseña</h2>
+        <h2 className="text-xl font-medium text-gray-700 dark:text-gray-100 text-center mb-6">Nueva contraseña</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Contraseña</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Contraseña</label>
             <div className="relative">
-              <input placeholder="Contraseña" type={showPass? 'text':'password'} value={password} onChange={e=>setPassword(e.target.value)} required className={`${stylesCont.input} mt-1`} />
+              <input placeholder="Contraseña" type={showPass? 'text':'password'} value={password} onChange={e=>setPassword(e.target.value)} required className={`${stylesCont.input} mt-1 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100`} />
               <button type="button" className="absolute inset-y-0 right-3 flex items-center" onClick={()=>setShowPass(!showPass)}>
                 {showPass?<EyeOffIcon className="w-5 h-5 text-gray-500"/>:<EyeIcon className="w-5 h-5 text-gray-500"/>}
               </button>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Repetir Contraseña</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Repetir Contraseña</label>
             <div className="relative">
-              <input placeholder="Repetir contraseña" type={showRepeat? 'text':'password'} value={repeat} onChange={e=>setRepeat(e.target.value)} required className={`${stylesCont.input} mt-1`} />
+              <input placeholder="Repetir contraseña" type={showRepeat? 'text':'password'} value={repeat} onChange={e=>setRepeat(e.target.value)} required className={`${stylesCont.input} mt-1 dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100`} />
               <button type="button" className="absolute inset-y-0 right-3 flex items-center" onClick={()=>setShowRepeat(!showRepeat)}>
                 {showRepeat?<EyeOffIcon className="w-5 h-5 text-gray-500"/>:<EyeIcon className="w-5 h-5 text-gray-500"/>}
               </button>

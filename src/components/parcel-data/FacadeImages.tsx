@@ -1,5 +1,6 @@
 import React from 'react';
 import { FacadeImagesProps, PARCEL_DATA_CONFIG } from '../../types/enums';
+import { FacadeImageGridProps, FacadeImageItemProps } from '../../types/components';
 import useTablePersonalization from '../../hooks/useTablePersonalization';
 
 const FacadeImages: React.FC<FacadeImagesProps> = ({ fachadaImages, pageCounter }) => {
@@ -25,13 +26,11 @@ const FacadeImages: React.FC<FacadeImagesProps> = ({ fachadaImages, pageCounter 
   );
 };
 
-const FacadeImageGrid: React.FC<{ images: string[] }> = ({ images }) => {
-  // Eliminar duplicados exactos (URL idénticas) manteniendo orden.
+const FacadeImageGrid: React.FC<FacadeImageGridProps> = ({ images }) => {
   const uniqueImages = images.filter((url, idx) => images.indexOf(url) === idx);
 
   const gridClass = uniqueImages.length > 1 ? 'grid-cols-2' : 'grid-cols-1';
 
-  // Mostrar máximo 2 imágenes únicas, o 1 si sólo hay una
   const displayImages = uniqueImages.slice(0, uniqueImages.length === 1 ? 1 : 2);
 
   return (
@@ -47,7 +46,7 @@ const FacadeImageGrid: React.FC<{ images: string[] }> = ({ images }) => {
   );
 };
 
-const FacadeImageItem: React.FC<{ imageUrl: string; index: number }> = ({ imageUrl, index }) => (
+const FacadeImageItem: React.FC<FacadeImageItemProps> = ({ imageUrl, index }) => (
   <div className="border p-4 text-center h-[400px] overflow-hidden">
     <img 
       src={imageUrl} 

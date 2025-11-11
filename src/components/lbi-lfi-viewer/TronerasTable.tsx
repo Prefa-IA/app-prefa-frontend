@@ -1,5 +1,12 @@
 import React from 'react';
 import { TronerasTableProps } from '../../types/enums';
+import {
+  TronerasTableBodyProps,
+  TroneraRowProps,
+  TipoEsquinaBadgeProps,
+  DistanciasCellProps,
+  TronerasTableFooterProps
+} from '../../types/components';
 
 const TronerasTable: React.FC<TronerasTableProps> = ({ troneras }) => {
   return (
@@ -30,7 +37,7 @@ const TronerasTableHeader: React.FC = () => (
   </thead>
 );
 
-const TronerasTableBody: React.FC<{ troneras: any[] }> = ({ troneras }) => (
+const TronerasTableBody: React.FC<TronerasTableBodyProps> = ({ troneras }) => (
   <tbody className="bg-white divide-y divide-green-100">
     {troneras.map((tronera, index) => (
       <TroneraRow key={index} tronera={tronera} index={index} />
@@ -38,7 +45,7 @@ const TronerasTableBody: React.FC<{ troneras: any[] }> = ({ troneras }) => (
   </tbody>
 );
 
-const TroneraRow: React.FC<{ tronera: any; index: number }> = ({ tronera, index }) => (
+const TroneraRow: React.FC<TroneraRowProps> = ({ tronera, index }) => (
   <tr className="hover:bg-green-50">
     <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-green-900">
       {index + 1}
@@ -67,13 +74,13 @@ const TroneraRow: React.FC<{ tronera: any; index: number }> = ({ tronera, index 
   </tr>
 );
 
-const TipoEsquinaBadge: React.FC<{ tipo?: string }> = ({ tipo }) => (
+const TipoEsquinaBadge: React.FC<TipoEsquinaBadgeProps> = ({ tipo }) => (
   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
     {tipo || 'esquina'}
   </span>
 );
 
-const DistanciasCell: React.FC<{ tronera: any }> = ({ tronera }) => {
+const DistanciasCell: React.FC<DistanciasCellProps> = ({ tronera }) => {
   const { distancia_anterior, distancia_siguiente } = tronera.properties;
 
   if (distancia_anterior && distancia_siguiente) {
@@ -96,7 +103,7 @@ const DistanciasCell: React.FC<{ tronera: any }> = ({ tronera }) => {
   return <span>N/A</span>;
 };
 
-const TronerasTableFooter: React.FC<{ troneras: any[] }> = ({ troneras }) => {
+const TronerasTableFooter: React.FC<TronerasTableFooterProps> = ({ troneras }) => {
   const totalArea = troneras.reduce((sum, t) => sum + (t.properties.area || 0), 0);
   const averageArea = totalArea / troneras.length;
 

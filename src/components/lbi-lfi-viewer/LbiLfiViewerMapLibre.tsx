@@ -1,34 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import maplibregl, { Map, LayerSpecification } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-
-interface MapData {
-  lfi: GeoJSON.FeatureCollection;
-  lib: GeoJSON.FeatureCollection;
-  parcela?: GeoJSON.FeatureCollection;
-  afectaciones?: {
-    parcela_afectada_lfi: GeoJSON.Feature | null;
-    parcela_afectada_lib: GeoJSON.Feature | null;
-    porcentaje_afectacion_lfi: number;
-    porcentaje_afectacion_lib: number;
-    area_total_parcela: number;
-    area_afectada_lfi: number;
-    area_afectada_lib: number;
-  };
-  estadisticas?: {
-    total_esquinas: number;
-    esquinas_con_troneras: number;
-    porcentaje_afectacion_lfi: number;
-    porcentaje_afectacion_lib: number;
-  };
-}
-
-interface ViewerProps {
-  smp: string;
-  centro: { lat: number; lon: number };
-  geometriaParcela?: any;
-  showStatsOverlay?: boolean;
-}
+import { ViewerProps, MapData } from '../../types/components';
 
 const LbiLfiViewerMapLibre: React.FC<ViewerProps> = ({ smp, centro, geometriaParcela, showStatsOverlay = true }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -71,7 +44,6 @@ const LbiLfiViewerMapLibre: React.FC<ViewerProps> = ({ smp, centro, geometriaPar
       }
     };
 
-    // Dibujar parcela completa (contorno)
     if (data.parcela && data.parcela.features.length > 0) {
       data.parcela.features.forEach((feat, idx) => {
         const featCollection = { type: 'FeatureCollection', features: [feat] } as GeoJSON.FeatureCollection;
@@ -85,7 +57,6 @@ const LbiLfiViewerMapLibre: React.FC<ViewerProps> = ({ smp, centro, geometriaPar
       });
     }
 
-    // Dibujar área afectada por LFI (relleno amarillo)
     if (data.afectaciones?.parcela_afectada_lfi) {
       const parcelaAfectadaLfi = {
         type: "FeatureCollection" as const,
@@ -101,7 +72,6 @@ const LbiLfiViewerMapLibre: React.FC<ViewerProps> = ({ smp, centro, geometriaPar
       });
     }
 
-    // Dibujar área afectada por LIB (relleno amarillo más claro)
     if (data.afectaciones?.parcela_afectada_lib) {
       const parcelaAfectadaLib = {
         type: "FeatureCollection" as const,
@@ -117,7 +87,6 @@ const LbiLfiViewerMapLibre: React.FC<ViewerProps> = ({ smp, centro, geometriaPar
       });
     }
 
-    // Dibujar LIB (línea naranja)
     if (data.lib?.features.length > 0) {
       addOrUpdateLayer('lib', data.lib, {
         type: 'line',
@@ -128,7 +97,6 @@ const LbiLfiViewerMapLibre: React.FC<ViewerProps> = ({ smp, centro, geometriaPar
       });
     }
 
-    // Dibujar LFI con troneras (línea azul)
     if (data.lfi?.features.length > 0) {
       addOrUpdateLayer('lfi', data.lfi, {
         type: 'line',
@@ -139,21 +107,17 @@ const LbiLfiViewerMapLibre: React.FC<ViewerProps> = ({ smp, centro, geometriaPar
       });
     }
 
-    // Centrar la vista de forma que se aprecie el contorno completo de la manzana/áreas LFI-LIB.
     const bounds = new maplibregl.LngLatBounds();
 
     const extendBounds = (coords: any) => {
       if (!coords) return;
       if (typeof coords[0] === 'number') {
-        // Punto [lng, lat]
         bounds.extend(coords as [number, number]);
       } else {
-        // Array anidado
         (coords as any[]).forEach(extendBounds);
       }
     };
 
-    // Extender límites con todas las capas relevantes
     if (data.lib) {
       data.lib.features.forEach(f => extendBounds((f.geometry as any).coordinates));
     }
@@ -171,7 +135,6 @@ const LbiLfiViewerMapLibre: React.FC<ViewerProps> = ({ smp, centro, geometriaPar
     }
   };
 
-  // Efecto para cargar los datos
   useEffect(() => {
     if (!smp) return;
     
@@ -180,7 +143,6 @@ const LbiLfiViewerMapLibre: React.FC<ViewerProps> = ({ smp, centro, geometriaPar
         let response;
         const base = (process.env.REACT_APP_API_URL || 'http://localhost:4000').replace(/\/$/, '');
         
-        // Si tienes los datos completos de la parcela, úsalos
         const token = localStorage.getItem('token');
         const authHeaderValue = token ? `Bearer ${token}` : null;
 
@@ -196,7 +158,6 @@ const LbiLfiViewerMapLibre: React.FC<ViewerProps> = ({ smp, centro, geometriaPar
             })
           });
         } else {
-          // Usar el endpoint original que hace fetch a la API
           const headers: Record<string, string> = {};
           if (authHeaderValue) headers.Authorization = authHeaderValue;
           const init: RequestInit = Object.keys(headers).length ? { headers } : {};
@@ -220,7 +181,6 @@ const LbiLfiViewerMapLibre: React.FC<ViewerProps> = ({ smp, centro, geometriaPar
     fetchData();
   }, [smp, geometriaParcela]);
 
-  // Efecto para inicializar el mapa
   useEffect(() => {
     if (mapRef.current || !mapContainer.current) return;
 

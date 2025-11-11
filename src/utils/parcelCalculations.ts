@@ -1,10 +1,6 @@
 import { Informe, PARCEL_DATA_CONFIG } from '../types/enums';
-// Tipologías eliminadas: clasificación por fallback
 
 export const determinarTipoEdificacion = (alturaMax: number): string => {
-  // Intentamos usar tipologías de BD si están cacheadas
-  // Tipologías dinámicas eliminadas
-  // Fallback legacy
   if (alturaMax >= 38) return 'Corredor Alto (PB + 12 pisos + 2 retiros)';
   if (alturaMax >= 31) return 'Corredor Medio (PB + 10 pisos + 2 retiros)';
   if (alturaMax >= 22.8) return 'USAA (PB + 7 plantas + 2 retiros)';
@@ -98,26 +94,18 @@ export const calculateAllValues = (
   const areaSegundoRetiro = calculateAreaSegundoRetiro(superficieParcelaAjustada, frenteValor);
   const totalCapConstructivaOriginal = calculateTotalCapConstructiva(areaPlantasTipicas, areaPrimerRetiro, areaSegundoRetiro);
   
-  // NUEVO: aplicar afección LBI/LFI si existe un porcentaje disponible en el informe
-  // Se asume que el backend, cuando corresponda, enviará un valor numérico entre 0-100 en
-  //   edificabilidad.lfi_afeccion_percent  (p.ej. 25 para un 25 %).
-  // En caso de no existir la propiedad o ser 0, se mantiene el valor original.
   let lfiAfeccionPercent: number = (informe.edificabilidad as any)?.lfi_afeccion_percent || 0;
 
   const totalCapConstructivaAjustada = lfiAfeccionPercent > 0
     ? totalCapConstructivaOriginal * (1 - lfiAfeccionPercent / 100)
     : totalCapConstructivaOriginal;
 
-  // Si no vino porcentaje pero hay diferencia entre original y ajustada, lo calculamos
   if (lfiAfeccionPercent === 0 && totalCapConstructivaOriginal !== 0) {
     const diff = totalCapConstructivaOriginal - totalCapConstructivaAjustada;
     if (diff > 0) {
       lfiAfeccionPercent = (diff / totalCapConstructivaOriginal) * 100;
     }
   }
-
-  // Reemplazamos la capacidad constructiva original por la ajustada para todos los cálculos posteriores
-  // (A1, A2, plusvalía, etc.)
 
   const a1 = calculateA1(superficieParcela, fotMedanera);
   const a2 = calculateA2(totalCapConstructivaAjustada, a1);
@@ -197,5 +185,3 @@ export const getPdfViewerUrl = (url?: string): string => {
   if (!url) return '';
   return `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true&toolbar=0&navpanes=0&scrollbar=0&statusbar=0&view=fitH`;
 };
-
-// Sin tipologías dinámicas

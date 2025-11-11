@@ -5,22 +5,16 @@ import {
   IndexGenerationContext,
   IndexSectionType,
   DYNAMIC_INDEX_CONFIG,
-  PageSectionConfig
+  PageSectionConfig,
+  DocumentosVisuales
 } from '../types/enums';
 
-/**
- * Genera el contexto necesario para la generación del índice dinámico
- */
 export const generateIndexContext = (
   informe: Informe,
   informeCompuesto?: InformeCompuesto,
   esInformeCompuesto: boolean = false,
   fachadaImages: string[] = [],
-  documentosVisuales: {
-    croquis: string[];
-    perimetros: string[];
-    planosIndice: string[];
-  } = { croquis: [], perimetros: [], planosIndice: [] }
+  documentosVisuales: DocumentosVisuales = { croquis: [], perimetros: [], planosIndice: [] }
 ): IndexGenerationContext => {
   const informeAMostrar = esInformeCompuesto && informeCompuesto 
     ? informeCompuesto.informeConsolidado 
@@ -45,9 +39,6 @@ export const generateIndexContext = (
   };
 };
 
-/**
- * Verifica si una sección debe incluirse en el índice
- */
 const shouldIncludeSection = (
   section: PageSectionConfig,
   informe: Informe,
@@ -57,23 +48,19 @@ const shouldIncludeSection = (
   return section.shouldInclude(informe, context);
 };
 
-/**
- * Calcula la numeración secuencial de páginas basada en secciones incluidas
- */
 const calculateSequentialPageNumbers = (
   sections: PageSectionConfig[],
   informe: Informe,
   context: IndexGenerationContext
 ): Map<string, number> => {
   const pageNumbers = new Map<string, number>();
-  let currentPage = 2; // Empezar en página 2 después del índice (página 1)
+  let currentPage = 2;
   
   sections.forEach(section => {
     if (shouldIncludeSection(section, informe, context)) {
       pageNumbers.set(section.id, currentPage);
       currentPage++;
       
-      // Si tiene subsecciones que se muestran en la misma página, mantener el número
       if (section.subSections) {
         section.subSections.forEach(subSection => {
           if (shouldIncludeSection(subSection, informe, context)) {
@@ -87,9 +74,6 @@ const calculateSequentialPageNumbers = (
   return pageNumbers;
 };
 
-/**
- * Convierte una configuración de sección en un item de índice dinámico
- */
 const createDynamicIndexItem = (
   section: PageSectionConfig,
   pageNumber: number,
@@ -184,9 +168,6 @@ export const getVisibleIndexItems = (items: DynamicIndexItem[]): DynamicIndexIte
   }));
 };
 
-/**
- * Obtiene el total de páginas del informe
- */
 export const getTotalPages = (indexItems: DynamicIndexItem[]): number => {
   let maxPage = 0;
   
@@ -205,9 +186,6 @@ export const getTotalPages = (indexItems: DynamicIndexItem[]): number => {
   return maxPage;
 };
 
-/**
- * Busca un item por su ID en el índice
- */
 export const findIndexItemById = (
   items: DynamicIndexItem[], 
   id: string
@@ -224,9 +202,6 @@ export const findIndexItemById = (
   return null;
 };
 
-/**
- * Obtiene la estructura jerárquica del índice como string
- */
 export const getIndexStructure = (items: DynamicIndexItem[]): string => {
   let structure = '';
   
@@ -247,17 +222,10 @@ export const getIndexStructure = (items: DynamicIndexItem[]): string => {
   return structure;
 };
 
-/**
- * Función de debugging para mostrar la estructura del índice
- */
 export const debugIndexStructure = (
   informe: Informe,
   fachadaImages: string[] = [],
-  documentosVisuales: {
-    croquis: string[];
-    perimetros: string[];
-    planosIndice: string[];
-  } = { croquis: [], perimetros: [], planosIndice: [] }
+  documentosVisuales: DocumentosVisuales = { croquis: [], perimetros: [], planosIndice: [] }
 ): string => {
   const context = generateIndexContext(
     informe,

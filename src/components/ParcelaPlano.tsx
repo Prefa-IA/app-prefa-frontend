@@ -43,25 +43,19 @@ const drawParcelCanvas = (
   const { WIDTH: width, HEIGHT: height } = PARCEL_MAP_CONFIG.CANVAS_DIMENSIONS;
   const padding = 80;
 
-  // Clear canvas
   ctx.clearRect(0, 0, width, height);
 
-  // Calculate bounds and scale
   const bounds = calculateBounds(coordinates);
   const scale = calculateScale(bounds, width, height, padding);
   const toPixels = createPixelConverter(bounds, scale, height, padding);
 
-  // Draw parcel shape
   drawParcelShape(ctx, coordinates, toPixels);
 
-  // Calculate and draw measurements
   const midPoints = calculateMidPoints(coordinates, toPixels);
   drawMeasurements(ctx, midPoints, datosCatastrales);
 
-  // Draw parcel information
   drawParcelInfo(ctx, datosCatastrales, datosEdificabilidad, padding);
 
-  // Draw north arrow
   drawNorthArrow(ctx, width);
 };
 

@@ -5,7 +5,6 @@ export const getUserTypeLabel = (tipo: string): string => {
 };
 
 export const getSubscriptionStatus = (usuario: Usuario) => {
-  // Verificamos la suscripción para cualquier tipo de organización/usuario
   const isActive = usuario.suscripcion?.fechaFin && 
     new Date(usuario.suscripcion.fechaFin) > new Date();
 

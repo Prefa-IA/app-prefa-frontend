@@ -1,5 +1,10 @@
 import React from 'react';
 import { MapContainerLbiProps, LBI_LFI_CONFIG } from '../../types/enums';
+import {
+  ErrorDisplayProps,
+  LoadingOverlayProps,
+  LoadingDataContentProps
+} from '../../types/components';
 
 const MapContainerLbi: React.FC<MapContainerLbiProps> = ({
   mapRef,
@@ -25,17 +30,13 @@ const MapContainerLbi: React.FC<MapContainerLbiProps> = ({
   );
 };
 
-const ErrorDisplay: React.FC<{ error: string }> = ({ error }) => (
+const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error }) => (
   <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
     {error}
   </div>
 );
 
-const LoadingOverlay: React.FC<{
-  loading: boolean;
-  loadingData: boolean;
-  smp: string;
-}> = ({ loading, loadingData, smp }) => (
+const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ loading, loadingData, smp }) => (
   <div className="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-90 z-10">
     <LoadingSpinner />
     {loadingData ? (
@@ -50,7 +51,7 @@ const LoadingSpinner: React.FC = () => (
   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
 );
 
-const LoadingDataContent: React.FC<{ smp: string }> = ({ smp }) => (
+const LoadingDataContent: React.FC<LoadingDataContentProps> = ({ smp }) => (
   <div className="text-center">
     <div className="text-lg font-medium text-blue-600 mb-2">
       {LBI_LFI_CONFIG.MESSAGES.LOADING_DATA}
