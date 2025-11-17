@@ -16,18 +16,20 @@
 }
 
 .formContainer {
-  width: 100%;
-  max-width: none;
+  width: 95%;
+  max-width: 28rem;
   padding: 1rem;
-  border-radius: 0;
   display: flex;
   flex-direction: column;
 }
 
-@media (min-width: 640px) {
+@media (max-width: 640px) {
   .formContainer {
-    max-width: 28rem;
-    border-radius: 0.75rem;
+    width: 100%;
+  }
+  .container {
+    padding-left: 0rem;
+    padding-right: 0rem;
   }
 }
 
@@ -55,7 +57,7 @@
   margin-top: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .inputGroup {
@@ -146,4 +148,4 @@
 
 .switchLink:hover {
   text-decoration: underline;
-} 
+}

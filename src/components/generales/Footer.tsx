@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import TermsAndConditions from '../usuario/TermsAndConditions';
-import PrivacyPolicy from '../usuario/PrivacyPolicy';
 import { Link } from 'react-router-dom';
+
 import { FooterModalProps } from '../../types/components';
+import PrivacyPolicy from '../usuario/PrivacyPolicy';
+import TermsAndConditions from '../usuario/TermsAndConditions';
 
 const Footer: React.FC = () => {
   const [showTyC, setShowTyC] = useState(false);
@@ -14,11 +15,23 @@ const Footer: React.FC = () => {
       <div className="w-[95%] lg:w-[63%] max-w-8xl mx-auto flex flex-col sm:flex-row justify-between items-center text-sm text-gray-600 dark:text-gray-300">
         <div className="mb-2 sm:mb-0">Todos los derechos reservados © {year} Prefa-IA</div>
         <div className="flex items-center">
-          <Link to="/faq" className="text-primary-600 dark:text-primary-400 hover:underline">Preguntas frecuentes</Link>
+          <Link to="/faq" className="text-primary-600 dark:text-primary-400 hover:underline">
+            Preguntas frecuentes
+          </Link>
           <span className="mx-3 text-gray-400 dark:text-gray-500">|</span>
-          <button onClick={() => setShowTyC(true)} className="text-primary-600 dark:text-primary-400 hover:underline">Términos y Condiciones</button>
+          <button
+            onClick={() => setShowTyC(true)}
+            className="text-primary-600 dark:text-primary-400 hover:underline"
+          >
+            Términos y Condiciones
+          </button>
           <span className="mx-3 text-gray-400 dark:text-gray-500">|</span>
-          <button onClick={() => setShowPrivacy(true)} className="text-primary-600 dark:text-primary-400 hover:underline">Políticas de Privacidad</button>
+          <button
+            onClick={() => setShowPrivacy(true)}
+            className="text-primary-600 dark:text-primary-400 hover:underline"
+          >
+            Políticas de Privacidad
+          </button>
         </div>
       </div>
 
@@ -42,15 +55,22 @@ const Modal: React.FC<FooterModalProps> = ({ title, onClose, children }) => (
     <div className="bg-white dark:bg-gray-900 rounded-xl max-w-3xl w-full max-h-[80vh] overflow-auto shadow-lg custom-scrollbar text-gray-900 dark:text-gray-100">
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
-      <div className="p-6 space-y-4 text-sm leading-relaxed">
-        {children}
-      </div>
+      <div className="p-6 space-y-4 text-sm leading-relaxed">{children}</div>
     </div>
   </div>
 );

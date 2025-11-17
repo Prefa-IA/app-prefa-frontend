@@ -24,8 +24,10 @@ export interface UseTutorialReturn {
   isCompleted: boolean;
   nextStep: () => void;
   previousStep: () => void;
-  skipTutorial: () => void;
-  completeTutorial: () => void;
+  skipTutorial: () => Promise<void>;
+  completeTutorial: () => Promise<void>;
   startTutorial: () => void;
+  needsTermsAcceptance?: boolean;
+  termsAccepted?: boolean;
+  acceptTerms?: () => Promise<void>;
 }
-

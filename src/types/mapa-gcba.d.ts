@@ -20,7 +20,7 @@ declare module 'mapa-gcba' {
   class MapaInteractivo {
     constructor(elementId: string, options?: MapaOptions);
     setMarkerView(lat: number, lng: number, popup?: string): void;
-    getMap(): any;
+    getMap(): unknown;
   }
 
   export default MapaInteractivo;
@@ -59,4 +59,4 @@ declare module 'mapa-gcba' {
   }
 }
 
-declare module 'mapa-gcba/dist/assets/css/main.css'; 
+declare module 'mapa-gcba/dist/assets/css/main.css';

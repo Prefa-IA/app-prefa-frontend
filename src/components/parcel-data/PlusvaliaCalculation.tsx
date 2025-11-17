@@ -1,113 +1,108 @@
 import React from 'react';
-import { PlusvaliaCalculationProps, PARCEL_DATA_CONFIG } from '../../types/enums';
+
+import useTablePersonalization from '../../hooks/use-table-personalization';
 import {
-  CapacidadConstructivaTableProps,
   CalculoA1TableProps,
   CalculoA2TableProps,
-  PlusvaliaFinalTableProps
+  CapacidadConstructivaTableProps,
+  PlusvaliaFinalTableProps,
 } from '../../types/components';
+import { PARCEL_DATA_CONFIG, PlusvaliaCalculationProps } from '../../types/enums';
+
 import DataTable, { TableRow } from './DataTable';
-import useTablePersonalization from '../../hooks/useTablePersonalization';
 import PageNumber from './PageNumber';
 
-const PlusvaliaCalculation: React.FC<PlusvaliaCalculationProps> = ({ 
-  informe, 
+const PlusvaliaCalculation: React.FC<PlusvaliaCalculationProps> = ({
+  informe,
   informeCompuesto,
   esInformeCompuesto = false,
   calculatedValues,
-  pageCounter 
+  pageCounter,
+  plusvaliaRef,
 }) => {
   const { parentTableStyle } = useTablePersonalization();
 
   return (
-    <div className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
-      <div 
-        className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-4`}
-        style={parentTableStyle}
-      >
+    <div ref={plusvaliaRef} className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
+      <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-4`} style={parentTableStyle}>
         CÁLCULO DETALLADO DE PLUSVALÍA / DDHUS
       </div>
 
       <div className={PARCEL_DATA_CONFIG.GRID_COLS_3}>
-        <CapacidadConstructivaTable 
+        <CapacidadConstructivaTable
           informe={informe}
           calculatedValues={calculatedValues}
-          informeCompuesto={informeCompuesto}
+          {...(informeCompuesto?.informeConsolidado && {
+            informeCompuesto: informeCompuesto.informeConsolidado,
+          })}
           esInformeCompuesto={esInformeCompuesto}
         />
 
-        <CalculoA1Table 
-          informe={informe}
-          calculatedValues={calculatedValues}
-        />
+        <CalculoA1Table informe={informe} calculatedValues={calculatedValues} />
 
-        <CalculoA2Table 
-          informe={informe}
-          calculatedValues={calculatedValues}
-        />
+        <CalculoA2Table informe={informe} calculatedValues={calculatedValues} />
       </div>
 
-      <PlusvaliaFinalTable 
-        calculatedValues={calculatedValues}
-      />
+      <PlusvaliaFinalTable calculatedValues={calculatedValues} />
 
       <PageNumber pageNumber={pageCounter} />
     </div>
   );
 };
 
-const CapacidadConstructivaTable: React.FC<CapacidadConstructivaTableProps> = ({ informe, calculatedValues, informeCompuesto, esInformeCompuesto }) => {
-  const breakdownSuperficie = esInformeCompuesto && informeCompuesto ?
-    `(${informeCompuesto.informesIndividuales.map((i: any) => i.edificabilidad?.superficie_parcela || 0).join(' + ')})` : '';
-
+const CapacidadConstructivaTable: React.FC<CapacidadConstructivaTableProps> = ({
+  informe: _informe,
+  calculatedValues,
+  informeCompuesto: _informeCompuesto,
+  esInformeCompuesto: _esInformeCompuesto,
+}) => {
   return (
     <DataTable title="CÁLCULO DE CAPACIDAD CONSTRUCTIVA">
       <div className="p-2">
         <div className="space-y-2">
-          
           <TableRow
             label="Altura Máxima"
-            value={`${calculatedValues.alturaMax} m`}
+            value={`${(calculatedValues['alturaMax'] as number) || 0} m`}
           />
-          
+
           <TableRow
             label="Tipo de Edificación"
-            value={calculatedValues.tipoEdificacion}
+            value={(calculatedValues['tipoEdificacion'] as string | undefined) || 'N/A'}
           />
-          
+
           <TableRow
             label="Total de Pisos"
-            value={calculatedValues.totalPisos}
+            value={(calculatedValues['totalPisos'] as number | undefined)?.toString() || 'N/A'}
           />
-          
+
           <TableRow
             label="Área Plantas Típicas"
-            value={`${calculatedValues.areaPlantasTipicas.toFixed(2)} m²`}
+            value={`${((calculatedValues['areaPlantasTipicas'] as number) || 0).toFixed(2)} m²`}
           />
-          
+
           <TableRow
             label="Área Primer Retiro"
-            value={`${calculatedValues.areaPrimerRetiro.toFixed(2)} m²`}
+            value={`${((calculatedValues['areaPrimerRetiro'] as number) || 0).toFixed(2)} m²`}
           />
-          
+
           <TableRow
             label="Área Segundo Retiro"
-            value={`${calculatedValues.areaSegundoRetiro.toFixed(2)} m²`}
+            value={`${((calculatedValues['areaSegundoRetiro'] as number) || 0).toFixed(2)} m²`}
           />
-          
+
           <div className="border-t pt-2 mt-2">
             <TableRow
               label="TOTAL CAPACIDAD CONSTRUCTIVA"
-              value={`${calculatedValues.totalCapConstructivaOriginal?.toFixed(2)} m²`}
+              value={`${((calculatedValues['totalCapConstructivaOriginal'] as number) || 0).toFixed(2)} m²`}
             />
           </div>
 
           {/* Nueva fila: capacidad ajustada por afección LBI/LFI */}
-          {calculatedValues.lfiAfeccionPercent > 0 && (
+          {((calculatedValues['lfiAfeccionPercent'] as number) || 0) > 0 && (
             <div className="pt-2">
               <TableRow
-                label={`TOTAL CAPACIDAD CONSTRUCTIVA - % DE AFECCION LFI/LBI (-${calculatedValues.lfiAfeccionPercent}%)`}
-                value={`${calculatedValues.totalCapConstructiva.toFixed(2)} m²`}
+                label={`TOTAL CAPACIDAD CONSTRUCTIVA - % DE AFECCION LFI/LBI (-${calculatedValues['lfiAfeccionPercent']}%)`}
+                value={`${((calculatedValues['totalCapConstructiva'] as number) || 0).toFixed(2)} m²`}
               />
             </div>
           )}
@@ -117,24 +112,24 @@ const CapacidadConstructivaTable: React.FC<CapacidadConstructivaTableProps> = ({
   );
 };
 
-const CalculoA1Table: React.FC<CalculoA1TableProps> = ({ informe, calculatedValues }) => (
+const CalculoA1Table: React.FC<CalculoA1TableProps> = ({ informe: _informe, calculatedValues }) => (
   <DataTable title="CÁLCULO DE A1">
     <div className="p-2">
       <div className="space-y-2">
         <TableRow
           label="Superficie de la Parcela"
-          value={`${calculatedValues.superficieParcela} m²`}
+          value={`${(calculatedValues['superficieParcela'] as number) || 0} m²`}
         />
-        
+
         <TableRow
           label="FOT"
-          value={calculatedValues.fotMedanera}
+          value={(calculatedValues['fotMedanera'] as number | undefined)?.toString() || 'N/A'}
         />
-        
+
         <div className="border-t pt-2 mt-2">
           <TableRow
             label="A1 = Superficie × FOT"
-            value={`${calculatedValues.a1.toFixed(2)} m²`}
+            value={`${((calculatedValues['a1'] as number) || 0).toFixed(2)} m²`}
           />
         </div>
       </div>
@@ -142,24 +137,21 @@ const CalculoA1Table: React.FC<CalculoA1TableProps> = ({ informe, calculatedValu
   </DataTable>
 );
 
-const CalculoA2Table: React.FC<CalculoA2TableProps> = ({ informe, calculatedValues }) => (
+const CalculoA2Table: React.FC<CalculoA2TableProps> = ({ informe: _informe, calculatedValues }) => (
   <DataTable title="CÁLCULO DE A2">
     <div className="p-2">
       <div className="space-y-2">
         <TableRow
           label="Capacidad Constructiva Total"
-          value={`${calculatedValues.totalCapConstructiva.toFixed(2)} m²`}
+          value={`${((calculatedValues['totalCapConstructiva'] as number) || 0).toFixed(2)} m²`}
         />
-        
-        <TableRow
-          label="A1"
-          value={`${calculatedValues.a1.toFixed(2)} m²`}
-        />
-        
+
+        <TableRow label="A1" value={`${((calculatedValues['a1'] as number) || 0).toFixed(2)} m²`} />
+
         <div className="border-t pt-2 mt-2">
           <TableRow
             label="A2 = Cap. Constructiva - A1"
-            value={`${calculatedValues.a2.toFixed(2)} m²`}
+            value={`${((calculatedValues['a2'] as number) || 0).toFixed(2)} m²`}
           />
         </div>
       </div>
@@ -175,37 +167,35 @@ const PlusvaliaFinalTable: React.FC<PlusvaliaFinalTableProps> = ({ calculatedVal
           <div>
             <TableRow
               label="A = A1 + A2"
-              value={`${calculatedValues.a.toFixed(2)} m²`}
+              value={`${((calculatedValues['a'] as number) || 0).toFixed(2)} m²`}
             />
           </div>
           <div>
             <TableRow
               label="B (Valor Incidencia Suelo)"
-              value={`$${calculatedValues.b.toLocaleString('es-AR')}`}
+              value={`$${((calculatedValues['b'] as number) || 0).toLocaleString('es-AR')}`}
             />
           </div>
         </div>
-        
+
         <div className="mt-4 border-t pt-4">
           <div className="grid grid-cols-2 gap-4">
             <TableRow
               label="A × B"
-              value={`$${calculatedValues.axb.toLocaleString('es-AR')}`}
+              value={`$${((calculatedValues['axb'] as number) || 0).toLocaleString('es-AR')}`}
             />
             <TableRow
               label="Alícuota"
-              value={`${calculatedValues.alicuota}%`}
+              value={`${(calculatedValues['alicuota'] as number | undefined) || 0}%`}
             />
           </div>
         </div>
-        
-        <div className="mt-4 border-t pt-4 bg-blue-50 p-3 rounded">
+
+        <div className="mt-4 border-t pt-4 bg-blue-50 dark:bg-blue-900/30 p-3 rounded border-gray-300 dark:border-gray-700">
           <div className="text-center">
-            <div className="text-lg font-bold">
-              PLUSVALÍA TOTAL ESTIMADA
-            </div>
-            <div className="text-2xl font-bold text-blue-600 mt-2">
-              ${calculatedValues.plusvaliaFinal.toLocaleString('es-AR')}
+            <div className="text-lg font-bold dark:text-gray-200">PLUSVALÍA TOTAL ESTIMADA</div>
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2">
+              ${((calculatedValues['plusvaliaFinal'] as number) || 0).toLocaleString('es-AR')}
             </div>
           </div>
         </div>
@@ -214,4 +204,4 @@ const PlusvaliaFinalTable: React.FC<PlusvaliaFinalTableProps> = ({ calculatedVal
   </div>
 );
 
-export default PlusvaliaCalculation; 
+export default PlusvaliaCalculation;

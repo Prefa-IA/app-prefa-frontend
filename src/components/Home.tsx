@@ -1,12 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { CreditCardIcon, DocumentSearchIcon, DocumentTextIcon } from '@heroicons/react/outline';
+
 import { useAuth } from '../contexts/AuthContext';
-import {
-  DocumentSearchIcon,
-  DocumentTextIcon,
-  CreditCardIcon,
-} from '@heroicons/react/outline';
-import { HomeProps, FeatureItem, HOME_CONFIG } from '../types/enums';
+import { FeatureItem, HOME_CONFIG, HomeProps, Usuario } from '../types/enums';
 
 const features: FeatureItem[] = [
   {
@@ -40,7 +37,7 @@ const Home: React.FC<HomeProps> = ({ className }) => {
   );
 };
 
-const HeroSection: React.FC<{ usuario: any }> = ({ usuario }) => (
+const HeroSection: React.FC<{ usuario: Usuario | null }> = ({ usuario }) => (
   <div className="relative bg-white dark:bg-gray-900">
     <main className="lg:relative">
       <div className="mx-auto max-w-7xl w-full pt-16 pb-20 text-center lg:py-48 lg:text-left">
@@ -51,7 +48,7 @@ const HeroSection: React.FC<{ usuario: any }> = ({ usuario }) => (
   </div>
 );
 
-const HeroContent: React.FC<{ usuario: any }> = ({ usuario }) => (
+const HeroContent: React.FC<{ usuario: Usuario | null }> = ({ usuario }) => (
   <div className="px-4 lg:w-1/2 sm:px-8 xl:pr-16">
     <HeroTitle />
     <HeroDescription />
@@ -62,9 +59,7 @@ const HeroContent: React.FC<{ usuario: any }> = ({ usuario }) => (
 const HeroTitle: React.FC = () => (
   <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-gray-100 sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl">
     <span className="block xl:inline">{HOME_CONFIG.HERO.TITLE}</span>{' '}
-    <span className="block text-primary-600 xl:inline">
-      {HOME_CONFIG.HERO.SUBTITLE}
-    </span>
+    <span className="block text-primary-600 xl:inline">{HOME_CONFIG.HERO.SUBTITLE}</span>
   </h1>
 );
 
@@ -74,16 +69,16 @@ const HeroDescription: React.FC = () => (
   </p>
 );
 
-const HeroActions: React.FC<{ usuario: any }> = ({ usuario }) => (
+const HeroActions: React.FC<{ usuario: Usuario | null }> = ({ usuario }) => (
   <div className="mt-10 mb-8 sm:flex sm:justify-center lg:justify-start lg:mb-0">
     <MainAction usuario={usuario} />
   </div>
 );
 
-const MainAction: React.FC<{ usuario: any }> = ({ usuario }) => (
+const MainAction: React.FC<{ usuario: Usuario | null }> = ({ usuario }) => (
   <div className="rounded-md shadow-xl">
     <Link
-      to={usuario ? "/consultar" : "/login"}
+      to={usuario ? '/consultar' : '/login'}
       className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 dark:from-primary-700 dark:to-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-300 md:py-4 md:text-lg md:px-10 shadow-lg hover:shadow-2xl"
     >
       Empezar ahora
@@ -141,7 +136,9 @@ const FeatureCard: React.FC<{ feature: FeatureItem }> = ({ feature }) => (
   </div>
 );
 
-const FeatureIcon: React.FC<{ icon: React.ComponentType<any> }> = ({ icon: Icon }) => (
+const FeatureIcon: React.FC<{ icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }> = ({
+  icon: Icon,
+}) => (
   <dt>
     <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-primary-600 text-white">
       <Icon className="h-6 w-6" aria-hidden="true" />
@@ -152,13 +149,9 @@ const FeatureIcon: React.FC<{ icon: React.ComponentType<any> }> = ({ icon: Icon 
 const FeatureContent: React.FC<{ name: string; description: string }> = ({ name, description }) => (
   <>
     <dt>
-      <p className="ml-16 text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
-        {name}
-      </p>
+      <p className="ml-16 text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">{name}</p>
     </dt>
-    <dd className="mt-2 ml-16 text-base text-gray-500 dark:text-gray-400">
-      {description}
-    </dd>
+    <dd className="mt-2 ml-16 text-base text-gray-500 dark:text-gray-400">{description}</dd>
   </>
 );
 

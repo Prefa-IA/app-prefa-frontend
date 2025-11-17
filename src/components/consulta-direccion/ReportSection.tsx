@@ -1,6 +1,7 @@
 import React from 'react';
-import ReportPreview from '../reportes/ReportPreview';
+
 import { ReportSectionProps } from '../../types/enums';
+import ReportPreview from '../reportes/ReportPreview';
 
 const ReportSection: React.FC<ReportSectionProps> = ({
   resultado,
@@ -10,24 +11,24 @@ const ReportSection: React.FC<ReportSectionProps> = ({
   loading,
   center,
   onGenerateReport,
-  onAcceptReport,
-  tipoPrefa
+  savedId,
+  tipoPrefa,
 }) => {
   if (!resultado && !loading) return null;
 
   return (
-    <ReportPreview 
+    <ReportPreview
       informe={resultado!}
-      informeCompuesto={modoCompuesto ? informeCompuesto || undefined : undefined}
+      {...(modoCompuesto && informeCompuesto ? { informeCompuesto } : {})}
       isCompoundMode={modoCompuesto}
       addresses={direcciones}
       isLoading={loading}
       center={center}
       onGenerateReport={onGenerateReport}
-      onAcceptReport={onAcceptReport}
+      savedId={savedId ?? null}
       tipoPrefa={tipoPrefa}
     />
   );
 };
 
-export default ReportSection; 
+export default ReportSection;

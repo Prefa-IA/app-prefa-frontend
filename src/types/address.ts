@@ -6,5 +6,3 @@ export interface AddressSuggestionsHookReturn {
   obtenerSugerencias: (valor: string) => void;
   seleccionarSugerencia: (direccionStr: string) => Promise<void>;
 }
-
-

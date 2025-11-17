@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { Usuario, LoginCredentials, RegistroData } from '../types/enums';
+
 import { auth as authService } from '../services/api';
+import { LoginCredentials, RegistroData, Usuario } from '../types/enums';
 
 interface AuthContextType {
   usuario: Usuario | null;
@@ -26,7 +27,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isTokenExpired = (token: string): boolean => {
     try {
-      const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      const parts = token.split('.');
+      if (parts.length < 2) return true;
+      const payloadPart = parts[1];
+      if (!payloadPart) return true;
+      const payload = JSON.parse(atob(payloadPart.replace(/-/g, '+').replace(/_/g, '/')));
       const exp = typeof payload.exp === 'number' ? payload.exp : 0;
       return !exp || Date.now() >= exp * 1000;
     } catch {
@@ -44,10 +49,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
       return;
     }
-    
+
     if (loadingRef.current) return;
     loadingRef.current = true;
-    cargarUsuario();
+    void cargarUsuario();
   }, []);
 
   useEffect(() => {
@@ -55,13 +60,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (usuario?.id) {
       const migrateAddressHistory = async () => {
         try {
-          const { migrateAddressHistoryFromLocalStorage } = await import('../utils/migrateAddressHistory');
+          const { migrateAddressHistoryFromLocalStorage } = await import(
+            '../utils/migrate-address-history'
+          );
           await migrateAddressHistoryFromLocalStorage(usuario.id);
         } catch (error) {
           console.error('Error en migración de historial:', error);
         }
       };
-      migrateAddressHistory();
+      void migrateAddressHistory();
     }
   }, [usuario?.id]);
 
@@ -92,8 +99,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUsuario(updatedUser);
       localStorage.setItem('userProfile', JSON.stringify(updatedUser));
       toast.success('Perfil actualizado correctamente');
-    } catch (error: any) {
-      const mensaje = error.response?.data?.error || 'Error al actualizar perfil';
+    } catch (error: unknown) {
+      const errorObj = error as { response?: { data?: { error?: string } } };
+      const mensaje = errorObj?.response?.data?.error || 'Error al actualizar perfil';
       toast.error(mensaje);
       throw error;
     }
@@ -101,14 +109,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updatePersonalization = async (personalizacion: Usuario['personalizacion']) => {
     if (!usuario) return;
-    
+
     try {
       const result = await authService.updatePersonalization(personalizacion);
       setUsuario(result);
       localStorage.setItem('userProfile', JSON.stringify(result));
       toast.success('Personalización guardada');
-    } catch (error: any) {
-      const mensaje = error.response?.data?.error || 'Error al guardar personalización';
+    } catch (error: unknown) {
+      const errorObj = error as { response?: { data?: { error?: string } } };
+      const mensaje = errorObj?.response?.data?.error || 'Error al guardar personalización';
       toast.error(mensaje);
       throw error;
     }
@@ -121,8 +130,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('userProfile', JSON.stringify(usuario));
       setUsuario(usuario);
       toast.success('¡Bienvenido de nuevo!');
-    } catch (error: any) {
-      const mensaje = error.response?.data?.error || 'Error al iniciar sesión';
+    } catch (error: unknown) {
+      const errorObj = error as { response?: { data?: { error?: string } } };
+      const mensaje = errorObj?.response?.data?.error || 'Error al iniciar sesión';
       toast.error(mensaje);
       throw error;
     }
@@ -132,8 +142,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { message } = await authService.registro(datos);
       toast.success(message || 'Registro exitoso. Revisa tu correo para verificar la cuenta.');
-    } catch (error: any) {
-      const mensaje = error.response?.data?.error || 'Error al registrar usuario';
+    } catch (error: unknown) {
+      const errorObj = error as { response?: { data?: { error?: string } } };
+      const mensaje = errorObj?.response?.data?.error || 'Error al registrar usuario';
       toast.error(mensaje);
       throw error;
     }
@@ -151,20 +162,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const reader = new FileReader();
       reader.onload = async (e) => {
         const base64 = e.target?.result as string;
-        
+
         // Guardar en personalización del usuario
         if (usuario) {
           try {
             const nuevaPersonalizacion = {
               ...usuario.personalizacion,
-              logo: base64
+              logo: base64,
             };
             await updatePersonalization(nuevaPersonalizacion);
           } catch (error) {
             console.error('Error al guardar logo en personalización:', error);
           }
         }
-        
+
         resolve(base64);
       };
       reader.readAsDataURL(logoFile);
@@ -180,7 +191,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const nuevaPersonalizacion = {
           ...usuario.personalizacion,
-          logo: ''
+          logo: '',
         };
         await updatePersonalization(nuevaPersonalizacion);
       } catch (error) {
@@ -190,19 +201,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      usuario, 
-      loading, 
-      login, 
-      registro, 
-      logout, 
-      updateProfile,
-      updatePersonalization,
-      saveTempLogo,
-      getTempLogo,
-      clearTempLogo,
-      refreshProfile
-    }}>
+    <AuthContext.Provider
+      value={{
+        usuario,
+        loading,
+        login,
+        registro,
+        logout,
+        updateProfile,
+        updatePersonalization,
+        saveTempLogo,
+        getTempLogo,
+        clearTempLogo,
+        refreshProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -214,4 +227,4 @@ export const useAuth = () => {
     throw new Error('useAuth debe ser usado dentro de un AuthProvider');
   }
   return context;
-}; 
+};

@@ -1,31 +1,31 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
+import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+
+import OveragesAdmin from './components/admin/OveragesAdmin';
+import BuscarDireccionPage from './components/BuscarDireccionPage';
+import ConsultaDireccion from './components/ConsultaDireccion';
+import FAQPage from './components/FAQPage';
+import ForgotPasswordPage from './components/ForgotPasswordPage';
+import Footer from './components/generales/Footer';
 import Navbar from './components/generales/Navbar';
 import Home from './components/Home';
-import LoginForm from './components/usuario/LoginForm';
-import RegistroForm from './components/usuario/RegistroForm';
-import ConsultaDireccion from './components/ConsultaDireccion';
 import ListaInformes from './components/ListaInformes';
-import PerfilUsuario from './components/usuario/PerfilUsuario';
-import { useAuth } from './contexts/AuthContext';
+import NotFound from './components/NotFound';
 import PrintInforme from './components/PrintInforme';
-import SubscriptionPage from './components/SubscriptionPage';
-import SubscriptionManager from './components/suscripcion/SubscriptionManager';
-import FAQPage from './components/FAQPage';
-import OveragesAdmin from './components/admin/OveragesAdmin';
-import VerifyEmailPage from './components/VerifyEmailPage';
-import ForgotPasswordPage from './components/ForgotPasswordPage';
 import ResendVerificationPage from './components/ResendVerificationPage';
 import ResetPasswordPage from './components/ResetPasswordPage';
-import Footer from './components/generales/Footer';
-import { useTheme } from './contexts/ThemeContext';
-import NotFound from './components/NotFound';
-import BuscarDireccionPage from './components/BuscarDireccionPage';
+import SubscriptionPage from './components/SubscriptionPage';
+import SubscriptionManager from './components/suscripcion/SubscriptionManager';
 import { TutorialOnboarding } from './components/tutorial/TutorialOnboarding';
+import LoginForm from './components/usuario/LoginForm';
+import PerfilUsuario from './components/usuario/PerfilUsuario';
+import RegistroForm from './components/usuario/RegistroForm';
+import VerifyEmailPage from './components/VerifyEmailPage';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+
+import 'react-toastify/dist/ReactToastify.css';
 
 const ProtectedRoute: React.FC<{
   children: React.ReactNode;
@@ -51,81 +51,85 @@ const App: React.FC = () => {
   return (
     <ThemeProvider>
       <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden flex flex-col">
-          <Navbar />
-          <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<LoginForm />} />
-            <Route path="/registro" element={<RegistroForm />} />
-            <Route
-              path="/consultar"
-              element={
-                <ProtectedRoute>
-                  <ConsultaDireccion />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/buscar"
-              element={
-                <ProtectedRoute>
-                  <BuscarDireccionPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/informes"
-              element={
-                <ProtectedRoute>
-                  <ListaInformes />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/perfil"
-              element={
-                <ProtectedRoute>
-                  <PerfilUsuario />
-                </ProtectedRoute>
-              }
-            />
+        <Router>
+          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden flex flex-col">
+            <Navbar />
+            <main className="flex-grow">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<LoginForm />} />
+                <Route path="/registro" element={<RegistroForm />} />
+                <Route
+                  path="/consultar"
+                  element={
+                    <ProtectedRoute>
+                      <ConsultaDireccion />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/buscar"
+                  element={
+                    <ProtectedRoute>
+                      <BuscarDireccionPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/informes"
+                  element={
+                    <ProtectedRoute>
+                      <ListaInformes />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/perfil"
+                  element={
+                    <ProtectedRoute>
+                      <PerfilUsuario />
+                    </ProtectedRoute>
+                  }
+                />
 
-            <Route
-              path="/suscripciones"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/suscripcion"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionManager />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/faq" element={<FAQPage />} />
-            <Route path="/print/informe/:id" element={<PrintInforme />} />
-            <Route path="/verify-email" element={<VerifyEmailPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/resend-verification" element={<ResendVerificationPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route
-              path="/admin/facturacion/overages"
-              element={<ProtectedRoute><OveragesAdmin /></ProtectedRoute>}
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          </main>
-          <Footer />
-          <ThemedToast />
-          <TutorialOnboarding />
-        </div>
-      </Router>
+                <Route
+                  path="/suscripciones"
+                  element={
+                    <ProtectedRoute>
+                      <SubscriptionPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/suscripcion"
+                  element={
+                    <ProtectedRoute>
+                      <SubscriptionManager />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/faq" element={<FAQPage />} />
+                <Route path="/print/informe/:id" element={<PrintInforme />} />
+                <Route path="/verify-email" element={<VerifyEmailPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/resend-verification" element={<ResendVerificationPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route
+                  path="/admin/facturacion/overages"
+                  element={
+                    <ProtectedRoute>
+                      <OveragesAdmin />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+            <Footer />
+            <ThemedToast />
+            <TutorialOnboarding />
+          </div>
+        </Router>
       </AuthProvider>
     </ThemeProvider>
   );

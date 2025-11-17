@@ -59,4 +59,3 @@ export const TutorialButtons: React.FC<TutorialButtonsProps> = ({
     </div>
   );
 };
-

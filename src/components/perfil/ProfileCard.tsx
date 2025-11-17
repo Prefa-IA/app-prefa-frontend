@@ -1,20 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { CameraIcon, TrashIcon } from '@heroicons/react/outline';
+
 import { useAuth } from '../../contexts/AuthContext';
-import { usePlanes } from '../../hooks/usePlanes';
-import { SubscriptionPlan } from '../../types/enums';
+import { Plan, usePlanes } from '../../hooks/use-planes';
 import { ProfileCardProps } from '../../types/components';
+import { SubscriptionPlan } from '../../types/enums';
 
 const ProfileCard: React.FC<ProfileCardProps> = ({ logoUrl, onLogoUpload, onLogoDelete }) => {
   const { usuario } = useAuth();
   const { planes } = usePlanes();
-  const [planActual,setPlanActual]=useState<SubscriptionPlan|null>(null);
+  const [planActual, setPlanActual] = useState<Plan | null>(null);
 
-  useEffect(()=>{
-    if(!usuario) return;
-    const p=planes.find((pl:any)=>pl.id?.toLowerCase()===usuario?.suscripcion?.tipo?.toLowerCase()||pl.name?.toLowerCase()===usuario?.suscripcion?.nombrePlan?.toLowerCase());
-    setPlanActual((p as any)||null);
-  },[usuario, planes]);
+  useEffect(() => {
+    if (!usuario) return;
+    const p =
+      planes.find(
+        (pl) =>
+          pl.id?.toLowerCase() === usuario?.suscripcion?.tipo?.toLowerCase() ||
+          pl.name?.toLowerCase() === usuario?.suscripcion?.nombrePlan?.toLowerCase()
+      ) || null;
+    setPlanActual(p);
+  }, [usuario, planes]);
   if (!usuario) return null;
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
@@ -22,7 +28,11 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ logoUrl, onLogoUpload, onLogo
         <div className="relative inline-block">
           <div className="w-32 h-32 rounded-xl bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center overflow-hidden border-4 border-white dark:border-gray-700 shadow-lg">
             {logoUrl ? (
-              <img src={logoUrl} alt={`Logo de ${usuario.nombre}`} className="w-full h-full object-cover" />
+              <img
+                src={logoUrl}
+                alt={`Logo de ${usuario.nombre}`}
+                className="w-full h-full object-cover"
+              />
             ) : (
               <CameraIcon className="w-12 h-12 text-primary-400" />
             )}
@@ -44,10 +54,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ logoUrl, onLogoUpload, onLogo
           </label>
         </div>
         <div className="space-y-1">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{usuario.nombre}</h3>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            {usuario.nombre}
+          </h3>
           <p className="text-gray-500 dark:text-gray-300">{usuario.email}</p>
           {usuario.suscripcion?.tipo && (
-            <PlanPill plan={usuario.suscripcion.tipo} planObj={planActual}/>
+            <PlanPill
+              plan={usuario.suscripcion.tipo}
+              planObj={planActual ? (planActual as unknown as SubscriptionPlan) : null}
+            />
           )}
         </div>
       </div>
@@ -55,17 +70,22 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ logoUrl, onLogoUpload, onLogo
   );
 };
 
-const PlanPill: React.FC<{ plan: string; planObj: SubscriptionPlan|null }> = ({ plan, planObj }) => {
-  let colorClass='bg-blue-600';
-  if(planObj?.tag?.bgClass){
-     colorClass=planObj.tag.bgClass;
+const PlanPill: React.FC<{ plan: string; planObj: SubscriptionPlan | null }> = ({
+  plan,
+  planObj,
+}) => {
+  let colorClass = 'bg-blue-600';
+  if (planObj?.tag?.bgClass) {
+    colorClass = planObj.tag.bgClass;
   }
   return (
-    <span className={`inline-flex items-center space-x-1 text-white px-3 py-1 rounded-full text-xs font-medium ${colorClass}`}>
+    <span
+      className={`inline-flex items-center space-x-1 text-white px-3 py-1 rounded-full text-xs font-medium ${colorClass}`}
+    >
       <span className="w-2 h-2 rounded-full bg-white"></span>
       <span className="capitalize">{plan}</span>
     </span>
   );
 };
 
-export default ProfileCard; 
+export default ProfileCard;

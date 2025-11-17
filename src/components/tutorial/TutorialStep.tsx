@@ -25,15 +25,10 @@ export const TutorialStep: React.FC<TutorialStepProps> = ({
         </div>
       )}
       <div className="text-center space-y-4">
-        <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          {title}
-        </h3>
-        <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed">
-          {description}
-        </p>
+        <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{title}</h3>
+        <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed">{description}</p>
         {children && <div className="mt-4">{children}</div>}
       </div>
     </div>
   );
 };
-

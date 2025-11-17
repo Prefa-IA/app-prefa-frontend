@@ -137,8 +137,10 @@ export interface BillingFormProps {
   onSuccess?: () => void;
 }
 
+import { Geometria, Informe, SubscriptionPlan, Usuario } from './enums';
+
 export interface PlanCardProps {
-  plan: any;
+  plan: SubscriptionPlan;
   loading?: boolean;
   onSelect?: () => void;
 }
@@ -162,25 +164,25 @@ export interface FooterModalProps {
 }
 
 export interface MobileMenuProps {
-  navigation: any[];
-  usuario: any;
-  planObj: any | null;
+  navigation: Array<{ name: string; href: string; icon?: unknown }>;
+  usuario: Usuario;
+  planObj: SubscriptionPlan | null;
   onLogout: () => void;
 }
 
 export interface NavigationLinkProps {
-  item: any;
+  item: { name: string; href: string; icon?: unknown };
 }
 
 export interface UserMenuButtonProps {
-  usuario: any;
-  planObj: any | null;
+  usuario: Usuario;
+  planObj: SubscriptionPlan | null;
 }
 
 export interface UserNameAndPlanProps {
   nombre: string;
   plan?: string;
-  planObj: any | null;
+  planObj: SubscriptionPlan | null;
 }
 
 export interface UserMenuItemsProps {
@@ -192,25 +194,24 @@ export interface MobileMenuButtonProps {
 }
 
 export interface MobileNavigationProps {
-  navigation: any[];
+  navigation: Array<{ name: string; href: string; icon?: unknown }>;
 }
 
 export interface MobileNavigationLinkProps {
-  item: any;
+  item: { name: string; href: string; icon?: unknown };
 }
 
 export interface PlanPillSectionProps {
-  planObj: any | null;
+  planObj: SubscriptionPlan | null;
   className?: string;
 }
 
 export interface BillingModalProps {
-  existing: any;
+  existing: unknown;
   onClose: () => void;
 }
 
-export interface BillingSectionProps {
-}
+export interface BillingSectionProps {}
 
 export interface AddressListHeaderProps {
   addressCount: number;
@@ -261,11 +262,11 @@ export interface TronerasMetricCardProps {
 }
 
 export interface TronerasTableBodyProps {
-  troneras: any[];
+  troneras: Array<Record<string, unknown>>;
 }
 
 export interface TroneraRowProps {
-  tronera: any;
+  tronera: Record<string, unknown>;
   index: number;
 }
 
@@ -274,11 +275,11 @@ export interface TipoEsquinaBadgeProps {
 }
 
 export interface DistanciasCellProps {
-  tronera: any;
+  tronera: Record<string, unknown>;
 }
 
 export interface TronerasTableFooterProps {
-  troneras: any[];
+  troneras: Array<Record<string, unknown>>;
 }
 
 export interface FacadeImageGridProps {
@@ -291,12 +292,12 @@ export interface FacadeImageItemProps {
 }
 
 export interface MetricsContentProps {
-  mediciones: any;
-  geoJSONData: any;
+  mediciones: Record<string, unknown>;
+  geoJSONData: Record<string, unknown>;
 }
 
 export interface TronerasSectionProps {
-  troneras: any[];
+  troneras: Array<Record<string, unknown>>;
 }
 
 export interface TronerasHeaderProps {
@@ -307,12 +308,6 @@ export interface DirectionsSectionProps {
   direcciones: string[];
 }
 
-export interface UvaInputModalProps {
-  defaultValue: number;
-  onConfirm: (value: number) => void;
-  onCancel: () => void;
-}
-
 export interface ConsultaMapContainerProps {
   center: { lat: number; lng: number };
   showMarker?: boolean;
@@ -320,7 +315,7 @@ export interface ConsultaMapContainerProps {
 
 export interface PersonalizationSectionProps {
   editMode: boolean;
-  personalizacion: any;
+  personalizacion: Record<string, unknown>;
   onPersonalizacionChange: (field: string, value: string) => void;
   onToggleEdit: () => void;
   onSave: () => void;
@@ -328,7 +323,7 @@ export interface PersonalizationSectionProps {
 
 export interface ReportPreviewModalProps {
   onClose: () => void;
-  personalizacion: any;
+  personalizacion: Record<string, unknown>;
   nombreInmobiliaria: string;
 }
 
@@ -339,8 +334,8 @@ export interface ChangePlanModalProps {
 }
 
 export interface OverageFormProps {
-  data: any;
-  onSave: (d: any) => void;
+  data: Record<string, unknown>;
+  onSave: (d: Record<string, unknown>) => void;
   onClose: () => void;
 }
 
@@ -359,7 +354,7 @@ export interface LoadingDataContentProps {
 }
 
 export interface PlanoSectionProps {
-  informe: any;
+  informe: Informe;
 }
 
 export interface ParcelInfoItemProps {
@@ -374,7 +369,7 @@ export interface CroquisSectionProps {
 
 export interface PerimetroSectionProps {
   perimetro?: string;
-  informe: any;
+  informe: Informe;
   pageCounter: number;
   lbiLfiPageCounter?: number;
 }
@@ -406,31 +401,31 @@ export interface ImageViewerProps {
 }
 
 export interface LbiLfiSectionProps {
-  informe: any;
-  informesIndividuales?: any[];
+  informe: Informe;
+  informesIndividuales?: Informe[];
   esCompuesto?: boolean;
   pageCounter?: number;
 }
 
 export interface CapacidadConstructivaTableProps {
-  informe: any;
-  calculatedValues: any;
-  informeCompuesto?: any;
+  informe: Informe;
+  calculatedValues: Record<string, unknown>;
+  informeCompuesto?: Informe;
   esInformeCompuesto?: boolean;
 }
 
 export interface CalculoA1TableProps {
-  informe: any;
-  calculatedValues: any;
+  informe: Informe;
+  calculatedValues: Record<string, unknown>;
 }
 
 export interface CalculoA2TableProps {
-  informe: any;
-  calculatedValues: any;
+  informe: Informe;
+  calculatedValues: Record<string, unknown>;
 }
 
 export interface PlusvaliaFinalTableProps {
-  calculatedValues: any;
+  calculatedValues: Record<string, unknown>;
 }
 
 export interface MapData {
@@ -457,7 +452,7 @@ export interface MapData {
 export interface ViewerProps {
   smp: string;
   centro: { lat: number; lon: number };
-  geometriaParcela?: any;
+  geometriaParcela?: Geometria;
   showStatsOverlay?: boolean;
 }
 
@@ -465,8 +460,7 @@ export interface ConsultaContainerProps {
   children: React.ReactNode;
 }
 
-export interface ConsultaHeaderProps {
-}
+export interface ConsultaHeaderProps {}
 
 export interface ReportContainerProps {
   children: React.ReactNode;
@@ -475,4 +469,3 @@ export interface ReportContainerProps {
 export interface ProcessingOverlayProps {
   seconds: number;
 }
-

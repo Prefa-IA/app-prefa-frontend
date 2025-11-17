@@ -1,12 +1,12 @@
 declare module '@usig-gcba/mapa-interactivo' {
   interface MapaInteractivoOptions {
-    onClick?: (event: any) => void;
-    onContextMenu?: (event: any) => void;
-    onMoveStart?: (event: any) => void;
-    onMoveEnd?: (event: any) => void;
-    onMarkerDragEnd?: (event: any) => void;
-    onFeatureClick?: (event: any) => void;
-    onInactivateMarker?: (event: any) => void;
+    onClick?: (event: unknown) => void;
+    onContextMenu?: (event: unknown) => void;
+    onMoveStart?: (event: unknown) => void;
+    onMoveEnd?: (event: unknown) => void;
+    onMarkerDragEnd?: (event: unknown) => void;
+    onFeatureClick?: (event: unknown) => void;
+    onInactivateMarker?: (event: unknown) => void;
     center?: [number, number];
     zoomControl?: boolean;
     zoom?: number;
@@ -16,10 +16,10 @@ declare module '@usig-gcba/mapa-interactivo' {
     markerZoomInLevel?: number;
     featureZoomInLevel?: number;
     language?: string;
-    fromMarker?: any;
-    toMarker?: any;
-    activeMarker?: any;
-    marker?: any;
+    fromMarker?: unknown;
+    toMarker?: unknown;
+    activeMarker?: unknown;
+    marker?: unknown;
     baseLayer?: {
       params?: {
         maxZoom?: number;
@@ -49,13 +49,13 @@ declare module '@usig-gcba/mapa-interactivo' {
 
   class MapaInteractivo {
     constructor(id: string, options?: MapaInteractivoOptions);
-    
-    getMapa(): any;
-    addPublicLayer(layerName: string, options?: any): void;
+
+    getMapa(): unknown;
+    addPublicLayer(layerName: string, options?: Record<string, unknown>): void;
     removePublicLayer(layerName: string): void;
-    addVectorTileLayer(layerId: string, options?: any): void;
+    addVectorTileLayer(layerId: string, options?: Record<string, unknown>): void;
     removeVectorTileLayer(layerId: string): void;
-    setBaseLayer(baseLayer?: any): void;
+    setBaseLayer(baseLayer?: unknown): void;
     addMarker(
       latlng: LatLng,
       visible: boolean,
@@ -63,16 +63,16 @@ declare module '@usig-gcba/mapa-interactivo' {
       goTo: boolean,
       activate: boolean,
       clickable: boolean,
-      options: any
+      options: Record<string, unknown>
     ): number;
     selectMarker(markerId: number): void;
     isMarkerActive(markerId: number): boolean;
     removeMarker(markerId: number): void;
-    addLocationMarker(position: any, recenter: boolean, zoomIn: boolean): any;
-    mostrarRecorrido(recorrido: any): void;
-    ocultarRecorrido(recorrido: any): void;
+    addLocationMarker(position: unknown, recenter: boolean, zoomIn: boolean): unknown;
+    mostrarRecorrido(recorrido: unknown): void;
+    ocultarRecorrido(recorrido: unknown): void;
     getStaticImage(): Promise<HTMLCanvasElement>;
   }
 
   export default MapaInteractivo;
-} 
+}

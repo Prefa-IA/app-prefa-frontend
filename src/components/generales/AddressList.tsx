@@ -1,14 +1,15 @@
 import React from 'react';
-import { AddressListProps, ADDRESS_LIST_CONFIG } from '../../types/enums';
+
 import {
-  AddressListHeaderProps,
   AddressGridProps,
   AddressItemProps,
+  AddressListHeaderProps,
   AddressTextProps,
   RemoveButtonProps,
-  SearchButtonProps
+  SearchButtonProps,
 } from '../../types/components';
-import { useButtonCooldown } from '../../utils/buttonUtils';
+import { ADDRESS_LIST_CONFIG, AddressListProps } from '../../types/enums';
+import { useButtonCooldown } from '../../utils/button-utils';
 
 const AddressList: React.FC<AddressListProps> = ({
   addresses,
@@ -16,20 +17,20 @@ const AddressList: React.FC<AddressListProps> = ({
   onSearch,
   isLoading,
   minCount = 1,
-  hasResult = false
+  hasResult = false,
 }) => {
   return (
     <div className="mb-4">
       <AddressListHeader addressCount={addresses.length} />
-      
+
       {addresses.length === 0 ? (
         <EmptyAddressList />
       ) : (
         <AddressGrid addresses={addresses} onRemove={onRemove} isLoading={isLoading} />
       )}
-      
+
       {!hasResult && (
-        <SearchButton 
+        <SearchButton
           onSearch={onSearch}
           isLoading={isLoading}
           addressCount={addresses.length}
@@ -47,15 +48,13 @@ const AddressListHeader: React.FC<AddressListHeaderProps> = ({ addressCount }) =
 );
 
 const EmptyAddressList: React.FC = () => (
-  <p className="text-gray-500 dark:text-gray-400 italic">
-    {ADDRESS_LIST_CONFIG.EMPTY_MESSAGE}
-  </p>
+  <p className="text-gray-500 dark:text-gray-400 italic">{ADDRESS_LIST_CONFIG.EMPTY_MESSAGE}</p>
 );
 
 const AddressGrid: React.FC<AddressGridProps> = ({ addresses, onRemove, isLoading }) => (
   <ul className="p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
     {addresses.map((address, index) => (
-      <AddressItem 
+      <AddressItem
         key={index}
         address={address}
         index={index}
@@ -88,10 +87,15 @@ const RemoveButton: React.FC<RemoveButtonProps> = ({ onClick, disabled }) => (
   </button>
 );
 
-const SearchButton: React.FC<SearchButtonProps> = ({ onSearch, isLoading, addressCount, minCount }) => {
+const SearchButton: React.FC<SearchButtonProps> = ({
+  onSearch,
+  isLoading,
+  addressCount,
+  minCount,
+}) => {
   const isDisabled = isLoading || addressCount < minCount;
   const { cooldown, handleClick } = useButtonCooldown(1500);
-  
+
   return (
     <button
       onClick={() => handleClick(onSearch, isDisabled)}
@@ -107,4 +111,4 @@ const SearchButton: React.FC<SearchButtonProps> = ({ onSearch, isLoading, addres
   );
 };
 
-export default AddressList; 
+export default AddressList;

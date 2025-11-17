@@ -47,12 +47,20 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
     <>
       <div
         ref={overlayRef}
+        role="button"
+        tabIndex={0}
         className="fixed inset-0 z-[9998] pointer-events-auto"
         onClick={onClose}
+        onKeyDown={(e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && onClose) {
+            e.preventDefault();
+            onClose();
+          }
+        }}
         style={{
           background: targetRect
-            ? `radial-gradient(circle at ${targetRect.left + targetRect.width / 2}px ${targetRect.top + targetRect.height / 2}px, transparent 0px, transparent ${Math.max(targetRect.width, targetRect.height) / 2 + 10}px, rgba(0, 0, 0, 0.7) ${Math.max(targetRect.width, targetRect.height) / 2 + 20}px)`
-            : 'rgba(0, 0, 0, 0.7)',
+            ? `radial-gradient(circle at ${targetRect.left + targetRect.width / 2}px ${targetRect.top + targetRect.height / 2}px, transparent 0px, transparent ${Math.max(targetRect.width, targetRect.height) / 2 + 10}px, rgba(0, 0, 0, 0.75) ${Math.max(targetRect.width, targetRect.height) / 2 + 20}px)`
+            : 'rgba(0, 0, 0, 0.75)',
         }}
       />
       {targetElement && targetRect && (
@@ -73,4 +81,3 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
     </>
   );
 };
-

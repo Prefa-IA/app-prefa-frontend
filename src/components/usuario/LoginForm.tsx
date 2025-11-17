@@ -1,23 +1,26 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { 
-  LoginCredentials, 
-  LoginFormProps, 
-  LOGIN_CONFIG 
-} from '../../types/enums';
-import { LoginFormComponentProps, LoginFieldsProps, ExtendedLoginFieldProps } from '../../types/components';
-import { createFormHandler } from '../../utils/formUtils';
-import styles from '../../styles/LoginForm.module.css';
+import { Link, useNavigate } from 'react-router-dom';
 import { EyeIcon, EyeOffIcon } from '@heroicons/react/outline';
+
+import { useAuth } from '../../contexts/AuthContext';
+import {
+  ExtendedLoginFieldProps,
+  LoginFieldsProps,
+  LoginFormComponentProps,
+} from '../../types/components';
+import { LOGIN_CONFIG, LoginCredentials, LoginFormProps } from '../../types/enums';
+import { createFormHandler } from '../../utils/form-utils';
+
 import GoogleLoginButton from './GoogleLoginButton';
+
+import styles from '../../styles/LoginForm.module.css';
 
 const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: '',
-    password: ''
+    password: '',
   });
   const [showPass, setShowPass] = useState(false);
 
@@ -38,11 +41,17 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   const handleChange = createFormHandler(setCredentials);
 
   return (
-    <div className={`${styles.container} min-h-screen pt-[90px] flex justify-center items-center w-full`}>
-      <div className={`${styles.formContainer} bg-white dark:bg-gray-800 p-4 sm:p-8 rounded shadow w-full sm:w-auto`}>
+    <div
+      className={`${styles['container']} min-h-screen pt-[90px] flex justify-center items-center w-full`}
+    >
+      <div
+        className={`${styles['formContainer']} bg-white dark:bg-gray-800 p-4 sm:p-8 rounded shadow`}
+      >
         <LoginFormComponent
           credentials={credentials}
-          onSubmit={handleSubmit}
+          onSubmit={(e) => {
+            void handleSubmit(e);
+          }}
           onChange={handleChange}
           showPass={showPass}
           setShowPass={setShowPass}
@@ -57,36 +66,64 @@ const LoginFormComponent: React.FC<LoginFormComponentProps> = ({
   onSubmit,
   onChange,
   showPass,
-  setShowPass
+  setShowPass,
 }) => {
   const navigate = useNavigate();
   return (
-    <form className={styles.form} onSubmit={onSubmit}>
-      <div className={styles.fieldsContainer}>
-        <LoginFields credentials={credentials} onChange={onChange} showPass={showPass} setShowPass={setShowPass} />
+    <form
+      className={styles['form']}
+      onSubmit={(e) => {
+        void onSubmit(e);
+      }}
+    >
+      <div className={styles['fieldsContainer']}>
+        <LoginFields
+          credentials={credentials}
+          onChange={onChange}
+          showPass={showPass}
+          setShowPass={setShowPass}
+        />
       </div>
       <SubmitButton />
-      <div className="my-0 flex items-center">
+      <div className="my-0.5 flex items-center">
         <div className="flex-grow border-t border-gray-300 dark:border-gray-700" />
         <span className="px-3 text-xs text-gray-500">o</span>
         <div className="flex-grow border-t border-gray-300 dark:border-gray-700" />
       </div>
-      <GoogleLoginButton
-        className="flex justify-center mb-1"
-        onSuccessNavigate="/consultar"
-      />
-      <hr />
-      <p className="text-center text-gray-900 dark:text-gray-100">¿Todavía no tenés cuenta? <Link to="/registro" className="text-primary-600 dark:text-primary-400 hover:underline">Registrate</Link></p>
+      <GoogleLoginButton className="flex justify-center" onSuccessNavigate="/consultar" />
+      <p className="text-center text-gray-900 dark:text-gray-100 mt-4">
+        ¿Todavía no tenés cuenta?{' '}
+        <Link to="/registro" className="text-primary-600 dark:text-primary-400 hover:underline">
+          Registrate
+        </Link>
+      </p>
       <div className="mt-2 text-sm flex flex-row justify-between">
-        <button type="button" className="text-primary-600 dark:text-primary-400 w-1/2 hover:underline" onClick={() => navigate('/forgot-password')}>¿Olvidaste tu contraseña?</button>
+        <button
+          type="button"
+          className="text-primary-600 dark:text-primary-400 w-1/2 hover:underline"
+          onClick={() => navigate('/forgot-password')}
+        >
+          ¿Olvidaste tu contraseña?
+        </button>
         <div className="border-l border-gray-400 h-10 mx-4" />
-        <button type="button" className="text-primary-600 dark:text-primary-400 w-1/2 hover:underline" onClick={() => navigate('/resend-verification')}>Reenviar correo de verificación</button>
+        <button
+          type="button"
+          className="text-primary-600 dark:text-primary-400 w-1/2 hover:underline"
+          onClick={() => navigate('/resend-verification')}
+        >
+          Reenviar correo de verificación
+        </button>
       </div>
     </form>
   );
 };
 
-const LoginFields: React.FC<LoginFieldsProps> = ({ credentials, onChange, showPass, setShowPass }) => (
+const LoginFields: React.FC<LoginFieldsProps> = ({
+  credentials,
+  onChange,
+  showPass,
+  setShowPass,
+}) => (
   <>
     {LOGIN_CONFIG.FIELDS.map((field) => (
       <LoginField
@@ -112,10 +149,10 @@ const LoginField: React.FC<ExtendedLoginFieldProps> = ({
   autoComplete,
   required = false,
   showPass,
-  setShowPass
+  setShowPass,
 }) => (
-  <div className={styles.fieldContainer}>
-    <label htmlFor={id} className={`${styles.label} dark:text-gray-300`}>
+  <div className={styles['fieldContainer']}>
+    <label htmlFor={id} className={`${styles['label']} dark:text-gray-300`}>
       {label}
     </label>
     <div className="relative">
@@ -124,15 +161,23 @@ const LoginField: React.FC<ExtendedLoginFieldProps> = ({
         name={name}
         type={type === 'password' && showPass ? 'text' : type}
         required={required}
-        className={`${styles.input} dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100`}
+        className={`${styles['input']} dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100`}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
         autoComplete={autoComplete}
       />
       {type === 'password' && (
-        <button type="button" className="absolute inset-y-0 right-3 flex items-center" onClick={() => setShowPass(!showPass)}>
-          {showPass ? <EyeOffIcon className="w-5 h-5 text-gray-500" /> : <EyeIcon className="w-5 h-5 text-gray-500" />}
+        <button
+          type="button"
+          className="absolute inset-y-0 right-3 flex items-center"
+          onClick={() => setShowPass(!showPass)}
+        >
+          {showPass ? (
+            <EyeOffIcon className="w-5 h-5 text-gray-500" />
+          ) : (
+            <EyeIcon className="w-5 h-5 text-gray-500" />
+          )}
         </button>
       )}
     </div>
@@ -150,4 +195,4 @@ const SubmitButton: React.FC = () => (
   </div>
 );
 
-export default LoginForm; 
+export default LoginForm;

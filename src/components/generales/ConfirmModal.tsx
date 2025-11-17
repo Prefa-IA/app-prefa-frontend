@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { ConfirmModalProps } from '../../types/components';
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
@@ -31,4 +32,4 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   </div>
 );
 
-export default ConfirmModal; 
+export default ConfirmModal;

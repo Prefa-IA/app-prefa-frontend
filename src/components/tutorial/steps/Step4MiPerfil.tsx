@@ -1,6 +1,7 @@
 import React from 'react';
+import { ColorSwatchIcon, CreditCardIcon, UserIcon } from '@heroicons/react/outline';
+
 import { TutorialStep } from '../TutorialStep';
-import { ColorSwatchIcon, UserIcon, CreditCardIcon } from '@heroicons/react/outline';
 
 export const Step4MiPerfil: React.FC = () => {
   return (
@@ -23,21 +24,16 @@ export const Step4MiPerfil: React.FC = () => {
           <p className="text-sm font-medium text-gray-900 dark:text-gray-100 text-center">
             Información Personal
           </p>
-          <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
-            Datos de tu cuenta
-          </p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 text-center">Datos de tu cuenta</p>
         </div>
         <div className="flex flex-col items-center gap-2 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
           <CreditCardIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
           <p className="text-sm font-medium text-gray-900 dark:text-gray-100 text-center">
             Facturación
           </p>
-          <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
-            Datos fiscales
-          </p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 text-center">Datos fiscales</p>
         </div>
       </div>
     </TutorialStep>
   );
 };
-

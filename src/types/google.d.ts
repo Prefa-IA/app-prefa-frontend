@@ -24,7 +24,15 @@ interface PromptMomentNotification {
   isDisplayMoment: () => boolean;
   isDisplayed: () => boolean;
   isNotDisplayed: () => boolean;
-  getNotDisplayedReason: () => 'browser_not_supported' | 'invalid_client' | 'missing_client_id' | 'opt_out_or_no_session' | 'secure_http_required' | 'suppressed_by_user' | 'unregistered_origin' | 'unknown_reason';
+  getNotDisplayedReason: () =>
+    | 'browser_not_supported'
+    | 'invalid_client'
+    | 'missing_client_id'
+    | 'opt_out_or_no_session'
+    | 'secure_http_required'
+    | 'suppressed_by_user'
+    | 'unregistered_origin'
+    | 'unknown_reason';
   isSkippedMoment: () => boolean;
   getSkippedReason: () => 'auto_cancel' | 'user_cancel' | 'tap_outside' | 'issuing_failed';
   isDismissedMoment: () => boolean;
@@ -70,7 +78,15 @@ declare global {
     isDisplayMoment: () => boolean;
     isDisplayed: () => boolean;
     isNotDisplayed: () => boolean;
-    getNotDisplayedReason: () => 'browser_not_supported' | 'invalid_client' | 'missing_client_id' | 'opt_out_or_no_session' | 'secure_http_required' | 'suppressed_by_user' | 'unregistered_origin' | 'unknown_reason';
+    getNotDisplayedReason: () =>
+      | 'browser_not_supported'
+      | 'invalid_client'
+      | 'missing_client_id'
+      | 'opt_out_or_no_session'
+      | 'secure_http_required'
+      | 'suppressed_by_user'
+      | 'unregistered_origin'
+      | 'unknown_reason';
     isSkippedMoment: () => boolean;
     getSkippedReason: () => 'auto_cancel' | 'user_cancel' | 'tap_outside' | 'issuing_failed';
     isDismissedMoment: () => boolean;
@@ -97,7 +113,10 @@ declare global {
     storeCredential: (credentials: { id: string; password: string }, callback?: () => void) => void;
     cancel: () => void;
     onGoogleLibraryLoad: () => void;
-    revoke: (hint: string, callback?: (response: { successful: boolean; error?: string }) => void) => void;
+    revoke: (
+      hint: string,
+      callback?: (response: { successful: boolean; error?: string }) => void
+    ) => void;
   }
 
   interface GoogleAccounts {
@@ -112,4 +131,3 @@ declare global {
 }
 
 export {};
-

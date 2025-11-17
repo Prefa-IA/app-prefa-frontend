@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { prefactibilidad } from '../services/api';
-import ReportPreview from './reportes/ReportPreview';
-import { Informe } from '../types/enums';
-import { useAuth } from '../contexts/AuthContext';
-import { usePlanes } from '../hooks/usePlanes';
 
-const PREFAC_LOGO = '/prefac_logo.png';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { usePlanes } from '../hooks/use-planes';
+import { prefactibilidad } from '../services/api';
+import { TIPO_PREFA } from '../types/consulta-direccion';
+import { Informe } from '../types/enums';
+
+import ReportPreview from './reportes/ReportPreview';
 
 const PrintInforme: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -14,6 +16,7 @@ const PrintInforme: React.FC = () => {
 
   const { usuario } = useAuth();
   const { planes } = usePlanes();
+  const { theme } = useTheme();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,13 +28,15 @@ const PrintInforme: React.FC = () => {
         console.error('Error cargando informe', err);
       }
     };
-    fetchData();
+    void fetchData();
   }, [id]);
 
   useEffect(() => {
     if (!usuario || planes.length === 0) return;
 
-    const plan = planes.find(p => p.id === usuario.suscripcion?.tipo || p.name === usuario.suscripcion?.nombrePlan);
+    const plan = planes.find(
+      (p) => p.id === usuario.suscripcion?.tipo || p.name === usuario.suscripcion?.nombrePlan
+    );
     const usarOrg = plan?.watermarkOrg;
     const usarPrefa = plan?.watermarkPrefas;
 
@@ -41,7 +46,8 @@ const PrintInforme: React.FC = () => {
         orgDataUri = usuario.personalizacion.logo;
       } else if (usuario.nombre) {
         const text = usuario.nombre.toUpperCase();
-        const svg = `<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"120\" viewBox=\"0 0 400 120\"><text x=\"0\" y=\"90\" font-size=\"90\" fill=\"rgba(0,0,0,0.15)\" font-family=\"Arial,Helvetica,sans-serif\">${text}</text></svg>`;
+        const textColor = theme === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)';
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="120" viewBox="0 0 500 120"><text x="10" y="90" font-size="90" fill="${textColor}" font-family="Arial,Helvetica,sans-serif">${text}</text></svg>`;
         orgDataUri = `data:image/svg+xml;base64,${btoa(svg)}`;
       }
     }
@@ -49,37 +55,52 @@ const PrintInforme: React.FC = () => {
     const prefaUrl = `url(/logo.png)`;
     const orgUrl = orgDataUri ? `url(${orgDataUri})` : null;
 
+    const MEDIA_SCREEN_PRINT = '@media screen,print {';
+    const WATERMARK_CLASSES = 'wm-present wm-vertical';
+    const WATERMARK_STYLE_SELECTOR = 'style[data-watermark="true"]';
     const ensureWatermark = () => {
-      let styleEl = document.querySelector('style[data-watermark="true"]') as HTMLStyleElement | null;
+      let styleEl = document.querySelector(WATERMARK_STYLE_SELECTOR);
       if (!styleEl) {
         styleEl = document.createElement('style');
-        styleEl.setAttribute('data-watermark','true');
+        styleEl.setAttribute('data-watermark', 'true');
         document.head.appendChild(styleEl);
       }
-      if (usarOrg && usarPrefa && orgUrl) {
-        styleEl.innerHTML = `@media screen,print {
+      if (usarOrg && orgUrl) {
+        styleEl.innerHTML = `${MEDIA_SCREEN_PRINT}
           body::before {
-            content:''; position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; opacity:0.05; transform:rotate(-30deg); background-size:500px 400px; background-repeat:repeat; z-index:0; background-image:${prefaUrl};
-          }
-          body.alt-org::before { background-image:${orgUrl}; }
-          body.wm-vertical::before {
-            transform:none; background-repeat:repeat-y; background-position:center top; background-size:300px auto;
+            content:''; position:fixed; top:0; left:0; width:100%; height:500vh; min-height:500vh; pointer-events:none; opacity:0.1; transform:none; background-repeat:repeat; background-position:left top; background-size:400px 144px; z-index:0; background-image:${orgUrl};
           }
         }`;
-        document.body.classList.add('wm-present');
+        document.body.classList.add(...WATERMARK_CLASSES.split(' '));
+      } else if (usarPrefa) {
+        styleEl.innerHTML = `${MEDIA_SCREEN_PRINT}
+          body::before {
+            content:''; position:fixed; top:0; left:0; width:100%; height:500vh; min-height:500vh; pointer-events:none; opacity:0.1; transform:none; background-repeat:repeat; background-position:left top; background-size:400px 144px; z-index:0; background-image:${prefaUrl};
+          }
+        }`;
+        document.body.classList.add(...WATERMARK_CLASSES.split(' '));
       }
     };
 
     try {
       const params = new URLSearchParams(window.location.search);
-      if (params.get('wm') === 'vertical') document.body.classList.add('wm-vertical');
-      else document.body.classList.remove('wm-vertical');
+      if (params.get('wm') === 'diagonal') {
+        document.body.classList.remove('wm-vertical');
+        const styleEl = document.querySelector(WATERMARK_STYLE_SELECTOR);
+        if (styleEl) {
+          const currentStyle = styleEl.innerHTML;
+          styleEl.innerHTML = currentStyle
+            .replace(/transform:none;/g, 'transform:rotate(-30deg);')
+            .replace(/background-repeat:repeat-y;/g, 'background-repeat:repeat;')
+            .replace(/background-size:300px auto;/g, 'background-size:400px 500px;');
+        }
+      }
     } catch {}
 
     ensureWatermark();
 
     const obs = new MutationObserver(() => {
-      const exists = document.querySelector('style[data-watermark="true"]');
+      const exists = document.querySelector(WATERMARK_STYLE_SELECTOR);
       if (!exists) ensureWatermark();
     });
     obs.observe(document.head, { childList: true });
@@ -87,7 +108,7 @@ const PrintInforme: React.FC = () => {
     return () => {
       obs.disconnect();
     };
-  }, [usuario, planes]);
+  }, [usuario, planes, theme]);
 
   if (!informe) return null;
 
@@ -100,11 +121,11 @@ const PrintInforme: React.FC = () => {
         isLoading={false}
         center={{ lat: Number(informe.googleMaps.lat), lng: Number(informe.googleMaps.lon) }}
         onGenerateReport={() => {}}
-        onAcceptReport={async () => false}
-        tipoPrefa={'prefa2'}
+        savedId={informe._id || null}
+        tipoPrefa={TIPO_PREFA.COMPLETA}
       />
     </div>
   );
 };
 
-export default PrintInforme; 
+export default PrintInforme;

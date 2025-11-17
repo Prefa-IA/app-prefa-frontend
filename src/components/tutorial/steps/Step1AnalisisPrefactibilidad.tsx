@@ -1,6 +1,7 @@
 import React from 'react';
-import { TutorialStep } from '../TutorialStep';
 import { DocumentTextIcon, DownloadIcon } from '@heroicons/react/outline';
+
+import { TutorialStep } from '../TutorialStep';
 
 export const Step1AnalisisPrefactibilidad: React.FC = () => {
   return (
@@ -18,4 +19,3 @@ export const Step1AnalisisPrefactibilidad: React.FC = () => {
     </TutorialStep>
   );
 };
-

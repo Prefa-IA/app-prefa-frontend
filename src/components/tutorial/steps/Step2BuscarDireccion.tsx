@@ -1,6 +1,7 @@
 import React from 'react';
+import { CalendarIcon, CurrencyDollarIcon } from '@heroicons/react/outline';
+
 import { TutorialStep } from '../TutorialStep';
-import { CurrencyDollarIcon, CalendarIcon } from '@heroicons/react/outline';
 
 export const Step2BuscarDireccion: React.FC = () => {
   return (
@@ -23,9 +24,7 @@ export const Step2BuscarDireccion: React.FC = () => {
         <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
           <CalendarIcon className="h-6 w-6 text-blue-600 dark:text-blue-400 flex-shrink-0" />
           <div className="text-left">
-            <p className="font-semibold text-gray-900 dark:text-gray-100">
-              Renovación mensual
-            </p>
+            <p className="font-semibold text-gray-900 dark:text-gray-100">Renovación mensual</p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Siempre recibirás 50 créditos el primer día de cada mes
             </p>
@@ -35,4 +34,3 @@ export const Step2BuscarDireccion: React.FC = () => {
     </TutorialStep>
   );
 };
-

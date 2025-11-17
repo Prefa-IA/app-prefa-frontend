@@ -1,17 +1,20 @@
 import React from 'react';
-import { 
-  ParcelMapPageProps, 
-  PlanoContainerProps, 
+
+import { ParcelInfoItemProps, PlanoSectionProps } from '../types/components';
+import {
+  PARCEL_MAP_CONFIG,
   ParcelInfoProps,
-  PARCEL_MAP_CONFIG 
+  ParcelMapPageProps,
+  PlanoContainerProps,
 } from '../types/enums';
-import { PlanoSectionProps, ParcelInfoItemProps } from '../types/components';
+
 import ParcelaPlano from './ParcelaPlano';
+
 import styles from '../styles/ParcelMapPage.module.css';
 
 const ParcelMapPage: React.FC<ParcelMapPageProps> = ({ informe }) => {
   return (
-    <div className={styles.container}>
+    <div className={styles['container']}>
       <TitleSection />
       <PlanoSection informe={informe} />
       <ParcelInfo geometria={informe.geometria} />
@@ -21,14 +24,14 @@ const ParcelMapPage: React.FC<ParcelMapPageProps> = ({ informe }) => {
 };
 
 const TitleSection: React.FC = () => (
-  <div className={styles.titleSection}>
-    <h2 className={styles.title}>{PARCEL_MAP_CONFIG.TITLE}</h2>
+  <div className={styles['titleSection']}>
+    <h2 className={styles['title']}>{PARCEL_MAP_CONFIG.TITLE}</h2>
   </div>
 );
 
 const PlanoSection: React.FC<PlanoSectionProps> = ({ informe }) => {
   const coordinates = informe.geometria?.features?.[0]?.geometry?.coordinates?.[0]?.[0];
-  
+
   if (!coordinates) {
     return <div>No hay datos de coordenadas disponibles</div>;
   }
@@ -42,13 +45,13 @@ const PlanoSection: React.FC<PlanoSectionProps> = ({ informe }) => {
   );
 };
 
-const PlanoContainer: React.FC<PlanoContainerProps> = ({ 
-  coordinates, 
-  datosCatastrales, 
-  datosEdificabilidad 
+const PlanoContainer: React.FC<PlanoContainerProps> = ({
+  coordinates,
+  datosCatastrales,
+  datosEdificabilidad,
 }) => (
-  <div className={styles.planoContainer}>
-    <ParcelaPlano 
+  <div className={styles['planoContainer']}>
+    <ParcelaPlano
       coordinates={coordinates}
       datosCatastrales={datosCatastrales}
       datosEdificabilidad={datosEdificabilidad}
@@ -62,7 +65,7 @@ const ParcelInfo: React.FC<ParcelInfoProps> = ({ geometria }) => {
   const fechaActualizacion = feature?.properties?.fecha_actualizacion || 'N/A';
 
   return (
-    <div className={styles.infoSection}>
+    <div className={styles['infoSection']}>
       <ParcelInfoItem label="Código de parcela" value={codigo} />
       <ParcelInfoItem label="Última actualización" value={fechaActualizacion} />
     </div>
@@ -70,11 +73,13 @@ const ParcelInfo: React.FC<ParcelInfoProps> = ({ geometria }) => {
 };
 
 const ParcelInfoItem: React.FC<ParcelInfoItemProps> = ({ label, value }) => (
-  <p>{label}: {value}</p>
+  <p>
+    {label}: {value}
+  </p>
 );
 
 const PageNumber: React.FC = () => (
-  <div className={styles.pageNumber}>{PARCEL_MAP_CONFIG.PAGE_NUMBER}</div>
+  <div className={styles['pageNumber']}>{PARCEL_MAP_CONFIG.PAGE_NUMBER}</div>
 );
 
-export default ParcelMapPage; 
+export default ParcelMapPage;

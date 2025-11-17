@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Container from './layout/Container';
 import { Disclosure } from '@headlessui/react';
 import { ChevronUpIcon } from '@heroicons/react/solid';
 
@@ -10,11 +9,11 @@ import Paso4 from '../assets/images/paso4.png';
 import Paso5 from '../assets/images/paso5.png';
 import Paso6 from '../assets/images/paso6.png';
 import Paso7 from '../assets/images/paso7.png';
-
 import PersonalizacionInforme from '../assets/images/Personalizacion informe.png';
-import VistaPreviaInforme from '../assets/images/Vista previa informe.png';
 import PlanesImg from '../assets/images/PLANES.png';
+import VistaPreviaInforme from '../assets/images/Vista previa informe.png';
 
+import Container from './layout/Container';
 import PrefaInfoModal from './PrefaInfoModal';
 
 const buildFaqs = (openInfo: (e: React.MouseEvent) => void) => [
@@ -23,22 +22,30 @@ const buildFaqs = (openInfo: (e: React.MouseEvent) => void) => [
     answer: (
       <div className="space-y-6">
         <div className="space-y-2">
-          <p><strong>Paso 1:</strong> Ingresa a la pestaña <em>Consultar</em> desde la barra de navegación.</p>
+          <p>
+            <strong>Paso 1:</strong> Ingresa a la pestaña <em>Consultar</em> desde la barra de
+            navegación.
+          </p>
           <img src={Paso1} alt="Paso 1" className="rounded-lg shadow border" />
         </div>
 
         {[Paso2, Paso3, Paso4, Paso5, Paso6, Paso7].map((src, idx) => (
           <div key={idx} className="space-y-2">
-            <p><strong>Paso {idx + 1}:</strong> {[
-              'Escribí la dirección completa dentro de CABA en el campo de búsqueda.',
-              'Presiona en la lupa para que nuestra IA arme tu prefactibilidad.',
-              'Seleccioná la dirección correcta de la lista desplegable.',
-              'Elegí el tipo de informe que necesitás (Simple, Completo o Compuesto) y hacé clic en la lupa.',
-              'Hacé clic en el ícono de la lupa (o presioná Enter) para iniciar la consulta.',
-              'Espera mientras se procesan los datos y se generan los resultados.',
-              'Revisa la información mostrada en pantalla o previsualiza tu informe.',
-              'Guarda el informe en tu cuenta o genera el PDF si lo deseas.'
-            ][idx]}</p>
+            <p>
+              <strong>Paso {idx + 1}:</strong>{' '}
+              {
+                [
+                  'Escribí la dirección completa dentro de CABA en el campo de búsqueda.',
+                  'Presiona en la lupa para que nuestra IA arme tu prefactibilidad.',
+                  'Seleccioná la dirección correcta de la lista desplegable.',
+                  'Elegí el tipo de informe que necesitás (Simple, Completo o Compuesto) y hacé clic en la lupa.',
+                  'Hacé clic en el ícono de la lupa (o presioná Enter) para iniciar la consulta.',
+                  'Espera mientras se procesan los datos y se generan los resultados.',
+                  'Revisa la información mostrada en pantalla o previsualiza tu informe.',
+                  'Guarda el informe en tu cuenta o genera el PDF si lo deseas.',
+                ][idx]
+              }
+            </p>
             <img src={src} alt={`Paso ${idx + 1}`} className="rounded-lg shadow border" />
           </div>
         ))}
@@ -50,16 +57,32 @@ const buildFaqs = (openInfo: (e: React.MouseEvent) => void) => [
     answer: (
       <div className="space-y-6">
         <div className="space-y-2">
-          <p>Podés personalizar los informes de tu empresa y darle una identidad única. Simplemente andá a <strong>Perfil &gt; Personalización</strong> y configurá:</p>
+          <p>
+            Podés personalizar los informes de tu empresa y darle una identidad única. Simplemente
+            andá a <strong>Perfil &gt; Personalización</strong> y configurá:
+          </p>
           <ul className="list-disc pl-6 space-y-1">
-            <li>Los <strong>colores de fondo</strong> y de <strong>texto</strong> para los encabezados principales y secundarios.</li>
-            <li>La <strong>tipografía</strong> que querés usar en todos los informes.</li>
+            <li>
+              Los <strong>colores de fondo</strong> y de <strong>texto</strong> para los encabezados
+              principales y secundarios.
+            </li>
+            <li>
+              La <strong>tipografía</strong> que querés usar en todos los informes.
+            </li>
           </ul>
         </div>
 
-        <img src={PersonalizacionInforme} alt="Pantalla de personalización" className="rounded-lg shadow border" />
+        <img
+          src={PersonalizacionInforme}
+          alt="Pantalla de personalización"
+          className="rounded-lg shadow border"
+        />
 
-        <img src={VistaPreviaInforme} alt="Vista previa del informe" className="rounded-lg shadow border" />
+        <img
+          src={VistaPreviaInforme}
+          alt="Vista previa del informe"
+          className="rounded-lg shadow border"
+        />
       </div>
     ),
   },
@@ -68,8 +91,16 @@ const buildFaqs = (openInfo: (e: React.MouseEvent) => void) => [
     answer: (
       <div className="space-y-4">
         <ul className="list-disc pl-5 space-y-1">
-        <li>Hay tres tipos de informes que puedes generar, cada uno con un costo de créditos diferente.</li>
-        <li>Para ver el detalle de cada uno, <button type="button" onClick={openInfo} className="text-blue-500 hover:underline">hacé click aquí</button></li>
+          <li>
+            Hay tres tipos de informes que puedes generar, cada uno con un costo de créditos
+            diferente.
+          </li>
+          <li>
+            Para ver el detalle de cada uno,{' '}
+            <button type="button" onClick={openInfo} className="text-blue-500 hover:underline">
+              hacé click aquí
+            </button>
+          </li>
         </ul>
       </div>
     ),
@@ -79,10 +110,15 @@ const buildFaqs = (openInfo: (e: React.MouseEvent) => void) => [
     answer: (
       <div className="space-y-4">
         <ol className="list-decimal pl-5 space-y-1">
-          <li>Ingresa a <strong>Perfil &gt; Gestionar Suscripción</strong>.</li>
+          <li>
+            Ingresa a <strong>Perfil &gt; Gestionar Suscripción</strong>.
+          </li>
           <li>Elegí el plan que mejor se adapte a tu proyecto.</li>
           <li>Completá el proceso de pago seguro.</li>
-          <li>¡Listo! Los créditos se cargarán automáticamente a tu cuenta y podrás empezar a usarlos al instante.</li>
+          <li>
+            ¡Listo! Los créditos se cargarán automáticamente a tu cuenta y podrás empezar a usarlos
+            al instante.
+          </li>
         </ol>
         <img src={PlanesImg} alt="Planes disponibles" className="rounded-lg shadow border" />
       </div>
@@ -103,7 +139,9 @@ const FAQPage: React.FC = () => {
   return (
     <Container>
       <div className="w-full py-10">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">Preguntas Frecuentes</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">
+          Preguntas Frecuentes
+        </h1>
         <div className="space-y-4">
           {faqs.map((faq, idx) => (
             <Disclosure key={idx}>
@@ -130,4 +168,4 @@ const FAQPage: React.FC = () => {
   );
 };
 
-export default FAQPage; 
+export default FAQPage;

@@ -1,4 +1,5 @@
 import { BillingInfo } from '../types/billing';
+
 import api from './api';
 
 export const getBillingInfo = async (): Promise<BillingInfo | null> => {

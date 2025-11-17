@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { TutorialStep } from '../TutorialStep';
 
 export const Step3Registros: React.FC = () => {
@@ -11,9 +12,7 @@ export const Step3Registros: React.FC = () => {
     >
       <div className="mt-6 flex flex-col items-center gap-4 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
         <div className="flex items-center gap-4">
-          <span className="text-gray-700 dark:text-gray-300 font-medium">
-            Modo compuesto
-          </span>
+          <span className="text-gray-700 dark:text-gray-300 font-medium">Modo compuesto</span>
           <button
             type="button"
             onClick={() => setEnabled(!enabled)}
@@ -29,10 +28,10 @@ export const Step3Registros: React.FC = () => {
           </button>
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-          Activa el modo compuesto para consultas que incluyen múltiples direcciones en un solo informe
+          Activa el modo compuesto para consultas que incluyen múltiples direcciones en un solo
+          informe
         </p>
       </div>
     </TutorialStep>
   );
 };
-

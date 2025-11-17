@@ -5,16 +5,15 @@ interface TutorialProgressProps {
   totalSteps: number;
 }
 
-export const TutorialProgress: React.FC<TutorialProgressProps> = ({
-  currentStep,
-  totalSteps,
-}) => {
+export const TutorialProgress: React.FC<TutorialProgressProps> = ({ currentStep, totalSteps }) => {
   const percentage = ((currentStep + 1) / totalSteps) * 100;
 
   return (
     <div className="space-y-2">
       <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-        <span>Paso {currentStep + 1} de {totalSteps}</span>
+        <span>
+          Paso {currentStep + 1} de {totalSteps}
+        </span>
         <span>{Math.round(percentage)}%</span>
       </div>
       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -26,4 +25,3 @@ export const TutorialProgress: React.FC<TutorialProgressProps> = ({
     </div>
   );
 };
-

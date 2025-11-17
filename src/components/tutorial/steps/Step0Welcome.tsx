@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { TutorialStep } from '../TutorialStep';
 
 export const Step0Welcome: React.FC = () => {
@@ -9,4 +10,3 @@ export const Step0Welcome: React.FC = () => {
     />
   );
 };
-

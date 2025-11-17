@@ -1,10 +1,11 @@
 import React from 'react';
-import { MapLegendProps, LBI_LFI_CONFIG } from '../../types/enums';
+
+import { LBI_LFI_CONFIG, MapLegendProps } from '../../types/enums';
 
 const MapLegend: React.FC<MapLegendProps> = ({ visualizacion3D, onToggleVisualizacion3D }) => {
   return (
     <div className="p-4 bg-gray-50 border-t">
-      <LegendHeader 
+      <LegendHeader
         visualizacion3D={visualizacion3D}
         onToggleVisualizacion3D={onToggleVisualizacion3D}
       />
@@ -19,10 +20,7 @@ const LegendHeader: React.FC<{
 }> = ({ visualizacion3D, onToggleVisualizacion3D }) => (
   <div className="flex justify-between items-center mb-4">
     <div className="text-sm font-medium">Referencias:</div>
-    <ViewToggle 
-      visualizacion3D={visualizacion3D}
-      onToggle={onToggleVisualizacion3D}
-    />
+    <ViewToggle visualizacion3D={visualizacion3D} onToggle={onToggleVisualizacion3D} />
   </div>
 );
 
@@ -35,8 +33,8 @@ const ViewToggle: React.FC<{
     <button
       onClick={onToggle}
       className={`px-3 py-1 rounded-md text-xs font-medium transition-colors duration-200 ${
-        visualizacion3D 
-          ? 'bg-blue-500 text-white shadow-md' 
+        visualizacion3D
+          ? 'bg-blue-500 text-white shadow-md'
           : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
       }`}
     >
@@ -65,16 +63,16 @@ const LegendItem: React.FC<{
   };
 }> = ({ item }) => (
   <div className="flex items-center">
-    <div 
-      className="w-4 h-4 mr-2" 
-      style={{ 
-        backgroundColor: item.color, 
-        opacity: item.opacity, 
-        border: item.border 
+    <div
+      className="w-4 h-4 mr-2"
+      style={{
+        backgroundColor: item.color,
+        opacity: item.opacity,
+        border: item.border,
       }}
     ></div>
     <span className="text-xs">{item.label}</span>
   </div>
 );
 
-export default MapLegend; 
+export default MapLegend;

@@ -1,16 +1,26 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import Container from './layout/Container';
-import { prefactibilidad } from '../services/api';
-import { Informe, ListaInformesProps, LISTA_INFORMES_CONFIG } from '../types/enums';
-import { DocumentTextIcon, DownloadIcon, CalendarIcon, LocationMarkerIcon, OfficeBuildingIcon, TagIcon } from '@heroicons/react/outline';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  CalendarIcon,
+  DocumentTextIcon,
+  DownloadIcon,
+  LocationMarkerIcon,
+  OfficeBuildingIcon,
+  TagIcon,
+} from '@heroicons/react/outline';
 import { CurrencyDollarIcon } from '@heroicons/react/solid';
-import { formatearFecha } from '../utils/dateUtils';
-import { downloadBlob } from '../utils/downloadUtils';
+
+import { prefactibilidad } from '../services/api';
+import { TIPO_PREFA } from '../types/consulta-direccion';
+import { Informe, LISTA_INFORMES_CONFIG, ListaInformesProps } from '../types/enums';
+import { formatearFecha } from '../utils/date-utils';
+import { downloadBlob } from '../utils/download-utils';
+
+import Container from './layout/Container';
 import MisDirecciones from './registros/MisDirecciones';
 
 const TAB_STORAGE_KEY = 'listaInformes_activeTab';
 
-const ListaInformes: React.FC<ListaInformesProps> = ({ className }) => {
+const ListaInformes: React.FC<ListaInformesProps> = () => {
   const [informes, setInformes] = useState<Informe[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,10 +29,10 @@ const ListaInformes: React.FC<ListaInformesProps> = ({ className }) => {
   const [search, setSearch] = useState('');
   const [downloadingIds, setDownloadingIds] = useState<string[]>([]);
   const [downloadedIds, setDownloadedIds] = useState<string[]>([]);
-  const [searchCooldown,setSearchCooldown]=useState(false);
+  const [searchCooldown, setSearchCooldown] = useState(false);
   const [tab, setTab] = useState<'informes' | 'direcciones'>(() => {
     const saved = localStorage.getItem(TAB_STORAGE_KEY);
-    return (saved === 'informes' || saved === 'direcciones') ? saved : 'informes';
+    return saved === 'informes' || saved === 'direcciones' ? saved : 'informes';
   });
 
   const handleTabChange = (newTab: 'informes' | 'direcciones') => {
@@ -45,35 +55,35 @@ const ListaInformes: React.FC<ListaInformesProps> = ({ className }) => {
   }, [page, search]);
 
   useEffect(() => {
-    cargarInformes();
+    void cargarInformes();
   }, [cargarInformes]);
 
   const handleDescargar = async (informe: Informe) => {
     const id = informe._id as string;
     if (downloadingIds.includes(id)) return;
-    setDownloadingIds(prev => [...prev, id]);
+    setDownloadingIds((prev) => [...prev, id]);
     try {
       const blob = await prefactibilidad.descargarPDF(id);
       downloadBlob(blob, `informe-${informe.direccion.direccion}.pdf`);
       setTimeout(() => {
-        setDownloadedIds(prev => prev.filter(did => did !== id));
+        setDownloadedIds((prev) => prev.filter((did) => did !== id));
       }, 2000);
-      setDownloadedIds(prev => [...prev, id]);
+      setDownloadedIds((prev) => [...prev, id]);
     } catch (error) {
       console.error('Error al descargar informe:', error);
       setError('Error al descargar el informe PDF.');
     } finally {
-      setDownloadingIds(prev => prev.filter(did => did !== id));
+      setDownloadingIds((prev) => prev.filter((did) => did !== id));
     }
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if(searchCooldown) return;
+    if (searchCooldown) return;
     setSearchCooldown(true);
     setPage(1);
-    cargarInformes();
-    setTimeout(()=>setSearchCooldown(false),1500);
+    void cargarInformes();
+    setTimeout(() => setSearchCooldown(false), 1500);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,30 +106,35 @@ const ListaInformes: React.FC<ListaInformesProps> = ({ className }) => {
         <Tabs active={tab} onChange={handleTabChange} />
 
         {tab === 'informes' && (
-        <form onSubmit={handleSearchSubmit} className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-          <input
-            type="text"
-            value={search}
-            onChange={handleSearchChange}
-            placeholder="Buscá por dirección, barrio o SMP"
-            className="w-full sm:flex-1 border rounded px-3 py-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-          />
-          <button
-            type="submit"
-            className="w-full sm:w-auto px-4 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600 text-white rounded"
-            disabled={searchCooldown}
+          <form
+            onSubmit={handleSearchSubmit}
+            className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2"
           >
-            Buscar
-          </button>
-        </form>
+            <input
+              type="text"
+              value={search}
+              onChange={handleSearchChange}
+              placeholder="Buscá por dirección, barrio o SMP"
+              className="w-full sm:flex-1 border rounded px-3 py-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+            />
+            <button
+              type="submit"
+              className="w-full sm:w-auto px-4 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600 text-white rounded"
+              disabled={searchCooldown}
+            >
+              Buscar
+            </button>
+          </form>
         )}
 
         {tab === 'informes' ? (
-          <ListaInformesContent 
+          <ListaInformesContent
             loading={loading}
             error={error}
             informes={informes}
-            onDescargar={handleDescargar}
+            onDescargar={(informe) => {
+              void handleDescargar(informe);
+            }}
             downloadingIds={downloadingIds}
             downloadedIds={downloadedIds}
           />
@@ -136,7 +151,10 @@ const ListaInformes: React.FC<ListaInformesProps> = ({ className }) => {
             >
               Anterior
             </button>
-            <span className="text-center"> Página {page} de {totalPages} </span>
+            <span className="text-center">
+              {' '}
+              Página {page} de {totalPages}{' '}
+            </span>
             <button
               onClick={handleNextPage}
               disabled={page === totalPages}
@@ -153,14 +171,17 @@ const ListaInformes: React.FC<ListaInformesProps> = ({ className }) => {
 
 const ListaInformesHeader: React.FC = () => (
   <>
-    <h1 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-gray-100">{LISTA_INFORMES_CONFIG.TITLE}</h1>
-    <p className="text-gray-600 dark:text-gray-300 mb-6">
-      {LISTA_INFORMES_CONFIG.SUBTITLE}
-    </p>
+    <h1 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-gray-100">
+      {LISTA_INFORMES_CONFIG.TITLE}
+    </h1>
+    <p className="text-gray-600 dark:text-gray-300 mb-6">{LISTA_INFORMES_CONFIG.SUBTITLE}</p>
   </>
 );
 
-const Tabs: React.FC<{ active: 'informes' | 'direcciones'; onChange: (t:'informes'|'direcciones')=>void }> = ({ active, onChange }) => (
+const Tabs: React.FC<{
+  active: 'informes' | 'direcciones';
+  onChange: (t: 'informes' | 'direcciones') => void;
+}> = ({ active, onChange }) => (
   <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
     <nav className="-mb-px flex space-x-6" aria-label="Tabs">
       <button
@@ -207,7 +228,14 @@ const ListaInformesContent: React.FC<{
     return <EmptyState />;
   }
 
-  return <InformesList informes={informes} onDescargar={onDescargar} downloadingIds={downloadingIds} downloadedIds={downloadedIds} />;
+  return (
+    <InformesList
+      informes={informes}
+      onDescargar={onDescargar}
+      downloadingIds={downloadingIds}
+      downloadedIds={downloadedIds}
+    />
+  );
 };
 
 const LoadingState: React.FC = () => (
@@ -243,7 +271,7 @@ const InformesList: React.FC<{
   <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg mb-8">
     <ul className="divide-y divide-gray-200">
       {informes.map((informe, index) => (
-        <InformeItem 
+        <InformeItem
           key={index}
           informe={informe}
           index={index}
@@ -262,13 +290,23 @@ const InformeItem: React.FC<{
   onDescargar: (informe: Informe) => void;
   downloading: boolean;
   downloaded: boolean;
-}> = ({ informe, index, onDescargar, downloading, downloaded }) => (
+}> = ({ informe, index: _index, onDescargar, downloading, downloaded }) => (
   <li className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
     <div className="px-4 py-5 sm:px-6">
-      <InformeHeader informe={informe} onDescargar={onDescargar} downloading={downloading} downloaded={downloaded} />
+      <InformeHeader
+        informe={informe}
+        onDescargar={onDescargar}
+        downloading={downloading}
+        downloaded={downloaded}
+      />
       <InformeDetails informe={informe} />
       {/* Botón móvil */}
-      <DownloadButtonMobile informe={informe} onDescargar={onDescargar} downloading={downloading} downloaded={downloaded} />
+      <DownloadButtonMobile
+        informe={informe}
+        onDescargar={onDescargar}
+        downloading={downloading}
+        downloaded={downloaded}
+      />
     </div>
   </li>
 );
@@ -281,7 +319,12 @@ const InformeHeader: React.FC<{
 }> = ({ informe, onDescargar, downloading, downloaded }) => (
   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
     <InformeTitleSection informe={informe} />
-    <DownloadButton informe={informe} onDescargar={onDescargar} downloading={downloading} downloaded={downloaded} />
+    <DownloadButton
+      informe={informe}
+      onDescargar={onDescargar}
+      downloading={downloading}
+      downloaded={downloaded}
+    />
   </div>
 );
 
@@ -299,20 +342,30 @@ const DownloadButton: React.FC<{
   onDescargar: (informe: Informe) => void;
   downloading: boolean;
   downloaded: boolean;
-}> = ({ informe, onDescargar, downloading, downloaded }) => (
-  <div className="hidden sm:flex mt-2 sm:mt-0 sm:ml-2 flex-shrink-0 w-full sm:w-auto">
-    <button
-      onClick={() => onDescargar(informe)}
-      disabled={downloading || downloaded}
-      className={
-        `inline-flex justify-center items-center w-full sm:w-auto px-2 py-1 sm:px-3 sm:py-2 border border-transparent text-xs sm:text-sm leading-4 font-medium rounded-md shadow-sm text-white ${downloading || downloaded ? 'bg-primary-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200`
-      }
-    >
-      <DownloadIcon className="h-4 w-4 mr-1" />
-      {LISTA_INFORMES_CONFIG.BUTTON_TEXT}
-    </button>
-  </div>
-);
+}> = ({ informe, onDescargar, downloading, downloaded }) => {
+  if (!informe.esUltimoInforme && informe.esUltimoInforme !== undefined) {
+    return null;
+  }
+
+  const isDisabled = downloading || downloaded || !informe.pdfUrl;
+
+  return (
+    <div className="hidden sm:flex mt-2 sm:mt-0 sm:ml-2 flex-shrink-0 w-full sm:w-auto">
+      <button
+        onClick={() => onDescargar(informe)}
+        disabled={isDisabled}
+        className={`inline-flex justify-center items-center w-full sm:w-auto px-2 py-1 sm:px-3 sm:py-2 border border-transparent text-xs sm:text-sm leading-4 font-medium rounded-md shadow-sm text-white ${
+          isDisabled
+            ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+            : 'bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600'
+        } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200`}
+      >
+        <DownloadIcon className="h-4 w-4 mr-1" />
+        {LISTA_INFORMES_CONFIG.BUTTON_TEXT}
+      </button>
+    </div>
+  );
+};
 
 const InformeDetails: React.FC<{ informe: Informe }> = ({ informe }) => (
   <div className="mt-3 flex flex-col sm:flex-row sm:space-x-8">
@@ -333,7 +386,8 @@ const UvaInfo: React.FC<{ informe: Informe }> = ({ informe }) => {
   return (
     <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
       <CurrencyDollarIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
-      UVA: {original}{personalizado !== original ? ` → ${personalizado}` : ''}
+      UVA: {original}
+      {personalizado !== original ? ` → ${personalizado}` : ''}
     </div>
   );
 };
@@ -359,7 +413,7 @@ const SmpInfo: React.FC<{ informe: Informe }> = ({ informe }) => {
 const TipoPrefaInfo: React.FC<{ informe: Informe }> = ({ informe }) => (
   <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
     <TagIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
-    {informe.tipoPrefa === 'prefa1' ? 'Simple' : 'Completa'}
+    {informe.tipoPrefa === TIPO_PREFA.SIMPLE ? 'Simple' : 'Completa'}
   </div>
 );
 
@@ -370,17 +424,34 @@ const DateInfo: React.FC<{ informe: Informe }> = ({ informe }) => (
   </div>
 );
 
-const DownloadButtonMobile: React.FC<{ informe: Informe; onDescargar: (inf: Informe)=>void; downloading:boolean; downloaded:boolean }> = ({ informe, onDescargar, downloading, downloaded }) => (
-  <div className="sm:hidden mt-4">
-    <button
-      onClick={() => onDescargar(informe)}
-      disabled={downloading || downloaded}
-      className={`w-full inline-flex justify-center items-center px-3 py-2 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white ${downloading || downloaded ? 'bg-primary-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200`}
-    >
-      <DownloadIcon className="h-4 w-4 mr-1" />
-      {LISTA_INFORMES_CONFIG.BUTTON_TEXT}
-    </button>
-  </div>
-);
+const DownloadButtonMobile: React.FC<{
+  informe: Informe;
+  onDescargar: (inf: Informe) => void;
+  downloading: boolean;
+  downloaded: boolean;
+}> = ({ informe, onDescargar, downloading, downloaded }) => {
+  if (!informe.esUltimoInforme && informe.esUltimoInforme !== undefined) {
+    return null;
+  }
 
-export default ListaInformes; 
+  const isDisabled = downloading || downloaded || !informe.pdfUrl;
+
+  return (
+    <div className="sm:hidden mt-4">
+      <button
+        onClick={() => onDescargar(informe)}
+        disabled={isDisabled}
+        className={`w-full inline-flex justify-center items-center px-3 py-2 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white ${
+          isDisabled
+            ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+            : 'bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600'
+        } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200`}
+      >
+        <DownloadIcon className="h-4 w-4 mr-1" />
+        {LISTA_INFORMES_CONFIG.BUTTON_TEXT}
+      </button>
+    </div>
+  );
+};
+
+export default ListaInformes;

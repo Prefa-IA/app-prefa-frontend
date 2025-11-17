@@ -1,11 +1,14 @@
 declare global {
   interface Window {
     grecaptcha: {
-      render: (container: HTMLElement, options: {
-        sitekey: string;
-        callback: (token: string) => void;
-        'error-callback': () => void;
-      }) => number;
+      render: (
+        container: HTMLElement,
+        options: {
+          sitekey: string;
+          callback: (token: string) => void;
+          'error-callback': () => void;
+        }
+      ) => number;
       reset: (widgetId: number) => void;
       getResponse: (widgetId: number) => string;
     };
@@ -23,4 +26,3 @@ export interface UseRecaptchaReturn {
   reset: () => void;
   widgetIdRef: React.MutableRefObject<number | null>;
 }
-

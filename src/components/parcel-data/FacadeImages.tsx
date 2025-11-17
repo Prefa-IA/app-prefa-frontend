@@ -1,27 +1,23 @@
 import React from 'react';
-import { FacadeImagesProps, PARCEL_DATA_CONFIG } from '../../types/enums';
+
+import useTablePersonalization from '../../hooks/use-table-personalization';
 import { FacadeImageGridProps, FacadeImageItemProps } from '../../types/components';
-import useTablePersonalization from '../../hooks/useTablePersonalization';
+import { FacadeImagesProps, PARCEL_DATA_CONFIG } from '../../types/enums';
 
 const FacadeImages: React.FC<FacadeImagesProps> = ({ fachadaImages, pageCounter }) => {
   const { parentTableStyle } = useTablePersonalization();
 
   return (
     <div className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
-      <div 
-        className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-4`}
-        style={parentTableStyle}
-      >
+      <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-4`} style={parentTableStyle}>
         ENTORNO / IMAGEN DE LA FACHADA
       </div>
-      
-      {fachadaImages.length > 0 ? (
-        <FacadeImageGrid images={fachadaImages} />
-      ) : (
-        <NoImagesMessage />
-      )}
-      
-      <div className="mt-4 border rounded w-fit px-3 py-1 text-dark bg-gray-100 ml-auto">{pageCounter}</div>
+
+      {fachadaImages.length > 0 ? <FacadeImageGrid images={fachadaImages} /> : <NoImagesMessage />}
+
+      <div className="mt-4 border rounded w-fit px-3 py-1 text-dark dark:text-gray-200 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 ml-auto">
+        {pageCounter}
+      </div>
     </div>
   );
 };
@@ -36,21 +32,17 @@ const FacadeImageGrid: React.FC<FacadeImageGridProps> = ({ images }) => {
   return (
     <div className={`grid ${gridClass} gap-4 mb-8`}>
       {displayImages.map((imageUrl, index) => (
-        <FacadeImageItem 
-          key={index} 
-          imageUrl={imageUrl} 
-          index={index} 
-        />
+        <FacadeImageItem key={index} imageUrl={imageUrl} index={index} />
       ))}
     </div>
   );
 };
 
 const FacadeImageItem: React.FC<FacadeImageItemProps> = ({ imageUrl, index }) => (
-  <div className="border p-4 text-center h-[400px] overflow-hidden">
-    <img 
-      src={imageUrl} 
-      alt={`Fachada vista ${index + 1}`} 
+  <div className="border border-gray-300 dark:border-gray-700 p-4 text-center h-[400px] overflow-hidden">
+    <img
+      src={imageUrl}
+      alt={`Fachada vista ${index + 1}`}
       className="max-h-full object-contain mx-auto"
       onError={(e) => {
         const container = e.currentTarget.parentElement;
@@ -63,9 +55,11 @@ const FacadeImageItem: React.FC<FacadeImageItemProps> = ({ imageUrl, index }) =>
 );
 
 const NoImagesMessage: React.FC = () => (
-  <div className="text-center p-4 border mb-8">
-    <p className="text-gray-500">No se encontraron imágenes de la fachada para esta parcela.</p>
+  <div className="text-center p-4 border border-gray-300 dark:border-gray-700 mb-8">
+    <p className="text-gray-500 dark:text-gray-400">
+      No se encontraron imágenes de la fachada para esta parcela.
+    </p>
   </div>
 );
 
-export default FacadeImages; 
+export default FacadeImages;

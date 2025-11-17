@@ -1,17 +1,19 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import type { RegistrationFormProps, FormFieldsProps, FormFieldProps } from '../../types/enums';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeftIcon, EyeIcon, EyeOffIcon } from '@heroicons/react/outline';
+
+import { useRegistrationForm } from '../../hooks/use-registration-form';
 import { TermsModalProps } from '../../types/components';
-import { createFormHandler } from '../../utils/formUtils';
-import { REGISTRATION_FORM_FIELDS } from '../../utils/formConfigUtils';
-import styles from '../../styles/RegistroForm.module.css';
+import type { FormFieldProps, FormFieldsProps, RegistrationFormProps } from '../../types/enums';
 import { InputType } from '../../types/enums';
-import { EyeIcon, EyeOffIcon, ArrowLeftIcon } from '@heroicons/react/outline';
-import TermsAndConditions from './TermsAndConditions';
+import { REGISTRATION_FORM_FIELDS } from '../../utils/form-config-utils';
+import { createFormHandler } from '../../utils/form-utils';
+import { sanitizePath } from '../../utils/url-sanitizer';
 import { Recaptcha } from '../common/Recaptcha';
-import { sanitizePath } from '../../utils/urlSanitizer';
-import { useRegistrationForm } from '../../hooks/useRegistrationForm';
-import { useNavigate } from 'react-router-dom';
+
+import TermsAndConditions from './TermsAndConditions';
+
+import styles from '../../styles/RegistroForm.module.css';
 
 const RegistroForm: React.FC = () => {
   const navigate = useNavigate();
@@ -22,8 +24,8 @@ const RegistroForm: React.FC = () => {
     setShowPass,
     aceptoTyC,
     mostrarTyC,
-    showCaptcha,
     captchaToken,
+    captchaValidated,
     isSubmitting,
     recaptchaWidgetIdRef,
     handleSubmit,
@@ -37,23 +39,33 @@ const RegistroForm: React.FC = () => {
   const handleChange = createFormHandler(setDatos);
 
   return (
-    <div className={styles.container}>
-      <div className={`${styles.formContainer} bg-white dark:bg-gray-800 p-4 sm:p-8 rounded shadow w-full sm:w-auto`}>
-        <button type="button" onClick={() => navigate(sanitizePath('/login'))} className="text-gray-500 hover:text-gray-700 flex items-center mb-4">
+    <div
+      className={`${styles['container']} min-h-screen pt-[90px] flex justify-center items-center w-full`}
+    >
+      <div
+        className={`${styles['formContainer']} bg-white dark:bg-gray-800 p-4 sm:p-8 rounded shadow`}
+      >
+        <button
+          type="button"
+          onClick={() => navigate(sanitizePath('/login'))}
+          className="text-gray-500 hover:text-gray-700 flex items-center mb-4"
+        >
           <ArrowLeftIcon className="w-5 h-5 mr-1" />
         </button>
         <FormHeader />
         <RegistrationForm
           datos={datos}
-          onSubmit={handleSubmit}
+          onSubmit={(e) => {
+            void handleSubmit(e);
+          }}
           onChange={handleChange}
           aceptoTyC={aceptoTyC}
           onToggleTyC={toggleTyC}
           onOpenTyC={openModal}
           showPass={showPass}
           setShowPass={setShowPass}
-          showCaptcha={showCaptcha}
           captchaToken={captchaToken}
+          captchaValidated={captchaValidated}
           onCaptchaVerify={handleCaptchaVerify}
           onCaptchaError={handleCaptchaError}
           recaptchaWidgetIdRef={recaptchaWidgetIdRef}
@@ -67,19 +79,21 @@ const RegistroForm: React.FC = () => {
 
 const FormHeader: React.FC = () => <></>;
 
-const RegistrationForm: React.FC<RegistrationFormProps & { 
-  aceptoTyC: boolean; 
-  onToggleTyC: () => void; 
-  onOpenTyC: () => void; 
-  showPass:boolean; 
-  setShowPass:React.Dispatch<React.SetStateAction<boolean>>;
-  showCaptcha: boolean;
-  captchaToken: string | null;
-  onCaptchaVerify: (token: string) => void;
-  onCaptchaError: () => void;
-  recaptchaWidgetIdRef: React.MutableRefObject<number | null>;
-  isSubmitting: boolean;
-}> = ({
+const RegistrationForm: React.FC<
+  RegistrationFormProps & {
+    aceptoTyC: boolean;
+    onToggleTyC: () => void;
+    onOpenTyC: () => void;
+    showPass: boolean;
+    setShowPass: React.Dispatch<React.SetStateAction<boolean>>;
+    captchaToken: string | null;
+    captchaValidated: boolean;
+    onCaptchaVerify: (token: string) => void;
+    onCaptchaError: () => void;
+    recaptchaWidgetIdRef: React.MutableRefObject<number | null>;
+    isSubmitting: boolean;
+  }
+> = ({
   datos,
   onSubmit,
   onChange,
@@ -88,19 +102,29 @@ const RegistrationForm: React.FC<RegistrationFormProps & {
   onOpenTyC,
   showPass,
   setShowPass,
-  showCaptcha,
   captchaToken,
+  captchaValidated,
   onCaptchaVerify,
   onCaptchaError,
   recaptchaWidgetIdRef,
-  isSubmitting
+  isSubmitting,
 }) => {
-  const recaptchaSiteKey = process.env.REACT_APP_RECAPTCHA_SITE_KEY || '';
-  
+  const recaptchaSiteKey = process.env['REACT_APP_RECAPTCHA_SITE_KEY'] || '';
+
   return (
-    <form className={styles.form} onSubmit={onSubmit}>
-      <div className={styles.inputGroup}>
-        <FormFields datos={datos} onChange={onChange} showPass={showPass} setShowPass={setShowPass}/>
+    <form
+      className={styles['form']}
+      onSubmit={(e) => {
+        void onSubmit(e);
+      }}
+    >
+      <div className={styles['inputGroup']}>
+        <FormFields
+          datos={datos}
+          onChange={onChange}
+          showPass={showPass}
+          setShowPass={setShowPass}
+        />
       </div>
       <div className="flex items-center text-sm dark:text-gray-300">
         <input
@@ -112,12 +136,16 @@ const RegistrationForm: React.FC<RegistrationFormProps & {
         />
         <label htmlFor="aceptoTyC" className="">
           Acepto los{' '}
-          <button type="button" className="text-primary-600 dark:text-primary-400 underline" onClick={onOpenTyC}>
+          <button
+            type="button"
+            className="text-primary-600 dark:text-primary-400 underline"
+            onClick={onOpenTyC}
+          >
             Términos y Condiciones
           </button>
         </label>
       </div>
-      {showCaptcha && recaptchaSiteKey && (
+      {recaptchaSiteKey && !captchaValidated && (
         <div className="flex justify-center my-4">
           <Recaptcha
             siteKey={recaptchaSiteKey}
@@ -129,14 +157,21 @@ const RegistrationForm: React.FC<RegistrationFormProps & {
           />
         </div>
       )}
-      <SubmitButton disabled={!aceptoTyC || (showCaptcha && !captchaToken) || isSubmitting} />
-      <hr />
-      <p className="text-center text-gray-900 dark:text-gray-100">¿Ya tenés cuenta? <Link to={sanitizePath('/login')} className="text-primary-600 dark:text-primary-400 hover:underline">Ingresá</Link></p>
+      <SubmitButton disabled={!aceptoTyC || !captchaToken || isSubmitting} />
+      <p className="text-center text-gray-900 dark:text-gray-100 mt-4">
+        ¿Ya tenés cuenta?{' '}
+        <Link
+          to={sanitizePath('/login')}
+          className="text-primary-600 dark:text-primary-400 hover:underline"
+        >
+          Ingresá
+        </Link>
+      </p>
     </form>
   );
 };
 
-const FormFields: React.FC<FormFieldsProps> = ({ datos, onChange,showPass,setShowPass }) => (
+const FormFields: React.FC<FormFieldsProps> = ({ datos, onChange, showPass, setShowPass }) => (
   <>
     {REGISTRATION_FORM_FIELDS.map((field) => (
       <FormField
@@ -154,26 +189,34 @@ const FormFields: React.FC<FormFieldsProps> = ({ datos, onChange,showPass,setSho
 const FormField: React.FC<FormFieldProps> = ({ field, value, onChange }) => {
   const [show, setShow] = React.useState(false);
   return (
-    <div className={styles.fieldContainer}>
-      <label htmlFor={field.id} className={`${styles.label} dark:text-gray-300`}>
+    <div className={styles['fieldContainer']}>
+      <label htmlFor={field.id} className={`${styles['label']} dark:text-gray-300`}>
         {field.label}
       </label>
       <div className="relative">
         <input
           id={field.id}
           name={field.name}
-          type={field.type===InputType.PASSWORD && show? 'text': field.type}
+          type={field.type === InputType.PASSWORD && show ? 'text' : field.type}
           required={field.required}
-          className={`${styles.input} dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100`}
+          className={`${styles['input']} dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100`}
           placeholder={field.placeholder}
           value={value}
           onChange={onChange}
           autoComplete={field.autoComplete}
           maxLength={field.maxLength}
         />
-        {field.type===InputType.PASSWORD && (
-          <button type="button" className="absolute inset-y-0 right-3 flex items-center" onClick={()=>setShow(!show)}>
-            {show? <EyeOffIcon className="w-5 h-5 text-gray-500" /> : <EyeIcon className="w-5 h-5 text-gray-500" />}
+        {field.type === InputType.PASSWORD && (
+          <button
+            type="button"
+            className="absolute inset-y-0 right-3 flex items-center"
+            onClick={() => setShow(!show)}
+          >
+            {show ? (
+              <EyeOffIcon className="w-5 h-5 text-gray-500" />
+            ) : (
+              <EyeIcon className="w-5 h-5 text-gray-500" />
+            )}
           </button>
         )}
       </div>
@@ -185,10 +228,17 @@ const TermsModal: React.FC<TermsModalProps> = ({ onClose }) => (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
     <div className="bg-white dark:bg-gray-900 rounded-xl max-w-3xl w-full max-h-[80vh] overflow-auto">
       <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Términos y Condiciones</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Términos y Condiciones
+        </h3>
         <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -209,4 +259,4 @@ const SubmitButton: React.FC<{ disabled: boolean }> = ({ disabled }) => (
   </button>
 );
 
-export default RegistroForm; 
+export default RegistroForm;

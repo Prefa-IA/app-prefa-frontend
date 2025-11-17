@@ -1,22 +1,25 @@
 import React, { useState } from 'react';
-import PlanCard from './perfil/PlanCard';
-import { usePlanes, Plan as PlanType, separatePlanes } from '../hooks/usePlanes';
-import { getBillingInfo } from '../services/billing';
 import { Tab } from '@headlessui/react';
+
 import { useAuth } from '../contexts/AuthContext';
-import PrefaInfoModal from './PrefaInfoModal';
-import Container from './layout/Container';
-import { sanitizePath, sanitizeUrl } from '../utils/urlSanitizer';
+import { Plan as PlanType, separatePlanes, usePlanes } from '../hooks/use-planes';
 import { subscriptions } from '../services/api';
+import { getBillingInfo } from '../services/billing';
+import { SubscriptionPlan } from '../types/enums';
+import { sanitizePath, sanitizeUrl } from '../utils/url-sanitizer';
+
+import Container from './layout/Container';
+import PlanCard from './perfil/PlanCard';
+import PrefaInfoModal from './PrefaInfoModal';
 
 const SubscriptionPage: React.FC = () => {
-    const { planes } = usePlanes();
-    const { usuario } = useAuth();
-    const hasPlan = !!usuario?.suscripcion?.plan;
-    const [tabIndex,setTabIndex]=useState<number>(hasPlan?1:0);
-    const [loading, setLoading] = useState(false);
-    const [selected, setSelected] = useState<string | null>(null);
-    const [showInfo, setShowInfo] = useState(false);
+  const { planes } = usePlanes();
+  const { usuario } = useAuth();
+  const hasPlan = !!usuario?.suscripcion?.plan;
+  const [tabIndex, setTabIndex] = useState<number>(hasPlan ? 1 : 0);
+  const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [showInfo, setShowInfo] = useState(false);
 
   const handleSelect = async (plan: PlanType) => {
     const isOverage = Boolean(plan.isOverage);
@@ -37,7 +40,7 @@ const SubscriptionPage: React.FC = () => {
       const pref = isOverage
         ? await subscriptions.purchaseOverage(plan.id)
         : await subscriptions.createSubscription(plan.id);
-      
+
       const redirectUrl = pref?.init_point || pref?.sandbox_init_point;
       if (redirectUrl) {
         const safeUrl = sanitizeUrl(redirectUrl);
@@ -46,7 +49,7 @@ const SubscriptionPage: React.FC = () => {
           return;
         }
       }
-      
+
       alert('Error: La URL de pago no fue generada.');
     } catch (e) {
       console.error('Error al iniciar el pago con Mercado Pago:', e);
@@ -72,7 +75,13 @@ const SubscriptionPage: React.FC = () => {
         {/* Tabs */}
         <Tab.Group selectedIndex={tabIndex} onChange={setTabIndex}>
           <Tab.List className="flex space-x-4 justify-center mb-8">
-            <Tab className={({ selected }) => selected ? 'btn-primary' : 'btn-secondary dark:text-white'}>Planes</Tab>
+            <Tab
+              className={({ selected }) =>
+                selected ? 'btn-primary' : 'btn-secondary dark:text-white'
+              }
+            >
+              Planes
+            </Tab>
             <Tab
               disabled={!usuario?.suscripcion?.plan}
               className={({ selected, disabled }) => {
@@ -95,14 +104,28 @@ const SubscriptionPage: React.FC = () => {
                       .slice()
                       .sort((a, b) => (b.price ?? 0) - (a.price ?? 0))
                       .map((p) => (
-                        <PlanCard key={p.id} plan={p} loading={loading && selected === p.id} onSelect={() => handleSelect(p)} />
-                    ))}
+                        <PlanCard
+                          key={p.id}
+                          plan={p as unknown as SubscriptionPlan}
+                          loading={loading && selected === p.id}
+                          onSelect={() => {
+                            void handleSelect(p);
+                          }}
+                        />
+                      ))}
                   </div>
                 </Tab.Panel>
                 <Tab.Panel>
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-10 justify-items-stretch">
                     {overages.map((p) => (
-                      <PlanCard key={p.id} plan={p} loading={loading && selected === p.id} onSelect={() => handleSelect(p)} />
+                      <PlanCard
+                        key={p.id}
+                        plan={p as unknown as SubscriptionPlan}
+                        loading={loading && selected === p.id}
+                        onSelect={() => {
+                          void handleSelect(p);
+                        }}
+                      />
                     ))}
                   </div>
                 </Tab.Panel>
