@@ -36,7 +36,7 @@ const getFontFamily = (tipografia: string): string => {
     Lato: 'Lato, sans-serif',
     Poppins: 'Poppins, sans-serif',
   };
-  return fontMap[tipografia] || 'Inter, system-ui, sans-serif';
+  return Reflect.get(fontMap, tipografia) || 'Inter, system-ui, sans-serif';
 };
 
 const ReportPreview: React.FC<ReportPreviewProps> = ({

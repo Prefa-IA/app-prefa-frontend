@@ -166,7 +166,7 @@ export const manejarErrorGuardado = (
 export const isValidProcessingResponse = (response: unknown): boolean => {
   if (!response || typeof response !== 'object') return false;
   const responseObj = response as Record<string, unknown>;
-  const valores = PROCESSING_CONFIG.CRITICAL_FIELDS.map((key) => responseObj[key]);
+  const valores = PROCESSING_CONFIG.CRITICAL_FIELDS.map((key) => Reflect.get(responseObj, key));
   return !valores.every((v) => {
     if (v === undefined || v === null) return true;
     const s = String(v).trim();

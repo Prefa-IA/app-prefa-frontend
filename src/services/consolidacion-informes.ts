@@ -31,13 +31,15 @@ const buildAdyacencyMap = (informes: Informe[]): AdyMap => {
     }
 
     const filtradas = vecinosBrutos.filter((v) => smpsSeleccionados.includes(v));
-    if (!ady[smp]) ady[smp] = new Set();
+    const smpSet = Reflect.get(ady, smp);
+    if (!smpSet) Reflect.set(ady, smp, new Set());
     filtradas.forEach((l) => {
-      const smpSet = ady[smp];
-      if (smpSet) smpSet.add(l);
-      if (!ady[l]) ady[l] = new Set();
-      const lSet = ady[l];
-      if (lSet) lSet.add(smp);
+      const currentSmpSet = Reflect.get(ady, smp);
+      if (currentSmpSet) currentSmpSet.add(l);
+      const lSet = Reflect.get(ady, l);
+      if (!lSet) Reflect.set(ady, l, new Set());
+      const currentLSet = Reflect.get(ady, l);
+      if (currentLSet) currentLSet.add(smp);
     });
   }
 
@@ -93,8 +95,9 @@ const validateLinderas = (informes: Informe[]): void => {
   const smpsSeleccionados = informes.map((inf) => inf.datosCatastrales?.smp).filter(Boolean);
 
   for (let i = 0; i < smpsSeleccionados.length - 1; i++) {
-    const aSmp = smpsSeleccionados[i]!;
-    const bSmp = smpsSeleccionados[i + 1]!;
+    const aSmp = Reflect.get(smpsSeleccionados, i);
+    const bSmp = Reflect.get(smpsSeleccionados, i + 1);
+    if (!aSmp || !bSmp) continue;
 
     const infA = getInformeBySmp(informes, aSmp);
     const infB = getInformeBySmp(informes, bSmp);

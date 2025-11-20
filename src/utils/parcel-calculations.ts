@@ -77,7 +77,7 @@ const getEditedOrDefaultValue = <T>(
   key: string,
   defaultValue: T
 ): T => {
-  const value = editedValues[key];
+  const value = Reflect.get(editedValues, key);
   return value !== undefined ? (value as T) : defaultValue;
 };
 
@@ -154,7 +154,7 @@ const calculateAlicuota = (informe: Informe): number => {
     CPU3: 0.15,
     CPU4: 0.1,
   } as Record<string, number>;
-  const cpuAlicuota = cpu ? CPU_ALICUOTAS[cpu] : undefined;
+  const cpuAlicuota = cpu ? Reflect.get(CPU_ALICUOTAS, cpu) : undefined;
   return cpuAlicuota !== undefined ? cpuAlicuota : 0;
 };
 

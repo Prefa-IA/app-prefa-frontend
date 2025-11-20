@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -16,6 +16,42 @@ import ConfirmModal from './generales/ConfirmModal';
 import BasicInformation from './parcel-data/BasicInformation';
 import { MapContainer } from './consulta-direccion';
 
+const useSearchCounter = (isSearching: boolean): number => {
+  const [counter, setCounter] = useState<number>(10);
+
+  useEffect(() => {
+    if (!isSearching) {
+      setCounter(10);
+      return;
+    }
+
+    setCounter(10);
+
+    const interval = setInterval(() => {
+      setCounter((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isSearching]);
+
+  return counter;
+};
+
+const SearchOverlay: React.FC<{ seconds: number }> = ({ seconds }) => (
+  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 sm:p-0">
+    <div className="w-full sm:w-auto px-6 sm:px-10 py-6 bg-white/10 backdrop-blur-sm rounded-lg border border-white/30 shadow-lg text-center text-white space-y-4">
+      <div className="animate-pulse text-xl font-semibold">Buscando direccion…</div>
+      <div className="text-4xl font-extrabold tracking-wider">{seconds}s</div>
+    </div>
+  </div>
+);
+
 const BuscarDireccionPage: React.FC = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -28,18 +64,9 @@ const BuscarDireccionPage: React.FC = () => {
   const { refreshProfile } = useAuth();
   const isSearchingRef = React.useRef(false);
   const lastSearchedRef = React.useRef<string>('');
+  const searchCounter = useSearchCounter(loading);
   const { sugerencias, buscandoSugerencias, obtenerSugerencias, seleccionarSugerencia } =
     useDireccionSugerencias(setDireccion, setCenter, false, () => {}, 4, setError);
-
-  const shouldSkipCredits = React.useCallback(
-    async (fromHistory: boolean, direccion: string): Promise<boolean> => {
-      if (fromHistory) return true;
-      const historial = await listAddressHistory();
-      const direccionNormalizada = direccion.trim().toLowerCase();
-      return historial.some((item) => item.address.trim().toLowerCase() === direccionNormalizada);
-    },
-    []
-  );
 
   const normalizarDireccion = React.useCallback((dir: string): string => {
     if (!dir) return '';
@@ -77,6 +104,26 @@ const BuscarDireccionPage: React.FC = () => {
       }
     },
     [normalizarDireccion]
+  );
+
+  const shouldSkipCredits = React.useCallback(
+    async (fromHistory: boolean, direccion: string): Promise<boolean> => {
+      if (fromHistory) return true;
+      const historial = await listAddressHistory();
+      const direccionNormalizada = direccion.trim().toLowerCase();
+      const enHistorial = historial.some(
+        (item) => item.address.trim().toLowerCase() === direccionNormalizada
+      );
+      if (enHistorial) return true;
+
+      try {
+        const informeExistente = await buscarInformeExistente(direccion);
+        return !!informeExistente;
+      } catch {
+        return false;
+      }
+    },
+    [buscarInformeExistente]
   );
 
   const handleSuccessfulSearch = React.useCallback(
@@ -118,11 +165,14 @@ const BuscarDireccionPage: React.FC = () => {
         const informeExistente = await buscarInformeExistente(direccion);
         if (informeExistente) {
           await handleSuccessfulSearch(informeExistente, true, direccion);
-          toast.info('Se encontró un informe existente para esta dirección.');
+          toast.info('Ya tenias esta direccion guardada, no se consumieron creditos');
+          setLoading(false);
+          isSearchingRef.current = false;
           return true;
         }
       }
       toast.info('Ya tienes una consulta en curso. Espera a que finalice.');
+      setLoading(false);
       isSearchingRef.current = false;
       return false;
     },
@@ -143,7 +193,9 @@ const BuscarDireccionPage: React.FC = () => {
         const informeExistente = await buscarInformeExistente(direccion);
         if (informeExistente) {
           await handleSuccessfulSearch(informeExistente, true, direccion);
-          toast.info('Se encontró un informe existente para esta dirección.');
+          toast.info('Ya tenias esta direccion guardada, no se consumieron creditos');
+          setLoading(false);
+          isSearchingRef.current = false;
           return true;
         }
       }
@@ -195,10 +247,14 @@ const BuscarDireccionPage: React.FC = () => {
         const errorMessage = e instanceof Error ? e.message : 'Error al consultar la dirección';
         setError(errorMessage);
         lastSearchedRef.current = '';
+      } else {
+        return;
       }
     } finally {
-      setLoading(false);
-      isSearchingRef.current = false;
+      if (isSearchingRef.current) {
+        setLoading(false);
+        isSearchingRef.current = false;
+      }
     }
   }, [
     direccion,
@@ -211,16 +267,31 @@ const BuscarDireccionPage: React.FC = () => {
     manejarError409,
   ]);
 
+  const isInitializingRef = React.useRef(false);
+
   React.useEffect(() => {
     const direccionParam = params.get('direccion');
     const fromHistory = params.get('fromHistory') === 'true';
     if (direccionParam) {
       const searchKey = `${direccionParam}-${fromHistory}`;
-      if (searchKey !== lastSearchedRef.current) {
+      if (
+        searchKey !== lastSearchedRef.current &&
+        !isSearchingRef.current &&
+        !isInitializingRef.current
+      ) {
+        isInitializingRef.current = true;
         setDireccion(direccionParam);
-        void onSearch();
+        const timeoutId = setTimeout(() => {
+          isInitializingRef.current = false;
+          void onSearch();
+        }, 0);
+        return () => {
+          clearTimeout(timeoutId);
+          isInitializingRef.current = false;
+        };
       }
     }
+    return undefined;
   }, [params, onSearch]);
 
   React.useEffect(() => {
@@ -243,74 +314,77 @@ const BuscarDireccionPage: React.FC = () => {
   const isDisabled = loading || hasResult;
 
   return (
-    <div className="w-[95%] lg:w-[63%] max-w-8xl mt-8 mx-auto" data-tutorial="buscar-direccion">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-6">
-        <h1 className="text-2xl font-bold text-[#0369A1] mb-4">Buscar dirección</h1>
-        {params.get('fromHistory') !== 'true' && (
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-            Esta acción consumirá 5 créditos y no requiere plan.
-          </p>
+    <>
+      {loading && <SearchOverlay seconds={searchCounter} />}
+      <div className="w-[95%] lg:w-[63%] max-w-8xl mt-8 mx-auto" data-tutorial="buscar-direccion">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-6">
+          <h1 className="text-2xl font-bold text-[#0369A1] mb-4">Buscar dirección</h1>
+          {params.get('fromHistory') !== 'true' && (
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+              Esta acción consumirá 5 créditos y no requiere plan.
+            </p>
+          )}
+          <SearchSection
+            direccion={direccion}
+            onDireccionChange={setDireccion}
+            onSearch={() => {
+              void onSearch();
+            }}
+            modoCompuesto={false}
+            singleModeIcon
+            loading={loading || buscandoSugerencias}
+            sugerencias={sugerencias}
+            onInputChange={(value) => {
+              void obtenerSugerencias(value);
+            }}
+            onSeleccionarSugerencia={(sugerencia) => {
+              void seleccionarSugerencia(sugerencia);
+            }}
+            hasResult={hasResult}
+            onClear={() => {
+              if (resultado) {
+                setConfirmClear(true);
+              } else {
+                setResultado(null);
+                setDireccion('');
+                lastSearchedRef.current = '';
+              }
+            }}
+            disabled={isDisabled}
+          />
+
+          <div className="mt-4">
+            <MapContainer center={center} showMarker={!!resultado} />
+          </div>
+        </div>
+
+        {resultado && (
+          <div className="w-[100%] lg:w-[100%] mx-auto mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-6">
+            <BasicInformation
+              informe={resultado}
+              esInformeCompuesto={false}
+              calculatedValues={calculatedValues}
+              pageCounter={0}
+              isBasicSearch={true}
+            />
+          </div>
         )}
-        <SearchSection
-          direccion={direccion}
-          onDireccionChange={setDireccion}
-          onSearch={() => {
-            void onSearch();
-          }}
-          modoCompuesto={false}
-          singleModeIcon
-          loading={loading || buscandoSugerencias}
-          sugerencias={sugerencias}
-          onInputChange={(value) => {
-            void obtenerSugerencias(value);
-          }}
-          onSeleccionarSugerencia={(sugerencia) => {
-            void seleccionarSugerencia(sugerencia);
-          }}
-          hasResult={hasResult}
-          onClear={() => {
-            if (resultado) {
-              setConfirmClear(true);
-            } else {
+
+        {confirmClear && (
+          <ConfirmModal
+            message="Esta acción eliminará la información de la dirección consultada. ¿Continuar?"
+            onCancel={() => setConfirmClear(false)}
+            onConfirm={() => {
               setResultado(null);
               setDireccion('');
               lastSearchedRef.current = '';
-            }
-          }}
-          disabled={isDisabled}
-        />
-
-        <div className="mt-4">
-          <MapContainer center={center} showMarker={!!resultado} />
-        </div>
-      </div>
-
-      {resultado && (
-        <div className="w-[100%] lg:w-[100%] mx-auto mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-6">
-          <BasicInformation
-            informe={resultado}
-            esInformeCompuesto={false}
-            calculatedValues={calculatedValues}
-            pageCounter={0}
-            isBasicSearch={true}
+              setConfirmClear(false);
+              navigate('/buscar', { replace: true });
+            }}
           />
-        </div>
-      )}
-
-      {confirmClear && (
-        <ConfirmModal
-          message="Esta acción eliminará la información de la dirección consultada. ¿Continuar?"
-          onCancel={() => setConfirmClear(false)}
-          onConfirm={() => {
-            setResultado(null);
-            setDireccion('');
-            lastSearchedRef.current = '';
-            setConfirmClear(false);
-            navigate('/buscar', { replace: true });
-          }}
-        />
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 };
 

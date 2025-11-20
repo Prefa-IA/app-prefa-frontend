@@ -121,6 +121,7 @@ export const useSingleAddressConsultation = ({
       const response = await prefactibilidad.consultarDireccion(direccion, {
         prefaCompleta: tipoPrefa === TIPO_PREFA.COMPLETA,
         compuesta: false,
+        skipCredits: false,
       });
 
       if ('inProgress' in response && response.inProgress) {

@@ -27,4 +27,4 @@ export const PROCESSING_CONFIG = {
 } as const;
 
 export const NAVIGATION_WARNING =
-  'Si cambias de sección perderás la prefactibilidad en curso. Tené en cuenta que el crédito ya fue consumido.';
+  'Si cambias de sección dejarás de ver el informe en curso. Podrás volver a verlo en la sección de Registros en el apartado de "Mis informes".';

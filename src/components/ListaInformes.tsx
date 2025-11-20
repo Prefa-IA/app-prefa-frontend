@@ -5,6 +5,7 @@ import {
   DownloadIcon,
   LocationMarkerIcon,
   OfficeBuildingIcon,
+  RefreshIcon,
   TagIcon,
 } from '@heroicons/react/outline';
 import { CurrencyDollarIcon } from '@heroicons/react/solid';
@@ -58,6 +59,18 @@ const ListaInformes: React.FC<ListaInformesProps> = () => {
     void cargarInformes();
   }, [cargarInformes]);
 
+  useEffect(() => {
+    const handleInformeGuardado = () => {
+      void cargarInformes();
+    };
+
+    window.addEventListener('informe-guardado', handleInformeGuardado);
+
+    return () => {
+      window.removeEventListener('informe-guardado', handleInformeGuardado);
+    };
+  }, [cargarInformes]);
+
   const handleDescargar = async (informe: Informe) => {
     const id = informe._id as string;
     if (downloadingIds.includes(id)) return;
@@ -106,25 +119,37 @@ const ListaInformes: React.FC<ListaInformesProps> = () => {
         <Tabs active={tab} onChange={handleTabChange} />
 
         {tab === 'informes' && (
-          <form
-            onSubmit={handleSearchSubmit}
-            className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2"
-          >
-            <input
-              type="text"
-              value={search}
-              onChange={handleSearchChange}
-              placeholder="Buscá por dirección, barrio o SMP"
-              className="w-full sm:flex-1 border rounded px-3 py-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-            />
-            <button
-              type="submit"
-              className="w-full sm:w-auto px-4 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600 text-white rounded"
-              disabled={searchCooldown}
+          <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+            <form
+              onSubmit={handleSearchSubmit}
+              className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 flex-1"
             >
-              Buscar
+              <input
+                type="text"
+                value={search}
+                onChange={handleSearchChange}
+                placeholder="Buscá por dirección, barrio o SMP"
+                className="w-full sm:flex-1 border rounded px-3 py-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              />
+              <button
+                type="submit"
+                className="w-full sm:w-auto px-4 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600 text-white rounded"
+                disabled={searchCooldown}
+              >
+                Buscar
+              </button>
+            </form>
+            <button
+              onClick={() => {
+                void cargarInformes();
+              }}
+              disabled={loading}
+              className="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              title="Actualizar lista"
+            >
+              <RefreshIcon className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
             </button>
-          </form>
+          </div>
         )}
 
         {tab === 'informes' ? (

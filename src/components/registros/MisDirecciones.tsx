@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ClockIcon, LocationMarkerIcon } from '@heroicons/react/outline';
+import { ClockIcon, LocationMarkerIcon, RefreshIcon } from '@heroicons/react/outline';
 
 import { AddressHistoryItem, listAddressHistory } from '../../services/address-history';
 
@@ -11,21 +11,22 @@ const MisDirecciones: React.FC = () => {
   const [searchCooldown, setSearchCooldown] = React.useState(false);
   const navigate = useNavigate();
 
-  React.useEffect(() => {
-    const loadHistory = async () => {
-      try {
-        setLoading(true);
-        const history = await listAddressHistory();
-        setItems(history);
-      } catch (error) {
-        console.error('Error cargando historial:', error);
-        setItems([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    void loadHistory();
+  const loadHistory = React.useCallback(async (forceRefresh = false) => {
+    try {
+      setLoading(true);
+      const history = await listAddressHistory(forceRefresh);
+      setItems(history);
+    } catch (error) {
+      console.error('Error cargando historial:', error);
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  React.useEffect(() => {
+    void loadHistory();
+  }, [loadHistory]);
 
   const handleVerDatos = (address: string) => {
     const q = new URLSearchParams({ direccion: address, fromHistory: 'true' });
@@ -51,25 +52,37 @@ const MisDirecciones: React.FC = () => {
 
   return (
     <>
-      <form
-        onSubmit={handleSearchSubmit}
-        className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2"
-      >
-        <input
-          type="text"
-          value={search}
-          onChange={handleSearchChange}
-          placeholder="Buscá por dirección"
-          className="w-full sm:flex-1 border rounded px-3 py-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-        />
-        <button
-          type="submit"
-          className="w-full sm:w-auto px-4 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600 text-white rounded"
-          disabled={searchCooldown}
+      <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+        <form
+          onSubmit={handleSearchSubmit}
+          className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2 flex-1"
         >
-          Buscar
+          <input
+            type="text"
+            value={search}
+            onChange={handleSearchChange}
+            placeholder="Buscá por dirección"
+            className="w-full sm:flex-1 border rounded px-3 py-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+          />
+          <button
+            type="submit"
+            className="w-full sm:w-auto px-4 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600 text-white rounded"
+            disabled={searchCooldown}
+          >
+            Buscar
+          </button>
+        </form>
+        <button
+          onClick={() => {
+            void loadHistory(true);
+          }}
+          disabled={loading}
+          className="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+          title="Actualizar historial"
+        >
+          <RefreshIcon className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
         </button>
-      </form>
+      </div>
 
       {loading ? (
         <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow">

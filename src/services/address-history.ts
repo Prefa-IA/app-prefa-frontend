@@ -30,7 +30,13 @@ export async function addAddressToHistory(address: string): Promise<void> {
   }
 }
 
-export async function listAddressHistory(): Promise<AddressHistoryItem[]> {
+export async function listAddressHistory(forceRefresh = false): Promise<AddressHistoryItem[]> {
+  // Si se fuerza la recarga, limpiar caché y promesa
+  if (forceRefresh) {
+    cachedHistory = null;
+    loadingPromise = null;
+  }
+
   // Si hay una carga en progreso, esperarla
   if (loadingPromise) {
     return loadingPromise;

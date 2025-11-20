@@ -29,26 +29,27 @@ const buildFaqs = (openInfo: (e: React.MouseEvent) => void) => [
           <img src={Paso1} alt="Paso 1" className="rounded-lg shadow border" />
         </div>
 
-        {[Paso2, Paso3, Paso4, Paso5, Paso6, Paso7].map((src, idx) => (
-          <div key={idx} className="space-y-2">
-            <p>
-              <strong>Paso {idx + 1}:</strong>{' '}
-              {
-                [
-                  'Escribí la dirección completa dentro de CABA en el campo de búsqueda.',
-                  'Presiona en la lupa para que nuestra IA arme tu prefactibilidad.',
-                  'Seleccioná la dirección correcta de la lista desplegable.',
-                  'Elegí el tipo de informe que necesitás (Simple, Completo o Compuesto) y hacé clic en la lupa.',
-                  'Hacé clic en el ícono de la lupa (o presioná Enter) para iniciar la consulta.',
-                  'Espera mientras se procesan los datos y se generan los resultados.',
-                  'Revisa la información mostrada en pantalla o previsualiza tu informe.',
-                  'Guarda el informe en tu cuenta o genera el PDF si lo deseas.',
-                ][idx]
-              }
-            </p>
-            <img src={src} alt={`Paso ${idx + 1}`} className="rounded-lg shadow border" />
-          </div>
-        ))}
+        {[Paso2, Paso3, Paso4, Paso5, Paso6, Paso7].map((src, idx) => {
+          const pasosTextos = [
+            'Escribí la dirección completa dentro de CABA en el campo de búsqueda.',
+            'Presiona en la lupa para que nuestra IA arme tu prefactibilidad.',
+            'Seleccioná la dirección correcta de la lista desplegable.',
+            'Elegí el tipo de informe que necesitás (Simple, Completo o Compuesto) y hacé clic en la lupa.',
+            'Hacé clic en el ícono de la lupa (o presioná Enter) para iniciar la consulta.',
+            'Espera mientras se procesan los datos y se generan los resultados.',
+            'Revisa la información mostrada en pantalla o previsualiza tu informe.',
+            'Guarda el informe en tu cuenta o genera el PDF si lo deseas.',
+          ];
+          const textoPaso = Reflect.get(pasosTextos, idx) || '';
+          return (
+            <div key={idx} className="space-y-2">
+              <p>
+                <strong>Paso {idx + 1}:</strong> {textoPaso}
+              </p>
+              <img src={src} alt={`Paso ${idx + 1}`} className="rounded-lg shadow border" />
+            </div>
+          );
+        })}
       </div>
     ),
   },

@@ -52,7 +52,7 @@ export const calculateMidPoints = (
   coordinates.slice(1).forEach((coord, index) => {
     if (!coord) return;
     const point = toPixels(coord);
-    const prevCoord = index === 0 ? firstCoord : coordinates[index];
+    const prevCoord = index === 0 ? firstCoord : Reflect.get(coordinates, index);
     if (!prevCoord) return;
     const prevPoint = index === 0 ? firstPoint : toPixels(prevCoord);
     const midX = (prevPoint[0] + point[0]) / 2;

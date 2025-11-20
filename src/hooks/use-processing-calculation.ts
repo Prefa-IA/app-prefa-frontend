@@ -21,6 +21,27 @@ interface UseProcessingCalculationProps {
   setProcessing: (processing: boolean) => void;
 }
 
+const normalizarLfiAfeccionPercent = (parcelaParaCalcular: DatosParcela): void => {
+  const edificabilidad = parcelaParaCalcular['edificabilidad'] as
+    | Record<string, unknown>
+    | undefined;
+
+  if (edificabilidad) {
+    const lfiAfeccionPercent = edificabilidad['lfi_afeccion_percent'];
+
+    if (lfiAfeccionPercent === null || lfiAfeccionPercent === undefined) {
+      edificabilidad['lfi_afeccion_percent'] = 0;
+    } else if (typeof lfiAfeccionPercent === 'string') {
+      const parsed = Number.parseFloat(lfiAfeccionPercent);
+      edificabilidad['lfi_afeccion_percent'] = Number.isNaN(parsed) ? 0 : parsed;
+    } else if (typeof lfiAfeccionPercent !== 'number') {
+      edificabilidad['lfi_afeccion_percent'] = 0;
+    }
+  } else {
+    parcelaParaCalcular['edificabilidad'] = { lfi_afeccion_percent: 0 };
+  }
+};
+
 export const useProcessingCalculation = ({
   setResultado,
   setProcessing,
@@ -29,10 +50,13 @@ export const useProcessingCalculation = ({
     async (datosParcela: DatosParcela) => {
       setProcessing(true);
       try {
+        const parcelaParaCalcular = { ...datosParcela };
+        normalizarLfiAfeccionPercent(parcelaParaCalcular);
+
         let resumenValido: ProcessingResponse | null = null;
 
         for (let intento = 0; intento < PROCESSING_CONFIG.MAX_RETRIES; intento++) {
-          const respuesta = await prefactibilidad.calcular(datosParcela);
+          const respuesta = await prefactibilidad.calcular(parcelaParaCalcular);
 
           if (respuesta && isValidProcessingResponse(respuesta)) {
             resumenValido = respuesta;

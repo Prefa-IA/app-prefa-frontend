@@ -56,7 +56,7 @@ export const TutorialOnboarding: React.FC = () => {
       return;
     }
 
-    const targetRoute = STEP_ROUTES[currentStep];
+    const targetRoute = Reflect.get(STEP_ROUTES, currentStep);
     if (targetRoute && location.pathname !== targetRoute && !hasNavigated) {
       setHasNavigated(true);
       navigate(targetRoute);
@@ -93,11 +93,12 @@ export const TutorialOnboarding: React.FC = () => {
   }
 
   const isTermsStep = currentStep === TERMS_STEP_INDEX;
-  const CurrentStepComponent = isTermsStep ? null : STEP_COMPONENTS[currentStep];
-  const currentStepConfig = isTermsStep ? null : TUTORIAL_STEPS[currentStep];
+  const CurrentStepComponent = isTermsStep ? null : Reflect.get(STEP_COMPONENTS, currentStep);
+  const currentStepConfig = isTermsStep ? null : Reflect.get(TUTORIAL_STEPS, currentStep);
+  const stepSelector = isTermsStep ? undefined : Reflect.get(STEP_SELECTORS, currentStep);
   const highlightSelector = isTermsStep
     ? undefined
-    : STEP_SELECTORS[currentStep] || currentStepConfig?.highlightElement;
+    : stepSelector || currentStepConfig?.highlightElement;
 
   const handleTermsAcceptChange = (accepted: boolean) => {
     setTermsCheckboxAccepted(accepted);

@@ -44,7 +44,6 @@ export const useAutoSaveReport = ({
       return false;
     }
 
-    // Evitar guardar el mismo informe dos veces
     const resultadoId = resultado._id as string | undefined;
     if (resultadoId && saveState.lastSavedResultadoId === resultadoId) {
       return false;
@@ -69,9 +68,13 @@ export const useAutoSaveReport = ({
         setSaveState((prev) => ({
           ...prev,
           savedId,
-          lastSavedResultadoId: resultadoId || null,
+          lastSavedResultadoId: resultadoId || savedId,
         }));
         onSaveCompleteRef.current?.(savedId);
+
+        window.dispatchEvent(
+          new CustomEvent('informe-guardado', { detail: { informeId: savedId } })
+        );
 
         return true;
       } else {
@@ -95,27 +98,36 @@ export const useAutoSaveReport = ({
     setSavedId,
   ]);
 
-  // Guardar automáticamente cuando se obtiene un nuevo informe
-  useEffect(() => {
-    if (resultado && !saveState.isSaving) {
-      const resultadoId = resultado._id as string | undefined;
-      // Solo guardar si es un informe nuevo (sin _id) o si no se ha guardado antes
-      if (!resultadoId || saveState.lastSavedResultadoId !== resultadoId) {
-        void guardarInforme();
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resultado?._id, saveState.isSaving, saveState.lastSavedResultadoId]);
+  const resultadoIdRef = useRef<string | null>(null);
+  const resultadoRef = useRef<Informe | null>(null);
 
   useEffect(() => {
     if (!resultado) {
+      resultadoIdRef.current = null;
+      resultadoRef.current = null;
       setSaveState({
         isSaving: false,
         savedId: null,
         lastSavedResultadoId: null,
       });
+      return;
     }
-  }, [resultado]);
+
+    const resultadoId = resultado._id as string | undefined;
+    const resultadoIdString = resultadoId || null;
+
+    if (
+      resultadoIdString &&
+      resultadoIdString !== resultadoIdRef.current &&
+      resultadoIdString !== saveState.lastSavedResultadoId &&
+      !saveState.isSaving &&
+      resultado !== resultadoRef.current
+    ) {
+      resultadoIdRef.current = resultadoIdString;
+      resultadoRef.current = resultado;
+      void guardarInforme();
+    }
+  }, [resultado?._id, saveState.isSaving, saveState.lastSavedResultadoId, guardarInforme]);
 
   return {
     isSaving: saveState.isSaving,

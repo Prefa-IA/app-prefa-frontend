@@ -64,10 +64,27 @@ export const sanitizePath = (path: string | null | undefined): string => {
   }
 };
 
+function isValidLabelPart(part: string): boolean {
+  if (part.length === 0 || part.length > 63) return false;
+  if (!/^[a-zA-Z0-9]/.test(part)) return false;
+  if (!/[a-zA-Z0-9]$/.test(part)) return false;
+  for (let i = 0; i < part.length; i++) {
+    const char = part.charAt(i);
+    if (!char) continue;
+    const isValidChar = /[a-zA-Z0-9-]/.test(char);
+    if (!isValidChar) return false;
+  }
+  return true;
+}
+
 const isValidHostname = (hostname: string): boolean => {
-  const hostnameRegex =
-    /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-  return hostnameRegex.test(hostname);
+  if (hostname.length > 253) return false;
+  const parts = hostname.split('.');
+  if (parts.length === 0) return false;
+  for (const part of parts) {
+    if (!isValidLabelPart(part)) return false;
+  }
+  return true;
 };
 
 const containsScriptInjection = (str: string): boolean => {

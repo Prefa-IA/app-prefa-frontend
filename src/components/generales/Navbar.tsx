@@ -34,14 +34,17 @@ const Navbar: React.FC = () => {
   const { usuario, logout } = useAuth();
   const { status, refresh: refreshCredits } = useCreditStatus();
   const { theme, toggleTheme } = useTheme();
-  const { planes } = usePlanes();
+  const { planes, loading: planesLoading } = usePlanes();
   const { needsTermsAcceptance, isVisible: isTutorialVisible } = useTutorial();
 
   const [planActual, setPlanActual] = useState<Plan | null>(null);
 
   useEffect(() => {
     const fetchCredits = async () => {
-      if (!usuario) return;
+      if (!usuario || planesLoading || planes.length === 0) {
+        setPlanActual(null);
+        return;
+      }
       try {
         const planActual =
           planes.find((p) => {
@@ -53,14 +56,15 @@ const Navbar: React.FC = () => {
               p.name.toLowerCase() === usuario.suscripcion.nombrePlan.toLowerCase();
             return matchesTipo || matchesNombre;
           }) || null;
-        if (planActual) setPlanActual(planActual);
+        setPlanActual(planActual);
       } catch (error) {
         console.error('Error al obtener créditos:', error);
+        setPlanActual(null);
       }
     };
 
     void fetchCredits();
-  }, [usuario, planes]);
+  }, [usuario, planes, planesLoading]);
 
   useEffect(() => {
     if (usuario) {
@@ -424,8 +428,9 @@ const PlanPillSection: React.FC<PlanPillSectionProps> = ({ planObj, className = 
     'inline-block px-3 py-1 mb-4 ml-4 rounded-full text-xs font-semibold whitespace-nowrap ';
   if (planObj?.tag?.bgClass) {
     const g = planObj.tag.bgClass;
-    const m = g.match(/(?:via|to|from)-([a-z]+)-?(\d{3})?/);
-    const solid = m ? `bg-${m[1]}-600` : 'bg-blue-600';
+    const colorMatch = g.match(/(?:via|to|from)-([a-z]+)/);
+    const color = colorMatch?.[1];
+    const solid = color && /^[a-z]+$/.test(color) ? `bg-${color}-600` : 'bg-blue-600';
     pillClasses += solid + ' text-white';
   } else {
     pillClasses += 'bg-blue-100 text-blue-800';
