@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { toast } from 'react-toastify';
+import { useEffect, useRef, useState } from 'react';
 
-import { prefactibilidad } from '../services/api';
 import { TipoPrefa } from '../types/consulta-direccion';
 import { Informe } from '../types/enums';
-import { manejarErrorGuardado } from '../utils/consulta-direccion-utils';
+
+import { useReportSave } from './use-report-save';
 
 interface UseAutoSaveReportProps {
   resultado: Informe | null;
@@ -14,12 +13,6 @@ interface UseAutoSaveReportProps {
   onSaveComplete?: (savedId: string) => void;
 }
 
-interface SaveState {
-  isSaving: boolean;
-  savedId: string | null;
-  lastSavedResultadoId: string | null;
-}
-
 export const useAutoSaveReport = ({
   resultado,
   tipoPrefa,
@@ -27,76 +20,20 @@ export const useAutoSaveReport = ({
   setSavedId,
   onSaveComplete,
 }: UseAutoSaveReportProps) => {
-  const [saveState, setSaveState] = useState<SaveState>({
-    isSaving: false,
-    savedId: null,
-    lastSavedResultadoId: null,
+  const [savedId, setSavedIdState] = useState<string | null>(null);
+  const { guardarInforme, updateOnSaveComplete, isSaving, lastSavedResultadoId } = useReportSave({
+    tipoPrefa,
+    setError,
+    setSavedId: (id) => {
+      setSavedId(id);
+      setSavedIdState(id);
+    },
+    onSaveComplete,
   });
 
-  const onSaveCompleteRef = useRef(onSaveComplete);
-
   useEffect(() => {
-    onSaveCompleteRef.current = onSaveComplete;
-  }, [onSaveComplete]);
-
-  const guardarInforme = useCallback(async (): Promise<boolean> => {
-    if (!resultado || saveState.isSaving) {
-      return false;
-    }
-
-    const resultadoId = resultado._id as string | undefined;
-    if (resultadoId && saveState.lastSavedResultadoId === resultadoId) {
-      return false;
-    }
-
-    setSaveState((prev) => ({ ...prev, isSaving: true }));
-    const loadingId = toast.loading('Guardando informe...');
-
-    try {
-      const informeParaGuardar: Informe = {
-        ...resultado,
-        tipoPrefa,
-      };
-
-      const response = await prefactibilidad.aceptarInforme(informeParaGuardar);
-
-      if (response.success && response.informe?._id) {
-        toast.success(response.message || 'Informe guardado exitosamente');
-
-        const savedId = response.informe._id;
-        setSavedId(savedId);
-        setSaveState((prev) => ({
-          ...prev,
-          savedId,
-          lastSavedResultadoId: resultadoId || savedId,
-        }));
-        onSaveCompleteRef.current?.(savedId);
-
-        window.dispatchEvent(
-          new CustomEvent('informe-guardado', { detail: { informeId: savedId } })
-        );
-
-        return true;
-      } else {
-        toast.error('Error al guardar el informe');
-        setError('Error al guardar el informe');
-        return false;
-      }
-    } catch (err) {
-      manejarErrorGuardado(err, setError);
-      return false;
-    } finally {
-      toast.dismiss(loadingId);
-      setSaveState((prev) => ({ ...prev, isSaving: false }));
-    }
-  }, [
-    resultado,
-    tipoPrefa,
-    saveState.isSaving,
-    saveState.lastSavedResultadoId,
-    setError,
-    setSavedId,
-  ]);
+    updateOnSaveComplete(onSaveComplete);
+  }, [onSaveComplete, updateOnSaveComplete]);
 
   const resultadoIdRef = useRef<string | null>(null);
   const resultadoRef = useRef<Informe | null>(null);
@@ -105,32 +42,48 @@ export const useAutoSaveReport = ({
     if (!resultado) {
       resultadoIdRef.current = null;
       resultadoRef.current = null;
-      setSaveState({
-        isSaving: false,
-        savedId: null,
-        lastSavedResultadoId: null,
-      });
+      setSavedIdState(null);
+      return;
+    }
+
+    if (isSaving) {
       return;
     }
 
     const resultadoId = resultado._id as string | undefined;
     const resultadoIdString = resultadoId || null;
 
-    if (
-      resultadoIdString &&
-      resultadoIdString !== resultadoIdRef.current &&
-      resultadoIdString !== saveState.lastSavedResultadoId &&
-      !saveState.isSaving &&
-      resultado !== resultadoRef.current
-    ) {
+    const resultadoKey = JSON.stringify({
+      smp: resultado.datosCatastrales?.smp,
+      direccion: resultado.direccionesNormalizadas?.[0]?.direccion,
+      tipoPrefa,
+    });
+
+    const resultadoRefKey = resultadoRef.current
+      ? JSON.stringify({
+          smp: resultadoRef.current.datosCatastrales?.smp,
+          direccion: resultadoRef.current.direccionesNormalizadas?.[0]?.direccion,
+          tipoPrefa,
+        })
+      : null;
+
+    if (resultadoKey === resultadoRefKey) {
+      return;
+    }
+
+    if (resultadoIdString && resultadoIdString === lastSavedResultadoId) {
       resultadoIdRef.current = resultadoIdString;
       resultadoRef.current = resultado;
-      void guardarInforme();
+      return;
     }
-  }, [resultado?._id, saveState.isSaving, saveState.lastSavedResultadoId, guardarInforme]);
+
+    resultadoIdRef.current = resultadoIdString;
+    resultadoRef.current = resultado;
+    void guardarInforme(resultado);
+  }, [resultado, isSaving, lastSavedResultadoId, guardarInforme, tipoPrefa]);
 
   return {
-    isSaving: saveState.isSaving,
-    savedId: saveState.savedId,
+    isSaving,
+    savedId,
   };
 };

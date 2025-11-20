@@ -20,7 +20,7 @@ export const useConsultaConsolidation = ({
   setResultado,
   setError,
 }: UseConsultaConsolidationProps) => {
-  const consolidarInformes = useCallback(() => {
+  const consolidarInformes = useCallback(async () => {
     if (!modoCompuesto || resultados.length === 0) return;
     consolidarInformesCompuestos(
       direcciones,

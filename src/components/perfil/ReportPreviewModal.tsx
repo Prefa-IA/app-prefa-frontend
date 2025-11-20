@@ -2,6 +2,9 @@ import React from 'react';
 
 import { ReportPreviewModalProps } from '../../types/components';
 
+import ReportPreviewHeader from './ReportPreviewHeader';
+import ReportPreviewTables from './ReportPreviewTables';
+
 const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
   onClose,
   personalizacion,
@@ -31,81 +34,11 @@ const ReportPreviewModal: React.FC<ReportPreviewModalProps> = ({
           fontFamily: (personalizacion['tipografia'] as string | undefined) || 'Arial',
         }}
       >
-        <div
-          className="text-center p-4 rounded-lg mb-6"
-          style={{
-            backgroundColor:
-              (personalizacion['fondoEncabezadosPrincipales'] as string | undefined) || '#ffffff',
-          }}
-        >
-          <h1
-            className="text-2xl font-bold"
-            style={{
-              color:
-                (personalizacion['colorTextoTablasPrincipales'] as string | undefined) || '#000000',
-            }}
-          >
-            {nombreInmobiliaria}
-          </h1>
-          <p
-            className="text-sm opacity-75"
-            style={{
-              color:
-                (personalizacion['colorTextoTablasPrincipales'] as string | undefined) || '#000000',
-            }}
-          >
-            Informe de Prefactibilidad
-          </p>
-        </div>
-        {/* Tabla principal */}
-        <div className="border rounded-lg overflow-hidden mb-6 border-gray-200 dark:border-gray-700">
-          <div
-            className="p-3 font-semibold text-center"
-            style={{
-              backgroundColor:
-                (personalizacion['fondoEncabezadosPrincipales'] as string | undefined) || '#ffffff',
-              color:
-                (personalizacion['colorTextoTablasPrincipales'] as string | undefined) || '#000000',
-            }}
-          >
-            DATOS DEL TERRENO (Tabla Principal)
-          </div>
-          <div className="grid grid-cols-2">
-            <div className="border-r p-3 bg-gray-50 dark:bg-gray-700 font-medium">Superficie</div>
-            <div className="p-3">159.6 m²</div>
-            <div className="border-r border-t p-3 bg-gray-50 dark:bg-gray-700 font-medium">
-              Frente
-            </div>
-            <div className="border-t p-3">7.60 m</div>
-            <div className="border-r border-t p-3 bg-gray-50 dark:bg-gray-700 font-medium">
-              Zonificación
-            </div>
-            <div className="border-t p-3">R2a I</div>
-          </div>
-        </div>
-
-        {/* Tabla secundaria */}
-        <div className="border rounded-lg overflow-hidden border-gray-200 dark:border-gray-700">
-          <div
-            className="p-3 font-semibold text-center"
-            style={{
-              backgroundColor:
-                (personalizacion['fondoEncabezadosSecundarios'] as string | undefined) || '#f3f4f6',
-              color:
-                (personalizacion['colorTextoTablasSecundarias'] as string | undefined) || '#374151',
-            }}
-          >
-            DATOS SECUNDARIOS (Tabla Secundaria)
-          </div>
-          <div className="grid grid-cols-2">
-            <div className="border-r p-3 bg-gray-50 dark:bg-gray-700 font-medium">FOT</div>
-            <div className="p-3">2.0</div>
-            <div className="border-r border-t p-3 bg-gray-50 dark:bg-gray-700 font-medium">
-              Altura Máxima
-            </div>
-            <div className="border-t p-3">12.0 m</div>
-          </div>
-        </div>
+        <ReportPreviewHeader
+          personalizacion={personalizacion}
+          nombreInmobiliaria={nombreInmobiliaria}
+        />
+        <ReportPreviewTables personalizacion={personalizacion} />
       </div>
     </div>
   </div>

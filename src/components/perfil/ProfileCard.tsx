@@ -74,10 +74,7 @@ const PlanPill: React.FC<{ plan: string; planObj: SubscriptionPlan | null }> = (
   plan,
   planObj,
 }) => {
-  let colorClass = 'bg-blue-600';
-  if (planObj?.tag?.bgClass) {
-    colorClass = planObj.tag.bgClass;
-  }
+  const colorClass = planObj?.tag?.bgClass || 'bg-blue-600';
   return (
     <span
       className={`inline-flex items-center space-x-1 text-white px-3 py-1 rounded-full text-xs font-medium ${colorClass}`}

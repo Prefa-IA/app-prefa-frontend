@@ -47,6 +47,79 @@ const ProtectedRoute: React.FC<{
   return <>{children}</>;
 };
 
+const AppRoutes: React.FC = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<LoginForm />} />
+      <Route path="/registro" element={<RegistroForm />} />
+      <Route
+        path="/consultar"
+        element={
+          <ProtectedRoute>
+            <ConsultaDireccion />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/buscar"
+        element={
+          <ProtectedRoute>
+            <BuscarDireccionPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/informes"
+        element={
+          <ProtectedRoute>
+            <ListaInformes />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/perfil"
+        element={
+          <ProtectedRoute>
+            <PerfilUsuario />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/suscripciones"
+        element={
+          <ProtectedRoute>
+            <SubscriptionPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/suscripcion"
+        element={
+          <ProtectedRoute>
+            <SubscriptionManager />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/faq" element={<FAQPage />} />
+      <Route path="/print/informe/:id" element={<PrintInforme />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/resend-verification" element={<ResendVerificationPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route
+        path="/admin/facturacion/overages"
+        element={
+          <ProtectedRoute>
+            <OveragesAdmin />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
 const App: React.FC = () => {
   return (
     <ThemeProvider>
@@ -55,75 +128,7 @@ const App: React.FC = () => {
           <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden flex flex-col">
             <Navbar />
             <main className="flex-grow">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<LoginForm />} />
-                <Route path="/registro" element={<RegistroForm />} />
-                <Route
-                  path="/consultar"
-                  element={
-                    <ProtectedRoute>
-                      <ConsultaDireccion />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/buscar"
-                  element={
-                    <ProtectedRoute>
-                      <BuscarDireccionPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/informes"
-                  element={
-                    <ProtectedRoute>
-                      <ListaInformes />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/perfil"
-                  element={
-                    <ProtectedRoute>
-                      <PerfilUsuario />
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/suscripciones"
-                  element={
-                    <ProtectedRoute>
-                      <SubscriptionPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/suscripcion"
-                  element={
-                    <ProtectedRoute>
-                      <SubscriptionManager />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="/faq" element={<FAQPage />} />
-                <Route path="/print/informe/:id" element={<PrintInforme />} />
-                <Route path="/verify-email" element={<VerifyEmailPage />} />
-                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="/resend-verification" element={<ResendVerificationPage />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-                <Route
-                  path="/admin/facturacion/overages"
-                  element={
-                    <ProtectedRoute>
-                      <OveragesAdmin />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <AppRoutes />
             </main>
             <Footer />
             <ThemedToast />

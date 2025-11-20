@@ -68,8 +68,7 @@ function isValidLabelPart(part: string): boolean {
   if (part.length === 0 || part.length > 63) return false;
   if (!/^[a-zA-Z0-9]/.test(part)) return false;
   if (!/[a-zA-Z0-9]$/.test(part)) return false;
-  for (let i = 0; i < part.length; i++) {
-    const char = part.charAt(i);
+  for (const char of part) {
     if (!char) continue;
     const isValidChar = /[a-zA-Z0-9-]/.test(char);
     if (!isValidChar) return false;

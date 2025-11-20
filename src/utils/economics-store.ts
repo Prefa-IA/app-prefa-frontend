@@ -12,17 +12,19 @@ export interface Indice {
   valor: number;
 }
 
-let plusCache: Plusvalia[] | null = null;
-let idxCache: Indice[] | null = null;
+const cache = {
+  plusvalias: null as Plusvalia[] | null,
+  indices: null as Indice[] | null,
+};
 
 export const getPlusvalias = async () => {
-  if (plusCache) return plusCache;
-  plusCache = (await axios.get<Plusvalia[]>('/api/economicos/plusvalias')).data;
-  return plusCache;
+  if (cache.plusvalias) return cache.plusvalias;
+  cache.plusvalias = (await axios.get<Plusvalia[]>('/api/economicos/plusvalias')).data;
+  return cache.plusvalias;
 };
 
 export const getIndices = async () => {
-  if (idxCache) return idxCache;
-  idxCache = (await axios.get<Indice[]>('/api/economicos/indices')).data;
-  return idxCache;
+  if (cache.indices) return cache.indices;
+  cache.indices = (await axios.get<Indice[]>('/api/economicos/indices')).data;
+  return cache.indices;
 };

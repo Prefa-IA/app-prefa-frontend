@@ -32,6 +32,8 @@ const DataTable: React.FC<DataTableProps & DataTableExtraProps> = ({
   );
 };
 
+const HOVER_BACKGROUND_COLOR = 'rgba(0, 0, 0, 0.05)';
+
 const TableRow: React.FC<TableRowProps> = ({ label, value, isAlternate = false }) => {
   const hoverStyle = {
     '--hover-bg': '#00000010',
@@ -41,11 +43,18 @@ const TableRow: React.FC<TableRowProps> = ({ label, value, isAlternate = false }
     <div
       className={`grid grid-cols-2 text-sm hover:bg-opacity-10 transition-colors duration-200 dark:hover:bg-gray-700 ${isAlternate ? 'bg-gray-25' : ''}`}
       style={hoverStyle}
+      role="row"
+      tabIndex={0}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+        e.currentTarget.style.backgroundColor = HOVER_BACKGROUND_COLOR;
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.backgroundColor = isAlternate ? '#f9f9f9' : 'transparent';
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.currentTarget.style.backgroundColor = HOVER_BACKGROUND_COLOR;
+        }
       }}
     >
       <div className="border-b border-r border-gray-200 dark:border-gray-700 p-3 font-semibold bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
@@ -84,11 +93,18 @@ const GridTableRow: React.FC<GridTableRowProps> = ({ values, gridClass }) => {
   return (
     <div
       className={`${gridClass} hover:bg-opacity-10 transition-colors duration-200 dark:hover:bg-gray-700`}
+      role="row"
+      tabIndex={0}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+        e.currentTarget.style.backgroundColor = HOVER_BACKGROUND_COLOR;
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.backgroundColor = 'transparent';
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.currentTarget.style.backgroundColor = HOVER_BACKGROUND_COLOR;
+        }
       }}
     >
       {values.map((value, index) => (

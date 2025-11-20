@@ -12,6 +12,65 @@ interface OveragePlan extends OveragePlanPayload {
   isOverage?: boolean;
 }
 
+const PlansTable: React.FC<{
+  plans: OveragePlan[];
+  isSuperAdmin: boolean;
+  onEdit: (plan: OveragePlan) => void;
+  onDelete: (id: string) => void;
+}> = ({ plans, isSuperAdmin, onEdit, onDelete }) => (
+  <table className="w-full text-sm">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Créditos</th>
+        <th>Precio</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {plans.map((p) => {
+        const planId = p._id || p.id || '';
+        return (
+          <tr key={planId} className="border-t border-gray-700">
+            <td>{p.name}</td>
+            <td>{p.creditosTotales}</td>
+            <td>${p.price}</td>
+            <td className="flex gap-2 py-2">
+              {isSuperAdmin ? (
+                <>
+                  <button
+                    className="btn-secondary"
+                    onClick={() =>
+                      onEdit({
+                        id: planId,
+                        name: p.name,
+                        creditosTotales: p.creditosTotales,
+                        price: p.price,
+                      } as OveragePlanPayload)
+                    }
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="btn-danger"
+                    onClick={() => {
+                      void onDelete(planId);
+                    }}
+                  >
+                    Eliminar
+                  </button>
+                </>
+              ) : (
+                <span className="text-gray-400 text-sm">Solo super admin</span>
+              )}
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+);
+
 const OveragesAdmin: React.FC = () => {
   const { usuario } = useAuth();
   const isSuperAdmin = usuario?.email === 'prefaia@admin.com';
@@ -65,57 +124,14 @@ const OveragesAdmin: React.FC = () => {
           </button>
         )}
       </div>
-      <table className="w-full text-sm">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Créditos</th>
-            <th>Precio</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {plans.map((p) => {
-            const planId = p._id || p.id || '';
-            return (
-              <tr key={planId} className="border-t border-gray-700">
-                <td>{p.name}</td>
-                <td>{p.creditosTotales}</td>
-                <td>${p.price}</td>
-                <td className="flex gap-2 py-2">
-                  {isSuperAdmin ? (
-                    <>
-                      <button
-                        className="btn-secondary"
-                        onClick={() =>
-                          setModalData({
-                            id: planId,
-                            name: p.name,
-                            creditosTotales: p.creditosTotales,
-                            price: p.price,
-                          })
-                        }
-                      >
-                        Editar
-                      </button>
-                      <button
-                        className="btn-danger"
-                        onClick={() => {
-                          void handleDelete(planId);
-                        }}
-                      >
-                        Eliminar
-                      </button>
-                    </>
-                  ) : (
-                    <span className="text-gray-400 text-sm">Solo super admin</span>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <PlansTable
+        plans={plans}
+        isSuperAdmin={isSuperAdmin}
+        onEdit={(plan) => setModalData(plan as OveragePlanPayload)}
+        onDelete={(id: string) => {
+          void handleDelete(id);
+        }}
+      />
 
       {modalData && (
         <OverageForm

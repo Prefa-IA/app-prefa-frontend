@@ -17,9 +17,10 @@ export const getReportTitle = (
 
 export const getReportData = (
   isCompoundMode: boolean,
-  informe: Informe,
+  informe: Informe | undefined,
   informeCompuesto?: InformeCompuesto
-): Informe => {
+): Informe | null => {
+  if (!informe) return null;
   return isCompoundMode && informeCompuesto ? informeCompuesto.informeConsolidado : informe;
 };
 

@@ -1,10 +1,12 @@
 export const hexToRgb = (hex: string) => {
-  let c = hex.replace('#', '');
-  if (c.length === 3)
-    c = c
-      .split('')
-      .map((ch) => ch + ch)
-      .join('');
+  const baseHex = hex.replace('#', '');
+  const c =
+    baseHex.length === 3
+      ? baseHex
+          .split('')
+          .map((ch) => ch + ch)
+          .join('')
+      : baseHex;
   const num = parseInt(c, 16);
   return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
 };

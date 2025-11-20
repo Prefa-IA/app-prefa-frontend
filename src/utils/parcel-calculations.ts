@@ -97,20 +97,30 @@ const calculateCapacidadConstructiva = (
     areaSegundoRetiro
   );
 
-  let lfiAfeccionPercent: number =
-    (informe.edificabilidad as { lfi_afeccion_percent?: number })?.lfi_afeccion_percent || 0;
+  const calcularLfiAfeccionPercent = (): number => {
+    const initialLfiAfeccionPercent: number =
+      (informe.edificabilidad as { lfi_afeccion_percent?: number })?.lfi_afeccion_percent || 0;
 
+    const totalCapConstructivaAjustada =
+      initialLfiAfeccionPercent > 0
+        ? totalCapConstructivaOriginal * (1 - initialLfiAfeccionPercent / 100)
+        : totalCapConstructivaOriginal;
+
+    if (initialLfiAfeccionPercent === 0 && totalCapConstructivaOriginal !== 0) {
+      const diff = totalCapConstructivaOriginal - totalCapConstructivaAjustada;
+      if (diff > 0) {
+        return (diff / totalCapConstructivaOriginal) * 100;
+      }
+    }
+
+    return initialLfiAfeccionPercent;
+  };
+
+  const lfiAfeccionPercent = calcularLfiAfeccionPercent();
   const totalCapConstructivaAjustada =
     lfiAfeccionPercent > 0
       ? totalCapConstructivaOriginal * (1 - lfiAfeccionPercent / 100)
       : totalCapConstructivaOriginal;
-
-  if (lfiAfeccionPercent === 0 && totalCapConstructivaOriginal !== 0) {
-    const diff = totalCapConstructivaOriginal - totalCapConstructivaAjustada;
-    if (diff > 0) {
-      lfiAfeccionPercent = (diff / totalCapConstructivaOriginal) * 100;
-    }
-  }
 
   return {
     pisosSinRetiro,

@@ -17,7 +17,9 @@ const AddressManagement: React.FC<AddressManagementProps> = ({
     <AddressList
       addresses={direcciones}
       onRemove={onEliminarDireccion}
-      onSearch={onConsultarDirecciones}
+      onSearch={() => {
+        void onConsultarDirecciones();
+      }}
       isLoading={loading}
       minCount={2}
       hasResult={!!hasResult}

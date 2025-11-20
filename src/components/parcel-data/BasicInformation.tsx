@@ -5,7 +5,9 @@ import { DirectionsSectionProps } from '../../types/components';
 import { BasicInformationProps, Informe, PARCEL_DATA_CONFIG } from '../../types/enums';
 import { calculateAllValues } from '../../utils/parcel-calculations';
 
-import DataTable, { GridTableHeader, GridTableRow, TableRow } from './DataTable';
+import BasicInformationHeader from './BasicInformationHeader';
+import BasicInfoTable from './BasicInfoTable';
+import NormativeParametersTable from './NormativeParametersTable';
 
 const determineIsBasicSearch = (
   isBasicSearchProp: boolean | undefined,
@@ -185,21 +187,40 @@ const getParametrosNormativos = (informeAMostrar: Informe) => {
     edificabilidad['lfi_afeccion_percent'] as number | null | undefined
   );
 
+  const afectaciones = informeAMostrar.edificabilidad?.afectaciones;
+  const riesgoHidricoRaw = afectaciones?.riesgo_hidrico;
+  const lepRaw = afectaciones?.lep;
+  const ensancheRaw = afectaciones?.ensanche;
+  const aperturaRaw = afectaciones?.apertura;
+
   return {
     esAPHFinal,
     aphLindero: informeAMostrar.edificabilidad?.parcelas_linderas?.aph_linderas,
     manzanaTipica,
-    riesgoHidrico: informeAMostrar.edificabilidad?.afectaciones?.riesgo_hidrico,
-    lep: informeAMostrar.edificabilidad?.afectaciones?.lep,
-    ensanche: informeAMostrar.edificabilidad?.afectaciones?.ensanche,
-    apertura: informeAMostrar.edificabilidad?.afectaciones?.apertura,
-    bandaMinima:
-      (
-        (informeAMostrar as unknown as Record<string, unknown>)['shp_assets_info'] as
-          | { banda_minima?: { features?: number } }
-          | undefined
-      )?.banda_minima?.features || 0 > 0,
-    rivolta: informeAMostrar.edificabilidad?.rivolta,
+    riesgoHidrico:
+      typeof riesgoHidricoRaw === 'number'
+        ? riesgoHidricoRaw > 0
+        : (riesgoHidricoRaw as boolean | undefined),
+    lep: typeof lepRaw === 'number' ? lepRaw > 0 : (lepRaw as boolean | undefined),
+    ensanche:
+      typeof ensancheRaw === 'number' ? ensancheRaw > 0 : (ensancheRaw as boolean | undefined),
+    apertura:
+      typeof aperturaRaw === 'number' ? aperturaRaw > 0 : (aperturaRaw as boolean | undefined),
+    bandaMinima: (
+      (informeAMostrar as unknown as Record<string, unknown>)['shp_assets_info'] as
+        | { banda_minima?: { features?: number } }
+        | undefined
+    )?.banda_minima?.features
+      ? (
+          (informeAMostrar as unknown as Record<string, unknown>)['shp_assets_info'] as
+            | { banda_minima?: { features?: number } }
+            | undefined
+        )?.banda_minima?.features! > 0
+      : false,
+    rivolta:
+      typeof informeAMostrar.edificabilidad?.rivolta === 'number'
+        ? informeAMostrar.edificabilidad.rivolta > 0
+        : undefined,
     troneraIrregular: informeAMostrar.edificabilidad?.irregular,
     zonaEspecialDisplay: zonaEspecial || 'N/A',
     enrase: informeAMostrar.edificabilidad?.enrase,
@@ -258,52 +279,17 @@ const BasicInformation: React.FC<BasicInformationProps> = ({
 
   return (
     <div className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
-      <div className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">
-        {esInformeCompuesto ? 'DATOS CONSOLIDADOS DE PARCELAS' : 'DATOS DE LA PARCELA'}
-      </div>
-
-      <div className="text-xl font-semibold mb-6 text-gray-800 dark:text-gray-200">
-        INFORMACIÓN BÁSICA
-      </div>
+      <BasicInformationHeader esInformeCompuesto={esInformeCompuesto} />
 
       {renderDirecciones()}
 
-      <div className="w-full mb-8">
-        <div className={PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} style={parentTableStyle}>
-          INFORMACIÓN BÁSICA
-        </div>
+      <BasicInfoTable
+        basicInfoColumns={basicInfoColumns}
+        basicInfoValues={basicInfoValues}
+        parentTableStyle={parentTableStyle}
+      />
 
-        <GridTableHeader columns={basicInfoColumns} gridClass={PARCEL_DATA_CONFIG.GRID_COLS_5} />
-
-        <GridTableRow values={basicInfoValues} gridClass={PARCEL_DATA_CONFIG.GRID_COLS_5} />
-      </div>
-
-      {/* Tabla de parámetros normativos disponibles */}
-      <div className="w-full mt-8">
-        <DataTable title="PARÁMETROS NORMATIVOS DISPONIBLES">
-          <div className="p-2">
-            <div className={PARCEL_DATA_CONFIG.GRID_COLS_2}>
-              <TableRow label="APH" value={parametros.esAPHFinal ? 'Sí' : 'No'} />
-              <TableRow label="APH Lindero" value={parametros.aphLindero ? 'Sí' : 'No'} />
-              <TableRow label="Manzana Típica" value={parametros.manzanaTipica} />
-              <TableRow label="Riesgo Hídrico" value={parametros.riesgoHidrico ? 'Sí' : 'No'} />
-              <TableRow label="LEP" value={parametros.lep ? 'Sí' : 'No'} />
-              <TableRow label="Ensanche" value={parametros.ensanche ? 'Sí' : 'No'} />
-              <TableRow label="Apertura de Calle" value={parametros.apertura ? 'Sí' : 'No'} />
-              <TableRow label="Banda Mínima" value={parametros.bandaMinima ? 'Sí' : 'No'} />
-              <TableRow label="Rivolta" value={parametros.rivolta ? 'Sí' : 'No'} />
-              <TableRow
-                label="Tronera Irregular"
-                value={parametros.troneraIrregular ? 'Sí' : 'No'}
-              />
-              <TableRow label="Zona Especial" value={parametros.zonaEspecialDisplay} />
-              <TableRow label="Enrase" value={parametros.enrase ? 'Sí' : 'No'} />
-              <TableRow label="Mixtura de Uso" value={parametros.mixturaUsoDisplay} />
-              <TableRow label="% Afección LFI/LBI" value={parametros.lfiAfeccionPercent} />
-            </div>
-          </div>
-        </DataTable>
-      </div>
+      <NormativeParametersTable parametros={parametros} />
 
       {pageCounter > 0 && <div className="text-right text-sm mt-8">{pageCounter}</div>}
     </div>

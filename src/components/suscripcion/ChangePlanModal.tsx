@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import { toast } from 'react-toastify';
+import React from 'react';
 import { Dialog } from '@headlessui/react';
 
-import { Plan, usePlanes } from '../../hooks/use-planes';
-import { subscriptionService } from '../../services/subscription-service';
+import { useChangePlanHandler } from '../../hooks/use-change-plan-handler';
+import { usePlanes } from '../../hooks/use-planes';
 import { ChangePlanModalProps } from '../../types/components';
 import { SubscriptionPlan } from '../../types/enums';
 import PlanCard from '../perfil/PlanCard';
@@ -12,45 +11,12 @@ const ChangePlanModal: React.FC<ChangePlanModalProps> = ({ onClose, currentPlanI
   const { planes, loading } = usePlanes();
   const normales = planes.filter((p) => !p.isOverage);
   const currentPlan = normales.find((p) => p.id === currentPlanId) || null;
-  const [selected, setSelected] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-
-  const handleSelect = async (plan: Plan) => {
-    if (plan.id === currentPlanId) {
-      toast.info('Ya estás en este plan.');
-      return;
-    }
-
-    const isUpgrade = currentPlan ? (plan.price ?? 0) > (currentPlan.price ?? 0) : true;
-    setSelected(plan.id);
-    setSaving(true);
-    try {
-      const result = await subscriptionService.changePlan(plan.id, isUpgrade);
-      if (result?.init_point) {
-        window.open(result.init_point, '_blank');
-      }
-      const amount = typeof result?.amount === 'number' ? result.amount : null;
-      if (isUpgrade) {
-        toast.success(
-          amount && amount > 0
-            ? `Upgrade iniciado. Pagá ${amount.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })} para completar.`
-            : 'Upgrade iniciado.'
-        );
-      } else {
-        toast.success('Downgrade programado para el próximo ciclo.');
-      }
-      onChanged?.();
-      onClose();
-    } catch (e: unknown) {
-      const errorObj = e as { response?: { data?: { error?: string } }; message?: string };
-      const message =
-        errorObj?.response?.data?.error || errorObj?.message || 'Error al cambiar de plan';
-      toast.error(message);
-    } finally {
-      setSaving(false);
-      setSelected(null);
-    }
-  };
+  const { handleSelect, selected, saving } = useChangePlanHandler({
+    currentPlanId,
+    currentPlan,
+    onChanged,
+    onClose,
+  });
 
   return (
     <Dialog open onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center">

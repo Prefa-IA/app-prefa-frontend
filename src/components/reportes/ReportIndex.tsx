@@ -41,13 +41,13 @@ const IndexTitle: React.FC = () => <div className={styles['title']}>ÍNDICE</div
 const DynamicIndexList: React.FC<DynamicIndexListProps> = ({ items }) => (
   <div className={styles['indexList']}>
     {items.map((item, index) => (
-      <>
-        <DynamicIndexItemComponent key={`${item.id}-${index}`} item={item} />
+      <React.Fragment key={`${item.id}-${index}`}>
+        <DynamicIndexItemComponent item={item} />
         {item.subItems &&
           item.subItems.map((subItem, subIndex) => (
             <DynamicIndexItemComponent key={`${subItem.id}-${subIndex}`} item={subItem} />
           ))}
-      </>
+      </React.Fragment>
     ))}
   </div>
 );

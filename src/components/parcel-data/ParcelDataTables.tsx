@@ -4,9 +4,11 @@ import useTablePersonalization from '../../hooks/use-table-personalization';
 import { Informe, PARCEL_DATA_CONFIG, ParcelDataTablesProps } from '../../types/enums';
 import { calculateAllValues } from '../../utils/parcel-calculations';
 
-type CalculatedValues = ReturnType<typeof calculateAllValues>;
-
 import DataTable, { TableRow } from './DataTable';
+import OptimizationsTable from './OptimizationsTable';
+import { calculateDisplayValues } from './ParcelDataDisplayCalculations';
+
+type CalculatedValues = ReturnType<typeof calculateAllValues>;
 
 const ParcelDataTables: React.FC<ParcelDataTablesProps & { pageCounter?: number }> = ({
   informe,
@@ -18,64 +20,12 @@ const ParcelDataTables: React.FC<ParcelDataTablesProps & { pageCounter?: number 
   const informeAMostrar = informe;
   const { parentTableStyle } = useTablePersonalization();
 
-  const supTotalRaw = informe.datosCatastrales?.['superficie_total'];
-  const supTotalValor = supTotalRaw
-    ? parseFloat(String(supTotalRaw))
-    : calculatedValues.superficieParcela || 0;
-  let superficieTerrenoDisplay = supTotalValor ? `${supTotalValor.toFixed(2)} m²` : 'N/A';
-
-  const supCubRaw = informe.datosCatastrales?.['superficie_cubierta'];
-  const supCubValor = supCubRaw ? parseFloat(String(supCubRaw)) : undefined;
-  let superficieCubiertaDisplay =
-    supCubValor !== undefined ? `${supCubValor.toFixed(2)} m²` : 'N/A';
-
-  const formatDim = (n: number) => `${Number(n).toFixed(2)} m`;
-  let frenteDisplay: string = formatDim(calculatedValues.frenteValor);
-
-  const supEdifValor = informe.edificabilidad?.sup_edificable_planta;
-  let superficieEdifDisplay =
-    supEdifValor !== undefined && supEdifValor !== null
-      ? `${Number(supEdifValor).toFixed(2)} m²`
-      : 'N/A';
-
-  if (esInformeCompuesto && informeCompuesto) {
-    const supList = informeCompuesto.informesIndividuales.map((i) => {
-      const supTotal = i.datosCatastrales?.['superficie_total'];
-      const supParcela = i.edificabilidad?.superficie_parcela;
-      const valor = supTotal ? parseFloat(String(supTotal)) : supParcela ? Number(supParcela) : 0;
-      return isNaN(valor) ? 0 : valor;
-    });
-    superficieTerrenoDisplay += ` (${supList.join(' + ')})`;
-
-    const supCubList = informeCompuesto.informesIndividuales.map((i) => {
-      const supCub = i.datosCatastrales?.['superficie_cubierta'];
-      if (!supCub) return 0;
-      const valor = parseFloat(String(supCub));
-      return isNaN(valor) ? 0 : valor;
-    });
-    if (supCubList.some((v) => v)) {
-      superficieCubiertaDisplay += ` (${supCubList.join(' + ')})`;
-    }
-
-    const frenteList = informeCompuesto.informesIndividuales.map((i) =>
-      parseFloat(i.datosCatastrales?.frente || '0')
-    );
-    frenteDisplay = `${formatDim(calculatedValues.frenteValor)} (${frenteList.map((f) => formatDim(f)).join(' + ')})`;
-
-    const supEdifList = informeCompuesto.informesIndividuales.map(
-      (i) => i.edificabilidad?.sup_edificable_planta || 0
-    );
-    if (supEdifList.length > 0) {
-      superficieEdifDisplay = `${informe.edificabilidad?.sup_edificable_planta} m² (${supEdifList.join(' + ')})`;
-    }
-  }
-
-  const breakdown = {
-    superficieTerrenoDisplay,
-    superficieCubiertaDisplay,
-    frenteDisplay,
-    superficieEdifDisplay,
-  };
+  const breakdown = calculateDisplayValues({
+    informe,
+    informeCompuesto,
+    esInformeCompuesto,
+    calculatedValues,
+  });
 
   return (
     <>
@@ -174,7 +124,7 @@ const ZoningDataTable: React.FC<{
       <TableRow
         label="Troneras"
         value={
-          informe.edificabilidad?.troneras
+          informe.edificabilidad?.troneras && informe.edificabilidad.troneras.area_total !== null
             ? `${informe.edificabilidad.troneras.cantidad} (${informe.edificabilidad.troneras.area_total.toFixed(2)} m²)`
             : 'N/A'
         }
@@ -259,54 +209,6 @@ const RestrictionsTable: React.FC<{
             <TableRow label="Ensanche" value={afectaciones.ensanche || 'N/A'} />
             <TableRow label="LEP" value={afectaciones.lep || 'N/A'} />
             <TableRow label="Riesgo Hídrico" value={afectaciones.riesgo_hidrico || 'N/A'} />
-          </div>
-        </div>
-      </DataTable>
-    </div>
-  );
-};
-
-const OptimizationsTable: React.FC<{
-  informe: Informe;
-}> = ({ informe }) => {
-  const hasOptimizations =
-    informe.edificabilidad?.completamiento_tejido ||
-    informe.edificabilidad?.manzana_atipica ||
-    informe.edificabilidad?.patio_iluminacion ||
-    informe.edificabilidad?.profundidad_balcones ||
-    informe.edificabilidad?.balcones ||
-    informe.edificabilidad?.sup_construible;
-
-  if (!hasOptimizations) return null;
-
-  return (
-    <div className="mt-6">
-      <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-4`}>OPTIMIZACIONES</div>
-
-      <DataTable title="PARÁMETROS DE OPTIMIZACIÓN">
-        <div className="p-2">
-          <div className={PARCEL_DATA_CONFIG.GRID_COLS_2}>
-            <TableRow
-              label="Completamiento de Tejido"
-              value={informe.edificabilidad?.completamiento_tejido || 'N/A'}
-            />
-            <TableRow
-              label="Manzana Atípica"
-              value={informe.edificabilidad?.manzana_atipica || 'N/A'}
-            />
-            <TableRow
-              label="Patio de Iluminación"
-              value={informe.edificabilidad?.patio_iluminacion || 'N/A'}
-            />
-            <TableRow
-              label="Profundidad Balcones"
-              value={informe.edificabilidad?.profundidad_balcones || 'N/A'}
-            />
-            <TableRow label="Balcones" value={informe.edificabilidad?.balcones || 'N/A'} />
-            <TableRow
-              label="Superficie Construible"
-              value={informe.edificabilidad?.sup_construible || 'N/A'}
-            />
           </div>
         </div>
       </DataTable>

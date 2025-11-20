@@ -30,26 +30,22 @@ export const Recaptcha: React.FC<RecaptchaProps> = ({
       return;
     }
 
-    let interval: NodeJS.Timeout | null = null;
-    let timeout: NodeJS.Timeout | null = null;
-
-    interval = setInterval(() => {
+    const interval = setInterval(() => {
       if (checkRecaptchaLoaded()) {
-        if (interval) clearInterval(interval);
-        if (timeout) clearTimeout(timeout);
+        clearInterval(interval);
       }
     }, 100);
 
-    timeout = setTimeout(() => {
-      if (interval) clearInterval(interval);
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
       if (!checkRecaptchaLoaded()) {
         console.warn('reCAPTCHA no se cargó en el tiempo esperado');
       }
     }, 10000);
 
     return () => {
-      if (interval) clearInterval(interval);
-      if (timeout) clearTimeout(timeout);
+      clearInterval(interval);
+      clearTimeout(timeout);
     };
   }, []);
 

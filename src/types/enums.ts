@@ -593,11 +593,27 @@ export interface ParcelDataTablesProps {
   esInformeCompuesto?: boolean;
   calculatedValues: {
     superficieParcela: number;
+    superficieParcelaAjustada: number;
     frenteValor: number;
     fotMedanera: number;
     alturaMax: number;
+    pisosSinRetiro: number;
+    totalPisos: number;
     tipoEdificacion: string;
+    areaPlantasTipicas: number;
+    areaPrimerRetiro: number;
+    areaSegundoRetiro: number;
+    totalCapConstructiva: number;
+    totalCapConstructivaOriginal: number;
+    lfiAfeccionPercent: number;
+    a1: number;
+    a2: number;
+    a: number;
+    b: number;
+    axb: number;
+    alicuotaValor: number;
     alicuota: number;
+    plusvaliaFinal: number;
   };
   pageCounter: number;
 }

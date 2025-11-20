@@ -429,9 +429,9 @@ export interface PlusvaliaFinalTableProps {
 }
 
 export interface MapData {
-  lfi: GeoJSON.FeatureCollection;
-  lib: GeoJSON.FeatureCollection;
-  parcela?: GeoJSON.FeatureCollection;
+  lfi: GeoJSON.FeatureCollection | null;
+  lib: GeoJSON.FeatureCollection | null;
+  parcela?: GeoJSON.FeatureCollection | null;
   afectaciones?: {
     parcela_afectada_lfi: GeoJSON.Feature | null;
     parcela_afectada_lib: GeoJSON.Feature | null;
@@ -440,13 +440,13 @@ export interface MapData {
     area_total_parcela: number;
     area_afectada_lfi: number;
     area_afectada_lib: number;
-  };
+  } | null;
   estadisticas?: {
     total_esquinas: number;
     esquinas_con_troneras: number;
     porcentaje_afectacion_lfi: number;
     porcentaje_afectacion_lib: number;
-  };
+  } | null;
 }
 
 export interface ViewerProps {

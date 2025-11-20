@@ -1,20 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { SearchIcon } from '@heroicons/react/outline';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import {
-  SEARCH_CONFIG,
-  SearchBarProps,
-  SuggestionItemProps,
-  SuggestionsListProps,
-} from '../../types/enums';
+import { SEARCH_CONFIG, SearchBarProps } from '../../types/enums';
 import { addClickOutsideListener } from '../../utils/dom-utils';
-import { handleKeyDown } from '../../utils/form-utils';
 import {
   createFocusHandler,
   createInputChangeHandler,
   createSuggestionSelectHandler,
   shouldShowSuggestions,
 } from '../../utils/search-utils';
+
+import SearchBarInput from './SearchBarInput';
+import SuggestionsList from './SearchBarSuggestions';
 
 import styles from '../../styles/SearchBar.module.css';
 
@@ -36,7 +32,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
   const [cooldown, setCooldown] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const cleanup = addClickOutsideListener((event: MouseEvent) => {
@@ -60,13 +55,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
     onSeleccionarSugerencia
   );
 
-  const handleSearchClick = () => {
+  const handleSearchClick = useCallback(() => {
     if (cooldown) return;
     setCooldown(true);
     onSearch();
     setMostrarSugerencias(false);
     setTimeout(() => setCooldown(false), 1500);
-  };
+  }, [cooldown, onSearch]);
 
   const handleFocus = createFocusHandler(value, setMostrarSugerencias);
 
@@ -74,77 +69,24 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   return (
     <div className={styles['container']} ref={containerRef}>
-      <div className={styles['inputContainer']}>
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder={placeholder}
-          className={`${styles['input']} dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500`}
-          onChange={handleInputChange}
-          value={value}
-          onKeyDown={handleKeyDown('Enter', handleSearchClick)}
-          onFocus={handleFocus}
-          disabled={disabled}
-        />
-        {hasResult ? (
-          <button
-            onClick={onClear}
-            className="bg-red-600 text-white px-5 py-2 rounded hover:bg-red-700"
-          >
-            ✕
-          </button>
-        ) : (
-          <button
-            onClick={handleSearchClick}
-            className={`${styles['searchButton']} dark:bg-primary-700 dark:hover:bg-primary-600`}
-            disabled={isLoading || cooldown || disabled}
-          >
-            {isLoading ? (
-              <div className="flex items-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                {!isCompoundMode}
-              </div>
-            ) : isCompoundMode ? (
-              'Agregar dirección'
-            ) : singleModeIcon ? (
-              <SearchIcon className={styles['icon']} />
-            ) : (
-              'Generar'
-            )}
-          </button>
-        )}
-      </div>
-
+      <SearchBarInput
+        value={value}
+        placeholder={placeholder}
+        disabled={disabled || cooldown}
+        hasResult={hasResult}
+        isLoading={isLoading}
+        isCompoundMode={isCompoundMode}
+        singleModeIcon={singleModeIcon}
+        onChange={handleInputChange}
+        onFocus={handleFocus}
+        onSearch={handleSearchClick}
+        {...(onClear ? { onClear } : {})}
+      />
       {showSuggestions && (
         <SuggestionsList sugerencias={sugerencias} onSelect={handleSeleccionarSugerencia} />
       )}
     </div>
   );
 };
-
-const SuggestionsList: React.FC<SuggestionsListProps> = ({ sugerencias, onSelect }) => (
-  <div className={`${styles['suggestionsContainer']} dark:bg-gray-800 dark:border-gray-700`}>
-    {sugerencias.map((sugerencia, index) => (
-      <SuggestionItem key={index} sugerencia={sugerencia} onSelect={onSelect} />
-    ))}
-  </div>
-);
-
-const SuggestionItem: React.FC<SuggestionItemProps> = ({ sugerencia, onSelect }) => (
-  <div
-    role="button"
-    tabIndex={0}
-    className={`${styles['suggestionItem']} dark:text-gray-100 dark:hover:bg-gray-700`}
-    onClick={() => onSelect(sugerencia.direccion)}
-    onKeyDown={(e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        onSelect(sugerencia.direccion);
-      }
-    }}
-  >
-    {sugerencia.direccion}
-  </div>
-);
 
 export default SearchBar;

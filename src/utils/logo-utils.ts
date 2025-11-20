@@ -1,27 +1,23 @@
-const TEMP_LOGO_KEY = 'tempLogo';
+import React from 'react';
 
-export const saveTempLogo = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      const base64String = reader.result as string;
-      localStorage.setItem(TEMP_LOGO_KEY, base64String);
-      resolve(base64String);
-    };
-
-    reader.onerror = () => {
-      reject(new Error('Error al leer el archivo'));
-    };
-
-    reader.readAsDataURL(file);
-  });
-};
-
-export const getTempLogo = (): string | null => {
-  return localStorage.getItem(TEMP_LOGO_KEY);
-};
-
-export const clearTempLogo = (): void => {
-  localStorage.removeItem(TEMP_LOGO_KEY);
+export const createLogoUploadMessage = (restantes: number, previewUrl: string): React.ReactNode => {
+  return React.createElement(
+    'div',
+    { className: 'space-y-4 text-center' },
+    React.createElement(
+      'p',
+      null,
+      `Subirás un nuevo logo. Cambios mensuales disponibles: ${restantes}.`
+    ),
+    React.createElement('img', {
+      src: previewUrl,
+      alt: 'Preview logo',
+      className: 'mx-auto max-h-32',
+    }),
+    React.createElement(
+      'p',
+      null,
+      'Este logo se usará como marca de agua en tus informes si tu plan incluye marca de agua organizacional.'
+    )
+  );
 };

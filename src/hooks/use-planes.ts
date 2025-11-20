@@ -27,33 +27,35 @@ export interface Plan {
 }
 
 // Cache simple de módulo para evitar llamadas duplicadas entre montajes
-let cachedPlanes: Plan[] | null = null;
-let inFlight: Promise<Plan[]> | null = null;
+const cache = {
+  planes: null as Plan[] | null,
+  inFlight: null as Promise<Plan[]> | null,
+};
 
 export const usePlanes = () => {
-  const [planes, setPlanes] = useState<Plan[]>(cachedPlanes || []);
-  const [loading, setLoading] = useState(!cachedPlanes);
+  const [planes, setPlanes] = useState<Plan[]>(cache.planes || []);
+  const [loading, setLoading] = useState(!cache.planes);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (cachedPlanes) return; // ya tenemos datos
+    if (cache.planes) return; // ya tenemos datos
 
     const fetchPlans = async () => {
       try {
-        if (!inFlight) {
+        if (!cache.inFlight) {
           const base = process.env['REACT_APP_API_URL'] || 'http://localhost:4000';
-          inFlight = fetch(`${base}/suscripciones/planes`)
+          cache.inFlight = fetch(`${base}/suscripciones/planes`)
             .then((res) => res.json())
             .then((data) => (Array.isArray(data) ? data : Object.values(data)));
         }
-        const data = await inFlight;
-        cachedPlanes = data;
+        const data = await cache.inFlight;
+        cache.planes = data;
         setPlanes(data);
       } catch (e) {
         setError('Error al cargar planes');
       } finally {
         setLoading(false);
-        inFlight = null;
+        cache.inFlight = null;
       }
     };
 

@@ -64,52 +64,7 @@ const processLFI = (
   }
 };
 
-const calculateLIBLFIDistance = (
-  libFeatures: GeoJSONFeature[] | null,
-  lfiFeatures: GeoJSONFeature[] | null,
-  resultados: MedicionesCalculadas
-): void => {
-  if (
-    !libFeatures ||
-    libFeatures.length === 0 ||
-    !libFeatures[0] ||
-    !lfiFeatures ||
-    lfiFeatures.length === 0 ||
-    !lfiFeatures[0]
-  ) {
-    return;
-  }
-
-  try {
-    const libFeature = libFeatures[0];
-    const lfiFeature = lfiFeatures[0];
-
-    const libCoords = libFeature.geometry.coordinates;
-    const lfiCoords = lfiFeature.geometry.coordinates;
-    const libPoints: number[][] =
-      libFeature.geometry.type === 'LineString' && Array.isArray(libCoords)
-        ? [...(libCoords as number[][])]
-        : [];
-    const lfiPoints: number[][] =
-      lfiFeature.geometry.type === 'LineString' && Array.isArray(lfiCoords)
-        ? [...(lfiCoords as number[][])]
-        : [];
-
-    let minDistance = Infinity;
-    for (const libPoint of libPoints) {
-      for (const lfiPoint of lfiPoints) {
-        const from = turf.point(libPoint);
-        const to = turf.point(lfiPoint);
-        const distance = turf.distance(from, to, { units: 'meters' });
-        minDistance = Math.min(minDistance, distance);
-      }
-    }
-
-    resultados.distanciaLIB_LFI = minDistance;
-  } catch (err) {
-    console.error('Error al calcular distancia:', err);
-  }
-};
+import { calculateLIBLFIDistance } from './geo-calculations-helpers';
 
 export const calcularMetricas = (features: {
   superficieEdificable: GeoJSONFeature[] | null;

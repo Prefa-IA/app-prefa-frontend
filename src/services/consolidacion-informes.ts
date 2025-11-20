@@ -94,25 +94,25 @@ const areNeighbors = (infA: Informe, infB: Informe, aSmp: string, bSmp: string):
 const validateLinderas = (informes: Informe[]): void => {
   const smpsSeleccionados = informes.map((inf) => inf.datosCatastrales?.smp).filter(Boolean);
 
-  for (let i = 0; i < smpsSeleccionados.length - 1; i++) {
-    const aSmp = Reflect.get(smpsSeleccionados, i);
-    const bSmp = Reflect.get(smpsSeleccionados, i + 1);
-    if (!aSmp || !bSmp) continue;
+  const smpsArray = Array.from(smpsSeleccionados);
 
-    const infA = getInformeBySmp(informes, aSmp);
-    const infB = getInformeBySmp(informes, bSmp);
+  smpsArray.reduce((previousSmp: string | null, currentSmp: string) => {
+    if (previousSmp && currentSmp) {
+      const infA = getInformeBySmp(informes, previousSmp);
+      const infB = getInformeBySmp(informes, currentSmp);
 
-    if (!areNeighbors(infA, infB, aSmp, bSmp)) {
-      throw new Error('Las parcelas seleccionadas no son parcelas linderas entre sí.');
+      if (!areNeighbors(infA, infB, previousSmp, currentSmp)) {
+        throw new Error('Las parcelas seleccionadas no son parcelas linderas entre sí.');
+      }
     }
-  }
+    return currentSmp;
+  }, null);
 };
 
 const consolidateDatosCatastrales = (consolidado: Informe, informes: Informe[]): void => {
   if (!consolidado.datosCatastrales) return;
 
-  let superficieTotal = 0;
-  informes.forEach((inf) => {
+  const superficieTotal = informes.reduce((total, inf) => {
     if (inf.datosCatastrales?.superficie) {
       const superficie =
         typeof inf.datosCatastrales.superficie === 'string'
@@ -120,14 +120,14 @@ const consolidateDatosCatastrales = (consolidado: Informe, informes: Informe[]):
           : inf.datosCatastrales.superficie;
 
       if (!isNaN(superficie)) {
-        superficieTotal += superficie;
+        return total + superficie;
       }
     }
-  });
+    return total;
+  }, 0);
   consolidado.datosCatastrales.superficie = superficieTotal.toString();
 
-  let frenteTotal = 0;
-  informes.forEach((inf) => {
+  const frenteTotal = informes.reduce((total, inf) => {
     if (inf.datosCatastrales?.frente) {
       const frente =
         typeof inf.datosCatastrales.frente === 'string'
@@ -135,10 +135,11 @@ const consolidateDatosCatastrales = (consolidado: Informe, informes: Informe[]):
           : inf.datosCatastrales.frente;
 
       if (!isNaN(frente)) {
-        frenteTotal += frente;
+        return total + frente;
       }
     }
-  });
+    return total;
+  }, 0);
   consolidado.datosCatastrales.frente = frenteTotal.toString();
 
   const smps = informes.map((inf) => inf.datosCatastrales?.smp || '').filter((smp) => smp);
@@ -150,45 +151,34 @@ const consolidateDatosCatastrales = (consolidado: Informe, informes: Informe[]):
 const consolidateEdificabilidad = (consolidado: Informe, informes: Informe[]): void => {
   if (!consolidado.edificabilidad) return;
 
-  let superficieParcelaTotal = 0;
-  informes.forEach((inf) => {
-    if (inf.edificabilidad?.superficie_parcela) {
-      superficieParcelaTotal += inf.edificabilidad.superficie_parcela;
-    }
-  });
+  const superficieParcelaTotal = informes.reduce((total, inf) => {
+    return total + (inf.edificabilidad?.superficie_parcela || 0);
+  }, 0);
   consolidado.edificabilidad.superficie_parcela = superficieParcelaTotal;
 
-  let supEdificablePlantaTotal = 0;
-  informes.forEach((inf) => {
-    if (inf.edificabilidad?.sup_edificable_planta) {
-      supEdificablePlantaTotal += inf.edificabilidad.sup_edificable_planta;
-    }
-  });
+  const supEdificablePlantaTotal = informes.reduce((total, inf) => {
+    return total + (inf.edificabilidad?.sup_edificable_planta || 0);
+  }, 0);
   consolidado.edificabilidad.sup_edificable_planta = supEdificablePlantaTotal;
 
-  let supMaxEdificableTotal = 0;
-  informes.forEach((inf) => {
-    if (inf.edificabilidad?.sup_max_edificable) {
-      supMaxEdificableTotal += inf.edificabilidad.sup_max_edificable;
-    }
-  });
+  const supMaxEdificableTotal = informes.reduce((total, inf) => {
+    return total + (inf.edificabilidad?.sup_max_edificable || 0);
+  }, 0);
   consolidado.edificabilidad.sup_max_edificable = supMaxEdificableTotal;
 
   if (consolidado.edificabilidad.plusvalia) {
-    let plusvaliaEmTotal = 0;
-    let plusvaliaPlTotal = 0;
+    const plusvaliaTotals = informes.reduce(
+      (totals, inf) => {
+        return {
+          em: totals.em + (inf.edificabilidad?.plusvalia?.plusvalia_em || 0),
+          pl: totals.pl + (inf.edificabilidad?.plusvalia?.plusvalia_pl || 0),
+        };
+      },
+      { em: 0, pl: 0 }
+    );
 
-    informes.forEach((inf) => {
-      if (inf.edificabilidad?.plusvalia?.plusvalia_em) {
-        plusvaliaEmTotal += inf.edificabilidad.plusvalia.plusvalia_em;
-      }
-      if (inf.edificabilidad?.plusvalia?.plusvalia_pl) {
-        plusvaliaPlTotal += inf.edificabilidad.plusvalia.plusvalia_pl;
-      }
-    });
-
-    consolidado.edificabilidad.plusvalia.plusvalia_em = plusvaliaEmTotal;
-    consolidado.edificabilidad.plusvalia.plusvalia_pl = plusvaliaPlTotal;
+    consolidado.edificabilidad.plusvalia.plusvalia_em = plusvaliaTotals.em;
+    consolidado.edificabilidad.plusvalia.plusvalia_pl = plusvaliaTotals.pl;
   }
 };
 

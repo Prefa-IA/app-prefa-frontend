@@ -129,30 +129,43 @@ export const drawParcelInfo = (
 ) => {
   ctx.font = '14px Arial';
   ctx.textAlign = 'left';
-  let yPos = 30;
+  const initialYPos = 30;
+  const lineHeight = 20;
+
+  const items: Array<{ text: string; yPos: number }> = [];
+  const yPosState = { current: initialYPos };
+
+  const addItem = (text: string, incrementY: boolean = true) => {
+    items.push({ text, yPos: yPosState.current });
+    if (incrementY) {
+      yPosState.current += lineHeight;
+    }
+  };
 
   if (datosCatastrales?.superficie_total) {
     const superficie = toNumber(datosCatastrales.superficie_total);
     if (superficie) {
-      ctx.fillText(`Superficie: ${superficie.toFixed(2)} m²`, padding, yPos);
-      yPos += 20;
+      addItem(`Superficie: ${superficie.toFixed(2)} m²`);
     }
   }
 
   if (datosEdificabilidad?.altura_max?.[0]) {
     const altura = toNumber(datosEdificabilidad.altura_max[0]);
     if (altura) {
-      ctx.fillText(`Altura máxima: ${altura}m + 2R`, padding, yPos);
-      yPos += 20;
+      addItem(`Altura máxima: ${altura}m + 2R`);
     }
   }
 
   if (datosEdificabilidad?.fot?.fot_medianera) {
     const fot = toNumber(datosEdificabilidad.fot.fot_medianera);
     if (fot) {
-      ctx.fillText(`FOT: ${fot}`, padding, yPos);
+      addItem(`FOT: ${fot}`, false);
     }
   }
+
+  items.forEach((item) => {
+    ctx.fillText(item.text, padding, item.yPos);
+  });
 };
 
 export const drawNorthArrow = (

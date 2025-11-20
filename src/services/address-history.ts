@@ -5,13 +5,15 @@ export interface AddressHistoryItem {
   timestamp: number;
 }
 
-let cachedHistory: AddressHistoryItem[] | null = null;
-let loadingPromise: Promise<AddressHistoryItem[]> | null = null;
+const cache = {
+  history: null as AddressHistoryItem[] | null,
+  loadingPromise: null as Promise<AddressHistoryItem[]> | null,
+};
 
 async function loadHistoryFromAPI(): Promise<AddressHistoryItem[]> {
   try {
     const data = await auth.getAddressHistory();
-    cachedHistory = data;
+    cache.history = data;
     return data;
   } catch (error) {
     console.error('Error cargando historial de direcciones:', error);
@@ -23,8 +25,8 @@ export async function addAddressToHistory(address: string): Promise<void> {
   try {
     await auth.addAddressToHistory(address);
     // Actualizar caché
-    cachedHistory = null;
-    loadingPromise = null;
+    cache.history = null;
+    cache.loadingPromise = null;
   } catch (error) {
     console.error('Error agregando dirección al historial:', error);
   }
@@ -33,23 +35,23 @@ export async function addAddressToHistory(address: string): Promise<void> {
 export async function listAddressHistory(forceRefresh = false): Promise<AddressHistoryItem[]> {
   // Si se fuerza la recarga, limpiar caché y promesa
   if (forceRefresh) {
-    cachedHistory = null;
-    loadingPromise = null;
+    cache.history = null;
+    cache.loadingPromise = null;
   }
 
   // Si hay una carga en progreso, esperarla
-  if (loadingPromise) {
-    return loadingPromise;
+  if (cache.loadingPromise) {
+    return cache.loadingPromise;
   }
 
   // Si hay caché, retornarlo
-  if (cachedHistory !== null) {
-    return cachedHistory;
+  if (cache.history !== null) {
+    return cache.history;
   }
 
   // Cargar desde la API
-  loadingPromise = loadHistoryFromAPI();
-  const result = await loadingPromise;
-  loadingPromise = null;
+  cache.loadingPromise = loadHistoryFromAPI();
+  const result = await cache.loadingPromise;
+  cache.loadingPromise = null;
   return result;
 }

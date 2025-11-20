@@ -56,20 +56,19 @@ export const manejarSeleccionSugerencia = async (
 };
 
 export const validarDireccionConNumero = (direccion: string | DireccionSugerida): boolean => {
-  let direccionStr = '';
+  const direccionStr =
+    typeof direccion === 'object' && direccion !== null
+      ? (() => {
+          const dirObj = direccion;
+          if (dirObj.altura && dirObj.altura.trim() !== '') {
+            return null; // Indica que tiene altura válida
+          }
+          return dirObj.direccion || null;
+        })()
+      : direccion;
 
-  if (typeof direccion === 'object' && direccion !== null) {
-    const dirObj = direccion;
-    if (dirObj.altura && dirObj.altura.trim() !== '') {
-      return true;
-    }
-    if (dirObj.direccion) {
-      direccionStr = dirObj.direccion;
-    } else {
-      return false;
-    }
-  } else {
-    direccionStr = direccion;
+  if (direccionStr === null) {
+    return true; // Tiene altura válida
   }
 
   if (!direccionStr || direccionStr.trim().length === 0) {
@@ -176,13 +175,13 @@ export const isValidProcessingResponse = (response: unknown): boolean => {
 
 export const confirmarToast = (mensaje: string): Promise<boolean> => {
   return new Promise((resolve) => {
-    let toastId: React.ReactText;
+    const toastState = { id: null as React.ReactText | null };
     const handleClose = () => {
-      toast.dismiss(toastId);
+      if (toastState.id) toast.dismiss(toastState.id);
       resolve(false);
     };
     const handleConfirm = () => {
-      toast.dismiss(toastId);
+      if (toastState.id) toast.dismiss(toastState.id);
       resolve(true);
     };
     const content = React.createElement(
@@ -210,7 +209,7 @@ export const confirmarToast = (mensaje: string): Promise<boolean> => {
         )
       )
     );
-    toastId = toast.info(content, {
+    toastState.id = toast.info(content, {
       closeButton: false,
       autoClose: false,
       position: 'top-center',

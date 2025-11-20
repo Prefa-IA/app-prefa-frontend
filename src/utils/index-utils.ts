@@ -9,6 +9,17 @@ import {
   PageSectionConfig,
 } from '../types/enums';
 
+import {
+  checkHasAPH,
+  checkHasEdificabilidad,
+  checkHasEntorno,
+  checkHasGeometria,
+  checkHasLBI,
+  checkHasLFI,
+  checkHasTroneras,
+  getInformeAMostrar,
+} from './index-context-helpers';
+
 export const generateIndexContext = (
   informe: Informe,
   informeCompuesto?: InformeCompuesto,
@@ -16,40 +27,20 @@ export const generateIndexContext = (
   fachadaImages: string[] = [],
   documentosVisuales: DocumentosVisuales = { croquis: [], perimetros: [], planosIndice: [] }
 ): IndexGenerationContext => {
-  const informeAMostrar =
-    esInformeCompuesto && informeCompuesto ? informeCompuesto.informeConsolidado : informe;
+  const informeAMostrar = getInformeAMostrar(informe, informeCompuesto, esInformeCompuesto);
 
   return {
     esInformeCompuesto,
     ...(informeCompuesto !== undefined && { informeCompuesto }),
     fachadaImages,
     documentosVisuales,
-    hasEdificabilidad: !!(
-      informeAMostrar.edificabilidad && Object.keys(informeAMostrar.edificabilidad).length > 0
-    ),
-    hasGeometria: !!(informeAMostrar.geometria && informeAMostrar.geometria.features?.length > 0),
-    hasEntorno: !!(
-      informeAMostrar.entorno &&
-      (informeAMostrar.entorno.espaciosVerdes?.length > 0 ||
-        informeAMostrar.entorno.transportes?.length > 0 ||
-        informeAMostrar.entorno.servicios?.length > 0)
-    ),
-    hasTroneras: !!(
-      informeAMostrar.edificabilidad?.troneras &&
-      informeAMostrar.edificabilidad.troneras.cantidad > 0
-    ),
-    hasAPH: !!(
-      informeAMostrar.edificabilidad?.catalogacion &&
-      informeAMostrar.edificabilidad.catalogacion.catalogacion
-    ),
-    hasLFI: !!(
-      informeAMostrar.edificabilidad?.lfi_disponible &&
-      informeAMostrar.edificabilidad.lfi_disponible !== 'No'
-    ),
-    hasLBI: !!(
-      informeAMostrar.edificabilidad?.longitud_lfi &&
-      parseFloat(informeAMostrar.edificabilidad.longitud_lfi) > 0
-    ),
+    hasEdificabilidad: checkHasEdificabilidad(informeAMostrar),
+    hasGeometria: checkHasGeometria(informeAMostrar),
+    hasEntorno: checkHasEntorno(informeAMostrar),
+    hasTroneras: checkHasTroneras(informeAMostrar),
+    hasAPH: checkHasAPH(informeAMostrar),
+    hasLFI: checkHasLFI(informeAMostrar),
+    hasLBI: checkHasLBI(informeAMostrar),
   };
 };
 
@@ -68,12 +59,12 @@ const calculateSequentialPageNumbers = (
   context: IndexGenerationContext
 ): Map<string, number> => {
   const pageNumbers = new Map<string, number>();
-  let currentPage = 2;
+  const pageCounter = { current: 2 };
 
   sections.forEach((section) => {
     if (shouldIncludeSection(section, informe, context)) {
-      pageNumbers.set(section.id, currentPage);
-      currentPage++;
+      pageNumbers.set(section.id, pageCounter.current);
+      pageCounter.current++;
 
       if (section.subSections) {
         section.subSections.forEach((subSection) => {
@@ -185,12 +176,12 @@ export const getVisibleIndexItems = (items: DynamicIndexItem[]): DynamicIndexIte
 };
 
 export const getTotalPages = (indexItems: DynamicIndexItem[]): number => {
-  let maxPage = 0;
+  const maxPageRef = { current: 0 };
 
   const findMaxPage = (items: DynamicIndexItem[]) => {
     items.forEach((item) => {
-      if (item.visible && item.pagina > maxPage) {
-        maxPage = item.pagina;
+      if (item.visible && item.pagina > maxPageRef.current) {
+        maxPageRef.current = item.pagina;
       }
       if (item.subItems) {
         findMaxPage(item.subItems);
@@ -199,7 +190,7 @@ export const getTotalPages = (indexItems: DynamicIndexItem[]): number => {
   };
 
   findMaxPage(indexItems);
-  return maxPage;
+  return maxPageRef.current;
 };
 
 export const findIndexItemById = (
@@ -219,13 +210,13 @@ export const findIndexItemById = (
 };
 
 export const getIndexStructure = (items: DynamicIndexItem[]): string => {
-  let structure = '';
+  const structureParts: string[] = [];
 
   const buildStructure = (items: DynamicIndexItem[], level: number = 0) => {
     items.forEach((item) => {
       if (item.visible) {
         const indent = '  '.repeat(level);
-        structure += `${indent}${item.texto} (p. ${item.pagina})\n`;
+        structureParts.push(`${indent}${item.texto} (p. ${item.pagina})\n`);
 
         if (item.subItems) {
           buildStructure(item.subItems, level + 1);
@@ -235,7 +226,7 @@ export const getIndexStructure = (items: DynamicIndexItem[]): string => {
   };
 
   buildStructure(items);
-  return structure;
+  return structureParts.join('');
 };
 
 export const debugIndexStructure = (
@@ -254,26 +245,28 @@ export const debugIndexStructure = (
   const sections = [...DYNAMIC_INDEX_CONFIG.BASE_SECTIONS] as PageSectionConfig[];
   const pageNumbersMap = calculateSequentialPageNumbers(sections, informe, context);
 
-  let result = 'ESTRUCTURA DEL ÍNDICE DINÁMICO:\n';
-  result += '=====================================\n\n';
-  result += 'ÍNDICE (Página 1)\n\n';
+  const resultParts: string[] = [
+    'ESTRUCTURA DEL ÍNDICE DINÁMICO:\n',
+    '=====================================\n\n',
+    'ÍNDICE (Página 1)\n\n',
+  ];
 
   sections.forEach((section) => {
     if (shouldIncludeSection(section, informe, context)) {
       const pageNum = pageNumbersMap.get(section.id);
-      result += `${section.title} - Página ${pageNum}\n`;
+      resultParts.push(`${section.title} - Página ${pageNum}\n`);
 
       if (section.subSections) {
         section.subSections.forEach((subSection) => {
           if (shouldIncludeSection(subSection, informe, context)) {
             const subPageNum = pageNumbersMap.get(subSection.id);
-            result += `  ${subSection.title} - Página ${subPageNum}\n`;
+            resultParts.push(`  ${subSection.title} - Página ${subPageNum}\n`);
           }
         });
       }
-      result += '\n';
+      resultParts.push('\n');
     }
   });
 
-  return result;
+  return resultParts.join('');
 };
