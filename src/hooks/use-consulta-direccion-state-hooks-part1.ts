@@ -23,6 +23,7 @@ interface UseConsultaDireccionStateHooksPart1Props {
   setResultado: React.Dispatch<React.SetStateAction<Informe | null>>;
   setResultados: React.Dispatch<React.SetStateAction<Informe[]>>;
   setProcessing: (processing: boolean) => void;
+  setIsValidating: (isValidating: boolean) => void;
   setDirecciones: React.Dispatch<React.SetStateAction<string[]>>;
   refreshProfile: () => Promise<void>;
   refreshCredits: () => void;
@@ -42,6 +43,7 @@ export const useConsultaDireccionStateHooksPart1 = (
     resultados: props.resultados,
     setDirecciones: props.setDirecciones,
     setResultados: props.setResultados,
+    setDireccion: props.setDireccion,
   });
 
   const { sugerencias, buscandoSugerencias, obtenerSugerencias, seleccionarSugerencia } =
@@ -75,6 +77,7 @@ export const useConsultaDireccionStateHooksPart1 = (
     setInformeCompuesto: props.setInformeCompuesto,
     setResultado: props.setResultado,
     setError: props.setError,
+    setResultados: props.setResultados,
   });
 
   return {

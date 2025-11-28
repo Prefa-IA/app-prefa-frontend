@@ -20,6 +20,6 @@ export const shouldShowDocumentViewer = ({ tipoPrefa }: ShouldShowSectionsProps)
   return tipoPrefa === TIPO_PREFA.COMPLETA;
 };
 
-export const shouldShowPlusvalia = ({ informeAMostrar }: ShouldShowSectionsProps): boolean => {
-  return !!informeAMostrar.edificabilidad?.plusvalia;
+export const shouldShowPlusvalia = (_props: ShouldShowSectionsProps): boolean => {
+  return true;
 };

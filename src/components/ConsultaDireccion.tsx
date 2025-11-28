@@ -11,7 +11,10 @@ import { mapConsultaDireccionProps } from './consulta-direccion/ConsultaDireccio
 const ConsultaDireccion: React.FC<ConsultaDireccionProps> = ({ className }) => {
   const state = useConsultaDireccionState(className);
 
-  const processingCounter = useProcessingCounter(state.processing);
+  const numeroDirecciones =
+    state.modoCompuesto && state.direcciones.length > 0 ? state.direcciones.length : 1;
+
+  const processingCounter = useProcessingCounter(state.processing, numeroDirecciones);
   const hasActiveQuery =
     !!state.resultado || state.resultados.length > 0 || state.processing || state.loading;
   const { navConfirm, setNavConfirm } = useNavigationGuard(hasActiveQuery);

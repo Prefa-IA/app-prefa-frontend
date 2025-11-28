@@ -26,14 +26,15 @@ const ListaInformes: React.FC<ListaInformesProps> = () => {
     totalPages,
     search,
     downloadingIds,
-    downloadedIds,
     searchCooldown,
+    itemsPerPage,
     cargarInformes,
     handleDescargar,
     handleSearchSubmit,
     handleSearchChange,
     handlePrevPage,
     handleNextPage,
+    handleItemsPerPageChange,
   } = useInformesList();
 
   return (
@@ -47,7 +48,6 @@ const ListaInformes: React.FC<ListaInformesProps> = () => {
       totalPages={totalPages}
       search={search}
       downloadingIds={downloadingIds}
-      downloadedIds={downloadedIds}
       searchCooldown={searchCooldown}
       onSearchChange={handleSearchChange}
       onSearchSubmit={handleSearchSubmit}
@@ -59,6 +59,8 @@ const ListaInformes: React.FC<ListaInformesProps> = () => {
       }}
       onPrevPage={handlePrevPage}
       onNextPage={handleNextPage}
+      itemsPerPage={itemsPerPage}
+      onItemsPerPageChange={handleItemsPerPageChange}
     />
   );
 };

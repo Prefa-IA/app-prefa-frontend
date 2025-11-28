@@ -35,11 +35,21 @@ export const useGoogleLoginHandler = ({ onSuccessNavigate }: UseGoogleLoginHandl
 
         navigate(onSuccessNavigate);
       } catch (error: unknown) {
-        console.error('Error en login con Google:', error);
-        const errorObj = error as { response?: { data?: { error?: string; message?: string } } };
+        const errorObj = error as {
+          response?: { data?: { error?: string; message?: string }; status?: number };
+          code?: string;
+          message?: string;
+        };
+
+        if (errorObj.code === 'ECONNABORTED' || errorObj.response?.status === 504) {
+          toast.error('El servidor tardó demasiado en responder. Por favor, intenta nuevamente.');
+          return;
+        }
+
         const mensaje =
           errorObj.response?.data?.error ||
           errorObj.response?.data?.message ||
+          errorObj.message ||
           'Error al iniciar sesión con Google';
 
         if (mensaje.includes('inactiva')) {

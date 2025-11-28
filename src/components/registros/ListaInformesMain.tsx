@@ -20,14 +20,15 @@ interface ListaInformesMainProps {
   totalPages: number;
   search: string;
   downloadingIds: string[];
-  downloadedIds: string[];
   searchCooldown: boolean;
+  itemsPerPage?: number;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSearchSubmit: (e: React.FormEvent) => void;
   onRefresh: () => void;
   onDescargar: (informe: Informe) => void;
   onPrevPage: () => void;
   onNextPage: () => void;
+  onItemsPerPageChange?: (limit: number) => void;
 }
 
 const ListaInformesMain: React.FC<ListaInformesMainProps> = ({
@@ -40,14 +41,15 @@ const ListaInformesMain: React.FC<ListaInformesMainProps> = ({
   totalPages,
   search,
   downloadingIds,
-  downloadedIds,
   searchCooldown,
+  itemsPerPage,
   onSearchChange,
   onSearchSubmit,
   onRefresh,
   onDescargar,
   onPrevPage,
   onNextPage,
+  onItemsPerPageChange,
 }) => (
   <Container>
     <div className="py-8" data-tutorial="registros">
@@ -64,23 +66,26 @@ const ListaInformesMain: React.FC<ListaInformesMainProps> = ({
         />
       )}
       {tab === 'informes' ? (
-        <ListaInformesContent
-          loading={loading}
-          error={error}
-          informes={informes}
-          onDescargar={onDescargar}
-          downloadingIds={downloadingIds}
-          downloadedIds={downloadedIds}
-        />
+        <>
+          <ListaInformesContent
+            loading={loading}
+            error={error}
+            informes={informes}
+            onDescargar={onDescargar}
+            downloadingIds={downloadingIds}
+          />
+          <PaginationControls
+            page={page}
+            totalPages={totalPages}
+            itemsPerPage={itemsPerPage ?? 10}
+            onPrevPage={onPrevPage}
+            onNextPage={onNextPage}
+            onItemsPerPageChange={onItemsPerPageChange ?? (() => {})}
+          />
+        </>
       ) : (
         <MisDirecciones />
       )}
-      <PaginationControls
-        page={page}
-        totalPages={totalPages}
-        onPrevPage={onPrevPage}
-        onNextPage={onNextPage}
-      />
     </div>
   </Container>
 );

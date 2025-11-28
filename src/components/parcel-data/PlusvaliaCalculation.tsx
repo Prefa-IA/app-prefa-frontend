@@ -43,6 +43,12 @@ const PlusvaliaCalculation: React.FC<PlusvaliaCalculationProps> = ({
         <CalculoA2Table informe={informe} calculatedValues={calculatedValues} />
       </div>
 
+      <div className="mt-4">
+        <TableRow
+          label="TOTAL CAPACIDAD CONSTRUCTIVA"
+          value={`${Number(calculatedValues['totalCapConstructiva'] ?? 0).toFixed(2)} m²`}
+        />
+      </div>
       <PlusvaliaFinalTable calculatedValues={calculatedValues} />
 
       <PageNumber pageNumber={pageCounter} />
@@ -85,27 +91,12 @@ const CapacidadConstructivaTable: React.FC<CapacidadConstructivaTableProps> = ({
             value={`${((calculatedValues['areaPrimerRetiro'] as number) || 0).toFixed(2)} m²`}
           />
 
-          <TableRow
-            label="Área Segundo Retiro"
-            value={`${((calculatedValues['areaSegundoRetiro'] as number) || 0).toFixed(2)} m²`}
-          />
-
-          <div className="border-t pt-2 mt-2">
+          {calculatedValues['areaSegundoRetiro'] ? (
             <TableRow
-              label="TOTAL CAPACIDAD CONSTRUCTIVA"
-              value={`${((calculatedValues['totalCapConstructivaOriginal'] as number) || 0).toFixed(2)} m²`}
+              label="Área Segundo Retiro"
+              value={`${((calculatedValues['areaSegundoRetiro'] as number) || 0).toFixed(2)} m²`}
             />
-          </div>
-
-          {/* Nueva fila: capacidad ajustada por afección LBI/LFI */}
-          {((calculatedValues['lfiAfeccionPercent'] as number) || 0) > 0 && (
-            <div className="pt-2">
-              <TableRow
-                label={`TOTAL CAPACIDAD CONSTRUCTIVA - % DE AFECCION LFI/LBI (-${calculatedValues['lfiAfeccionPercent']}%)`}
-                value={`${((calculatedValues['totalCapConstructiva'] as number) || 0).toFixed(2)} m²`}
-              />
-            </div>
-          )}
+          ) : null}
         </div>
       </div>
     </DataTable>

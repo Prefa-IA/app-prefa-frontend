@@ -19,11 +19,13 @@ interface UseConsultaDireccionStateHooksPart2Props {
   setResultado: React.Dispatch<React.SetStateAction<Informe | null>>;
   setCenter: (center: { lat: number; lng: number }) => void;
   setProcessing: (processing: boolean) => void;
+  setIsValidating: (isValidating: boolean) => void;
   refreshProfile: () => Promise<void>;
   refreshCredits: () => void;
   savedId: string | null;
   resultado: Informe | null;
   setSavedId: React.Dispatch<React.SetStateAction<string | null>>;
+  direcciones: string[];
   resultados: Informe[];
   informeCompuesto: InformeCompuesto | null;
   setModoCompuesto: React.Dispatch<React.SetStateAction<boolean>>;
@@ -65,6 +67,7 @@ export const useConsultaDireccionStateHooksPart2 = (
     setResultado: props.setResultado,
     setCenter: props.setCenter,
     setProcessing: props.setProcessing,
+    setIsValidating: props.setIsValidating,
     agregarDireccion: props.agregarDireccion,
     procesarCalculoPrefactibilidad: procesarCalculoPrefactibilidadWrapper,
     refreshProfile: async () => await props.refreshProfile(),
@@ -113,6 +116,7 @@ export const useConsultaDireccionStateHooksPart2 = (
   useConsultaDireccionEffects({
     modoCompuesto: props.modoCompuesto,
     resultados: props.resultados,
+    direcciones: props.direcciones,
     consolidarInformes: props.consolidarInformes,
     error: props.error,
     setError: props.setError,

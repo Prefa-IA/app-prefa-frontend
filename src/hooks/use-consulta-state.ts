@@ -65,7 +65,17 @@ export const useConsultaState = ({
     setResultados([]);
     setDirecciones([]);
     setSavedId(null);
-  }, [setResultado, setInformeCompuesto, setResultados, setDirecciones, setSavedId]);
+    setTipoPrefa('');
+    setModoCompuesto(false);
+  }, [
+    setResultado,
+    setInformeCompuesto,
+    setResultados,
+    setDirecciones,
+    setSavedId,
+    setTipoPrefa,
+    setModoCompuesto,
+  ]);
 
   const handleTipoPrefaChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {

@@ -5,7 +5,17 @@ import { PageNumberProps } from '../../types/components';
 const PageNumber: React.FC<PageNumberProps> = ({ pageNumber, className = '' }) => {
   return (
     <div
-      className={`mt-4 border rounded w-fit px-3 py-1 text-dark bg-gray-100 ml-auto print-hidden ${className}`}
+      className={`mt-4 border border-gray-300 rounded w-fit px-3 py-1.5 text-black bg-white ml-auto print-hidden ${className}`}
+      style={{
+        fontSize: '0.875rem',
+        fontWeight: 600,
+        textAlign: 'right',
+        minWidth: 'fit-content',
+        whiteSpace: 'nowrap',
+        letterSpacing: 'normal',
+        wordSpacing: 'normal',
+        fontVariantNumeric: 'normal',
+      }}
     >
       {pageNumber}
     </div>

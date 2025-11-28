@@ -39,4 +39,23 @@
   text-align: right;
   font-size: 0.875rem;
   margin-top: 2rem;
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  border-color: #d1d5db !important;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: normal;
+  word-spacing: normal;
+  font-variant-numeric: normal;
+}
+
+@media print {
+  .pageNumber {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+    border-color: #d1d5db !important;
+    white-space: nowrap;
+    letter-spacing: normal;
+    word-spacing: normal;
+  }
 }

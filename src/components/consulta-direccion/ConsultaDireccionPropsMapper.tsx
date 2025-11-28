@@ -19,6 +19,7 @@ interface ConsultaDireccionContentProps {
   showTipoInfo: boolean;
   setShowTipoInfo: (show: boolean) => void;
   processing: boolean;
+  isValidating: boolean;
   confirmReset: boolean;
   setConfirmReset: (show: boolean) => void;
   isDisabled: boolean;
@@ -65,6 +66,7 @@ const mapStateToProps = (
     showTipoInfo: state['showTipoInfo'] as boolean,
     setShowTipoInfo: state['setShowTipoInfo'] as (show: boolean) => void,
     processing: state['processing'] as boolean,
+    isValidating: (state['isValidating'] as boolean) ?? false,
     confirmReset: state['confirmReset'] as boolean,
     setConfirmReset: state['setConfirmReset'] as (show: boolean) => void,
     isDisabled: state['isDisabled'] as boolean,
@@ -146,5 +148,6 @@ export const mapConsultaDireccionProps = (
     navConfirm: typedProps.navConfirm,
     setNavConfirm: typedProps.setNavConfirm,
     processingCounter: typedProps.processingCounter,
+    isValidating: typedProps.isValidating,
   };
 };

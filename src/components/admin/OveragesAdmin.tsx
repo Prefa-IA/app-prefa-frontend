@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 import { useAuth } from '../../contexts/AuthContext';
+import { usePlanes } from '../../hooks/use-planes';
 import { adminPlansService, OveragePlanPayload } from '../../services/admin-plans-service';
 import { OverageFormProps } from '../../types/components';
 import ModalBase from '../generales/ModalBase';
@@ -9,7 +10,6 @@ import ModalBase from '../generales/ModalBase';
 interface OveragePlan extends OveragePlanPayload {
   _id?: string;
   id?: string;
-  isOverage?: boolean;
 }
 
 const PlansTable: React.FC<{
@@ -118,7 +118,7 @@ const OveragesAdmin: React.FC = () => {
         {isSuperAdmin && (
           <button
             className="btn-primary"
-            onClick={() => setModalData({ name: '', creditosTotales: 0, price: 0 })}
+            onClick={() => setModalData({ name: '', creditosTotales: 0, price: 0, parentPlan: '' })}
           >
             Nuevo paquete
           </button>
@@ -127,7 +127,15 @@ const OveragesAdmin: React.FC = () => {
       <PlansTable
         plans={plans}
         isSuperAdmin={isSuperAdmin}
-        onEdit={(plan) => setModalData(plan as OveragePlanPayload)}
+        onEdit={(plan) =>
+          setModalData({
+            id: plan.id,
+            name: plan.name,
+            creditosTotales: plan.creditosTotales,
+            price: plan.price,
+            parentPlan: plan.parentPlan || '',
+          } as OveragePlanPayload)
+        }
         onDelete={(id: string) => {
           void handleDelete(id);
         }}
@@ -147,8 +155,9 @@ const OveragesAdmin: React.FC = () => {
 };
 
 const OverageForm: React.FC<OverageFormProps> = ({ data, onSave, onClose }) => {
+  const { planes } = usePlanes();
   const [form, setForm] = useState(data);
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm({ ...form, [e.target.name]: e.target.value });
   return (
     <ModalBase title={`${form['id'] ? 'Editar' : 'Nuevo'} paquete`} onClose={onClose} hideConfirm>
@@ -160,6 +169,22 @@ const OverageForm: React.FC<OverageFormProps> = ({ data, onSave, onClose }) => {
           onChange={handleChange}
           className="input-text w-full"
         />
+        <select
+          name="parentPlan"
+          value={(form['parentPlan'] as string) || ''}
+          onChange={handleChange}
+          className="input-text w-full"
+          required
+        >
+          <option value="">Seleccionar plan base</option>
+          {planes
+            .filter((p) => !p.isOverage)
+            .map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+        </select>
         <input
           name="creditosTotales"
           type="number"

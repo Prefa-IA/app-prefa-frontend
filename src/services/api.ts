@@ -99,11 +99,24 @@ export const auth = {
     return response.data;
   },
   loginWithGoogleIdToken: async (idToken: string) => {
-    const response = await api.post<{ token: string; usuario: Usuario; isNewUser?: boolean }>(
-      GOOGLE_LOGIN_URI,
-      { token: idToken }
-    );
-    return response.data;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    try {
+      const response = await api.post<{ token: string; usuario: Usuario; isNewUser?: boolean }>(
+        GOOGLE_LOGIN_URI,
+        { token: idToken },
+        { signal: controller.signal, timeout: 30000 }
+      );
+      clearTimeout(timeoutId);
+      return response.data;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error('La solicitud tardó demasiado. Por favor, intenta nuevamente.');
+      }
+      throw error;
+    }
   },
 
   registro: async (datos: RegistroData) => {
@@ -261,8 +274,15 @@ export const subscriptions = {
       const response = await api.post('/suscripciones/validar-uso', opts);
       return response.data;
     } catch (error: unknown) {
-      const err = error as { response?: { status?: number } };
+      const err = error as { response?: { status?: number; data?: { error?: string } } };
       if (err.response && err.response.status === 403) {
+        const errorCode = err.response.data?.error || '';
+        if (errorCode === 'limite_diario_superado') {
+          throw new Error('Límite diario de créditos superado');
+        }
+        if (errorCode === 'limite_mensual_superado') {
+          throw new Error('Límite mensual de créditos superado');
+        }
         throw new Error('Sin créditos disponibles');
       }
       throw error;
@@ -327,7 +347,6 @@ const obtenerSugerenciasDirecciones = async (
     if (err.name === 'AbortError') {
       throw error;
     }
-    console.error('Error al obtener sugerencias:', error);
     return [];
   }
 };
@@ -370,6 +389,26 @@ export const prefactibilidad = {
     }
   },
 
+  consultarDireccionesCompuestas: async (
+    direcciones: string[],
+    opts: {
+      prefaCompleta: boolean;
+    }
+  ): Promise<Informe[]> => {
+    const direccionesConCoordenadas = await Promise.all(
+      direcciones.map(async (direccion) => {
+        const coordenadas = await obtenerCoordenadas(direccion);
+        return { direccion, coordenadas };
+      })
+    );
+
+    const response = await api.post<Informe[]>('/prefactibilidad/consultar-compuestas', {
+      direcciones: direccionesConCoordenadas,
+      prefaCompleta: opts.prefaCompleta,
+    });
+    return response.data;
+  },
+
   generarInforme: async (datos: Informe) => {
     const response = await api.post(
       '/prefactibilidad/generar-informe',
@@ -402,8 +441,8 @@ export const prefactibilidad = {
     return response.data;
   },
 
-  obtenerInformes: async (page: number = 1, search: string = '') => {
-    const params = new URLSearchParams({ page: page.toString() });
+  obtenerInformes: async (page: number = 1, search: string = '', limit: number = 10) => {
+    const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
     if (search) params.append('search', search);
     const response = await api.get<{
       informes: Informe[];
@@ -418,6 +457,14 @@ export const prefactibilidad = {
 
   calcular: async (parcela: unknown) => {
     const { data } = await api.post('/prefactibilidad/calcular', { parcela });
+    return data;
+  },
+
+  validar: async (direccion: string, coordenadas: { lat: number; lon: number }) => {
+    const { data } = await api.post<{ tieneAPH: boolean; tieneEnrase: boolean }>(
+      '/prefactibilidad/validar',
+      { direccion, coordenadas }
+    );
     return data;
   },
 

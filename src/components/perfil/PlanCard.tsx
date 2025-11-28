@@ -49,7 +49,7 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, loading = false, onSelect }) 
   const { badge, badgeClasses } = getBadgeInfo(plan);
 
   return (
-    <div className="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-600 rounded-lg shadow-sm p-6 flex flex-col transition-all duration-300 hover:cursor-pointer">
+    <div className="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-600 dark:hover:border-blue-500 rounded-lg shadow-sm p-6 flex flex-col transition-all duration-300 hover:cursor-pointer">
       <PlanCardContent plan={plan} badge={badge} badgeClasses={badgeClasses} />
 
       {onSelect && (

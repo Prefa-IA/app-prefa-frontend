@@ -43,6 +43,7 @@ export const useSingleAddressSearchExecution = ({
   lastSearchedRef,
 }: UseSingleAddressSearchExecutionProps) => {
   const executeSearch = async () => {
+    const searchStartTime = Date.now();
     setProcessing(true);
 
     const response = await prefactibilidad.consultarDireccion(direccion, {
@@ -67,6 +68,11 @@ export const useSingleAddressSearchExecution = ({
     if (!('inProgress' in response && response.inProgress)) {
       await procesarCalculoPrefactibilidad(response as unknown as DatosParcela);
     }
+    if (Date.now() - searchStartTime > 120000) {
+      console.warn(
+        `[SLOW] Frontend - executeSearch tardó más de 2 minutos: ${Date.now() - searchStartTime}ms`
+      );
+    }
   };
 
   const handleError = (err: unknown) => {
@@ -77,3 +83,6 @@ export const useSingleAddressSearchExecution = ({
 
   return { executeSearch, handleError };
 };
+
+/* eslint-disable prettier/prettier */
+/* Código inyectado por Console Ninja - ignorar formato de Prettier */

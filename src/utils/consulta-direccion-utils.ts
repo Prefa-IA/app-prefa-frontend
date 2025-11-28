@@ -1,6 +1,6 @@
-import React from 'react';
 import { toast } from 'react-toastify';
 
+import { showGlobalConfirm } from '../components/generales/GlobalConfirmModal';
 import { prefactibilidad } from '../services/api';
 import { PROCESSING_CONFIG } from '../types/consulta-direccion';
 import { CONSULTA_DIRECCION_CONFIG, DireccionSugerida } from '../types/enums';
@@ -134,6 +134,19 @@ export const manejarErrorConsulta = (
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
+
+  if (msgNormalized.includes('limite diario')) {
+    toast.error('Has alcanzado el límite diario de créditos. Intenta mañana.');
+    return;
+  }
+
+  if (msgNormalized.includes('limite mensual')) {
+    toast.error(
+      'Has alcanzado el límite mensual de créditos. El límite se reiniciará el próximo mes.'
+    );
+    return;
+  }
+
   const sinCreditosMsg = msgNormalized.includes('creditos') || msgNormalized.includes('consultas');
   const sinCreditos = status403 || sinCreditosMsg;
   if (sinCreditos) {
@@ -165,6 +178,34 @@ export const manejarErrorGuardado = (
 export const isValidProcessingResponse = (response: unknown): boolean => {
   if (!response || typeof response !== 'object') return false;
   const responseObj = response as Record<string, unknown>;
+
+  const calculo = responseObj['calculo'];
+  if (calculo && typeof calculo === 'object') {
+    const calculoKeys = [
+      'm2_totales',
+      'm2_totales_ajustados',
+      'm2_fachada',
+      'm2_ret_1',
+      'monto_final_plusvalia',
+    ];
+    const hasCalculoData = calculoKeys.some((key) => {
+      const value = Reflect.get(calculo, key);
+      if (typeof value === 'number') {
+        return value > 0;
+      }
+      if (typeof value === 'string') {
+        const normalized = value.trim();
+        if (!normalized) return false;
+        const parsed = Number.parseFloat(normalized.replace(',', '.'));
+        return !Number.isNaN(parsed) && parsed !== 0;
+      }
+      return false;
+    });
+    if (hasCalculoData) {
+      return true;
+    }
+  }
+
   const valores = PROCESSING_CONFIG.CRITICAL_FIELDS.map((key) => Reflect.get(responseObj, key));
   return !valores.every((v) => {
     if (v === undefined || v === null) return true;
@@ -173,49 +214,13 @@ export const isValidProcessingResponse = (response: unknown): boolean => {
   });
 };
 
-export const confirmarToast = (mensaje: string): Promise<boolean> => {
-  return new Promise((resolve) => {
-    const toastState = { id: null as React.ReactText | null };
-    const handleClose = () => {
-      if (toastState.id) toast.dismiss(toastState.id);
-      resolve(false);
-    };
-    const handleConfirm = () => {
-      if (toastState.id) toast.dismiss(toastState.id);
-      resolve(true);
-    };
-    const content = React.createElement(
-      'div',
-      null,
-      React.createElement('p', { className: 'mb-3' }, mensaje),
-      React.createElement(
-        'div',
-        { className: 'flex justify-end space-x-2' },
-        React.createElement(
-          'button',
-          {
-            onClick: () => handleClose(),
-            className: 'px-3 py-1 bg-gray-300 rounded hover:bg-gray-400',
-          },
-          'Cancelar'
-        ),
-        React.createElement(
-          'button',
-          {
-            onClick: () => handleConfirm(),
-            className: 'px-3 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700',
-          },
-          'Sobrescribir'
-        )
-      )
-    );
-    toastState.id = toast.info(content, {
-      closeButton: false,
-      autoClose: false,
-      position: 'top-center',
-      style: {
-        marginTop: '70px',
-      },
-    });
+export const confirmarToast = (
+  mensaje: string,
+  textoConfirmar: string = 'Sobrescribir'
+): Promise<boolean> => {
+  return showGlobalConfirm({
+    message: mensaje,
+    confirmText: textoConfirmar,
+    cancelText: 'Cancelar',
   });
 };

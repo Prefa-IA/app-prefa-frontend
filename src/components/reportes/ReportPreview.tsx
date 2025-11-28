@@ -39,7 +39,7 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({
   }
 
   return (
-    <div className={styles['container']} style={customStyles}>
+    <div className={styles['container']} style={customStyles} data-report-container>
       <ReportHeader informe={reportData} isCompoundMode={isCompoundMode} addresses={addresses} />
 
       <div className={styles['pageBreak']}></div>

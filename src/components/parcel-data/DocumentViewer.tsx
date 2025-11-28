@@ -11,6 +11,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
   documentosVisuales,
   pageCounter,
   pageNumbers,
+  tipoPrefa,
 }) => {
   const informeAMostrar =
     esInformeCompuesto && informeCompuesto ? informeCompuesto.informeConsolidado : informe;
@@ -24,6 +25,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
           esInformeCompuesto={esInformeCompuesto}
           documentosVisuales={documentosVisuales}
           pageCounter={pageCounter}
+          {...(tipoPrefa !== undefined ? { tipoPrefa } : {})}
           {...(pageNumbers ? { pageNumbers } : {})}
         />
       )}
@@ -35,6 +37,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({
           esInformeCompuesto={esInformeCompuesto}
           documentosVisuales={documentosVisuales}
           pageCounter={pageCounter}
+          {...(tipoPrefa !== undefined ? { tipoPrefa } : {})}
           {...(pageNumbers ? { pageNumbers } : {})}
         />
       )}

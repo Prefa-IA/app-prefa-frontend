@@ -20,6 +20,7 @@ interface UseConsultaDireccionStateHooksProps {
   setResultado: React.Dispatch<React.SetStateAction<Informe | null>>;
   setResultados: React.Dispatch<React.SetStateAction<Informe[]>>;
   setProcessing: (processing: boolean) => void;
+  setIsValidating: (isValidating: boolean) => void;
   setDirecciones: React.Dispatch<React.SetStateAction<string[]>>;
   refreshProfile: () => Promise<void>;
   refreshCredits: () => void;
@@ -49,6 +50,7 @@ export const useConsultaDireccionStateHooks = (props: UseConsultaDireccionStateH
     setResultado: props.setResultado,
     setResultados: props.setResultados,
     setProcessing: props.setProcessing,
+    setIsValidating: props.setIsValidating,
     setDirecciones: props.setDirecciones,
     refreshProfile: props.refreshProfile,
     refreshCredits: props.refreshCredits,
@@ -65,11 +67,13 @@ export const useConsultaDireccionStateHooks = (props: UseConsultaDireccionStateH
     setResultado: props.setResultado,
     setCenter: props.setCenter,
     setProcessing: props.setProcessing,
+    setIsValidating: props.setIsValidating,
     refreshProfile: props.refreshProfile,
     refreshCredits: props.refreshCredits,
     savedId: props.savedId,
     resultado: props.resultado,
     setSavedId: props.setSavedId,
+    direcciones: props.direcciones,
     resultados: props.resultados,
     informeCompuesto: props.informeCompuesto,
     setModoCompuesto: props.setModoCompuesto,

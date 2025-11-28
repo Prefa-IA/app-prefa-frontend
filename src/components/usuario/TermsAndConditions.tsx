@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
+import api from '../../services/api';
 import { TermsAndConditionsProps } from '../../types/components';
 import ModalBase from '../generales/ModalBase';
-
-import TermsAndConditionsIntro from './TermsAndConditionsIntro';
-import TermsAndConditionsSections from './TermsAndConditionsSections';
+import SafeHtml from '../generales/SafeHtml';
 
 const TermsAndConditionsStyles: React.FC = () => (
   <style>{`
@@ -56,20 +55,43 @@ const TermsAndConditionsStyles: React.FC = () => (
       `}</style>
 );
 
-const TermsAndConditionsContent: React.FC = () => (
-  <div className="tyc-container">
-    <TermsAndConditionsIntro />
-    <TermsAndConditionsSections />
-  </div>
+const TermsAndConditionsContent: React.FC<{ content: string }> = ({ content }) => (
+  <SafeHtml html={content} className="tyc-container" />
 );
 
-const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({ onClose }) => (
-  <ModalBase title="Términos y Condiciones" onClose={onClose} hideConfirm>
-    <div className="prose max-w-none">
-      <TermsAndConditionsStyles />
-      <TermsAndConditionsContent />
-    </div>
-  </ModalBase>
-);
+const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({ onClose }) => {
+  const [content, setContent] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const { data } = await api.get('/legal-content/terms');
+        setContent(data?.content || '');
+      } catch (error) {
+        console.error('Error cargando términos y condiciones:', error);
+        setContent('<p>Error al cargar los términos y condiciones.</p>');
+      } finally {
+        setLoading(false);
+      }
+    };
+    void loadContent();
+  }, []);
+
+  return (
+    <ModalBase title="Términos y Condiciones" onClose={onClose} hideConfirm>
+      <div className="prose max-w-none">
+        <TermsAndConditionsStyles />
+        {loading ? (
+          <div className="text-center py-8">
+            <p className="text-gray-600 dark:text-gray-400">Cargando...</p>
+          </div>
+        ) : (
+          <TermsAndConditionsContent content={content} />
+        )}
+      </div>
+    </ModalBase>
+  );
+};
 
 export default TermsAndConditions;

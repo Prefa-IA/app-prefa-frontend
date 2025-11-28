@@ -11,6 +11,6 @@ export const useBuscarDireccionPageCalculations = (
   const values = calculateAllValues(resultado, {});
   return {
     totalCapConstructiva: values.totalCapConstructiva,
-    plusvaliaFinal: values.plusvaliaFinal,
+    plusvaliaFinal: values.plusvaliaFinal ?? 0,
   };
 };

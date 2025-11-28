@@ -5,8 +5,8 @@ export interface OveragePlanPayload {
   name: string;
   creditosTotales: number;
   price: number;
-  prioridad?: number;
-  discountPct?: number;
+  parentPlan: string;
+  currency?: string;
 }
 
 const fetchJSON = (url: string, options?: RequestInit) =>
@@ -15,23 +15,23 @@ const fetchJSON = (url: string, options?: RequestInit) =>
     return r.json();
   });
 
-export const list = () => fetchJSON(`${BASE}/admin/billing/planes?isOverage=1`);
+export const list = () => fetchJSON(`${BASE}/admin/billing/overages`);
 
 export const create = (data: OveragePlanPayload) =>
-  fetchJSON(`${BASE}/admin/billing/planes`, {
+  fetchJSON(`${BASE}/admin/billing/overages`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...data, isOverage: true }),
+    body: JSON.stringify(data),
   });
 
 export const update = (id: string, data: OveragePlanPayload) =>
-  fetchJSON(`${BASE}/admin/billing/planes/${id}`, {
-    method: 'PUT',
+  fetchJSON(`${BASE}/admin/billing/overages/${id}`, {
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
 
 export const remove = (id: string) =>
-  fetchJSON(`${BASE}/admin/billing/planes/${id}`, { method: 'DELETE' });
+  fetchJSON(`${BASE}/admin/billing/overages/${id}`, { method: 'DELETE' });
 
 export const adminPlansService = { list, create, update, remove };

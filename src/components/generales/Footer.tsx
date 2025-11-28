@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 
 import { FooterModalProps } from '../../types/components';
 import PrivacyPolicy from '../usuario/PrivacyPolicy';
@@ -15,10 +14,6 @@ const Footer: React.FC = () => {
       <div className="w-[95%] lg:w-[63%] max-w-8xl mx-auto flex flex-col sm:flex-row justify-between items-center text-sm text-gray-600 dark:text-gray-300">
         <div className="mb-2 sm:mb-0">Todos los derechos reservados © {year} Prefa-IA</div>
         <div className="flex items-center">
-          <Link to="/faq" className="text-primary-600 dark:text-primary-400 hover:underline">
-            Preguntas frecuentes
-          </Link>
-          <span className="mx-3 text-gray-400 dark:text-gray-500">|</span>
           <button
             onClick={() => setShowTyC(true)}
             className="text-primary-600 dark:text-primary-400 hover:underline"

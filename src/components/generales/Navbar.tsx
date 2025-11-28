@@ -5,7 +5,7 @@ import { useNavbarState } from '../../hooks/use-navbar-state';
 import NavbarContent from './NavbarContent';
 
 const Navbar: React.FC = () => {
-  const { usuario, logout, creditBalance, planObjValue, usuarioValue, shouldDisableNavigation } =
+  const { usuario, logout, creditBalance, planObjValue, shouldDisableNavigation } =
     useNavbarState();
 
   return (
@@ -14,7 +14,6 @@ const Navbar: React.FC = () => {
       logout={logout}
       creditBalance={creditBalance}
       planObjValue={planObjValue}
-      usuarioValue={usuarioValue}
       shouldDisableNavigation={shouldDisableNavigation}
     />
   );

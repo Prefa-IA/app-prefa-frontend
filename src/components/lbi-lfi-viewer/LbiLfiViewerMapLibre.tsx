@@ -43,18 +43,23 @@ const LbiLfiViewerMapLibre: React.FC<ViewerProps> = ({
     }
   }, [geometriaParcela, drawLayers]);
 
-  const geometriaGeoJSON: GeoJSON.Geometry | null = useMemo(
-    () =>
-      geometriaParcela
-        ? ({
-            type: geometriaParcela.type,
-            ...(geometriaParcela.features && geometriaParcela.features.length > 0
-              ? { geometries: geometriaParcela.features.map((f) => f.geometry) }
-              : {}),
-          } as GeoJSON.Geometry)
-        : null,
-    [geometriaParcela]
-  );
+  const geometriaGeoJSON: GeoJSON.Geometry | null = useMemo(() => {
+    if (!geometriaParcela) return null;
+
+    if (geometriaParcela.features && geometriaParcela.features.length > 0) {
+      const geometry = geometriaParcela.features[0]?.geometry;
+      return geometry ? (geometry as GeoJSON.Geometry) : null;
+    }
+
+    if (
+      geometriaParcela.type &&
+      ('coordinates' in geometriaParcela || 'geometries' in geometriaParcela)
+    ) {
+      return geometriaParcela as GeoJSON.Geometry;
+    }
+
+    return null;
+  }, [geometriaParcela]);
 
   const handleDataLoaded = useCallback(() => {
     if (isMapLoadedRef.current) {

@@ -21,6 +21,7 @@ interface ParcelDataSectionsRendererProps {
   calculatedValues: ReturnType<typeof calculateAllValues>;
   plusvaliaRef: React.RefObject<HTMLDivElement> | undefined;
   lastPageNumber: number;
+  tipoPrefa?: string;
 }
 
 const renderFacadeImages = (
@@ -40,7 +41,8 @@ const renderDocumentViewer = (
   informeCompuesto: InformeCompuesto | undefined,
   esInformeCompuesto: boolean,
   documentosVisuales: DocumentosVisuales,
-  pageNumbers: { [key: string]: number }
+  pageNumbers: { [key: string]: number },
+  tipoPrefa?: string
 ) => {
   if (!showDocumentViewer) return null;
   return (
@@ -50,6 +52,7 @@ const renderDocumentViewer = (
       esInformeCompuesto={esInformeCompuesto}
       documentosVisuales={documentosVisuales}
       pageCounter={pageNumbers['croquis_parcela'] || 5}
+      {...(tipoPrefa !== undefined ? { tipoPrefa } : {})}
       pageNumbers={{
         croquis: pageNumbers['croquis_parcela'] || 5,
         perimetro: pageNumbers['perimetro_manzana'] || 6,
@@ -97,6 +100,7 @@ const ParcelDataSectionsRenderer: React.FC<ParcelDataSectionsRendererProps> = ({
   calculatedValues,
   plusvaliaRef,
   lastPageNumber,
+  tipoPrefa,
 }) => (
   <>
     {renderFacadeImages(showFacadeImages, fachadaImages, pageNumbers)}
@@ -106,7 +110,8 @@ const ParcelDataSectionsRenderer: React.FC<ParcelDataSectionsRendererProps> = ({
       informeCompuesto,
       esInformeCompuesto,
       documentosVisuales,
-      pageNumbers
+      pageNumbers,
+      tipoPrefa
     )}
     {renderPlusvalia(
       showPlusvalia,

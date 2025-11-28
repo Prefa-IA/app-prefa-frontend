@@ -7,6 +7,7 @@ import ConsultaMainContent from './ConsultaMainContent';
 import ConsultaModalsContent from './ConsultaModalsContent';
 import ConsultaReportContent from './ConsultaReportContent';
 import ProcessingOverlay from './ProcessingOverlay';
+import ValidatingOverlay from './ValidatingOverlay';
 
 interface ConsultaDireccionContentWrapperProps {
   className?: string | undefined;
@@ -56,6 +57,7 @@ interface ConsultaDireccionContentWrapperProps {
   };
   processing: boolean;
   processingCounter: number;
+  isValidating: boolean;
 }
 
 const ConsultaDireccionContentWrapper: React.FC<ConsultaDireccionContentWrapperProps> = ({
@@ -65,10 +67,12 @@ const ConsultaDireccionContentWrapper: React.FC<ConsultaDireccionContentWrapperP
   modalsContentProps,
   processing,
   processingCounter,
+  isValidating,
 }) => (
   <div className={`flex flex-col items-center justify-center w-full ${className || ''}`}>
     <ConsultaMainContent {...mainContentProps} />
     <ConsultaReportContent {...reportContentProps} />
+    {isValidating && <ValidatingOverlay />}
     {processing && <ProcessingOverlay seconds={processingCounter} />}
     <ConsultaModalsContent {...modalsContentProps} />
   </div>

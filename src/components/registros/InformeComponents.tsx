@@ -17,8 +17,7 @@ export const InformesList: React.FC<{
   informes: Informe[];
   onDescargar: (informe: Informe) => void;
   downloadingIds: string[];
-  downloadedIds: string[];
-}> = ({ informes, onDescargar, downloadingIds, downloadedIds }) => (
+}> = ({ informes, onDescargar, downloadingIds }) => (
   <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg mb-8">
     <ul className="divide-y divide-gray-200">
       {informes.map((informe, index) => (
@@ -28,7 +27,6 @@ export const InformesList: React.FC<{
           index={index}
           onDescargar={onDescargar}
           downloading={downloadingIds.includes(informe._id as string)}
-          downloaded={downloadedIds.includes(informe._id as string)}
         />
       ))}
     </ul>
@@ -40,23 +38,12 @@ export const InformeItem: React.FC<{
   index: number;
   onDescargar: (informe: Informe) => void;
   downloading: boolean;
-  downloaded: boolean;
-}> = ({ informe, index: _index, onDescargar, downloading, downloaded }) => (
+}> = ({ informe, index: _index, onDescargar, downloading }) => (
   <li className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
     <div className="px-4 py-5 sm:px-6">
-      <InformeHeader
-        informe={informe}
-        onDescargar={onDescargar}
-        downloading={downloading}
-        downloaded={downloaded}
-      />
+      <InformeHeader informe={informe} onDescargar={onDescargar} downloading={downloading} />
       <InformeDetails informe={informe} />
-      <DownloadButtonMobile
-        informe={informe}
-        onDescargar={onDescargar}
-        downloading={downloading}
-        downloaded={downloaded}
-      />
+      <DownloadButtonMobile informe={informe} onDescargar={onDescargar} downloading={downloading} />
     </div>
   </li>
 );
@@ -65,16 +52,10 @@ export const InformeHeader: React.FC<{
   informe: Informe;
   onDescargar: (informe: Informe) => void;
   downloading: boolean;
-  downloaded: boolean;
-}> = ({ informe, onDescargar, downloading, downloaded }) => (
+}> = ({ informe, onDescargar, downloading }) => (
   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
     <InformeTitleSection informe={informe} />
-    <DownloadButton
-      informe={informe}
-      onDescargar={onDescargar}
-      downloading={downloading}
-      downloaded={downloaded}
-    />
+    <DownloadButton informe={informe} onDescargar={onDescargar} downloading={downloading} />
   </div>
 );
 
@@ -91,13 +72,12 @@ export const DownloadButton: React.FC<{
   informe: Informe;
   onDescargar: (informe: Informe) => void;
   downloading: boolean;
-  downloaded: boolean;
-}> = ({ informe, onDescargar, downloading, downloaded }) => {
+}> = ({ informe, onDescargar, downloading }) => {
   if (!informe.esUltimoInforme && informe.esUltimoInforme !== undefined) {
     return null;
   }
 
-  const isDisabled = downloading || downloaded || !informe.pdfUrl;
+  const isDisabled = downloading || !informe.pdfUrl;
 
   return (
     <div className="hidden sm:flex mt-2 sm:mt-0 sm:ml-2 flex-shrink-0 w-full sm:w-auto">
@@ -178,13 +158,12 @@ export const DownloadButtonMobile: React.FC<{
   informe: Informe;
   onDescargar: (inf: Informe) => void;
   downloading: boolean;
-  downloaded: boolean;
-}> = ({ informe, onDescargar, downloading, downloaded }) => {
+}> = ({ informe, onDescargar, downloading }) => {
   if (!informe.esUltimoInforme && informe.esUltimoInforme !== undefined) {
     return null;
   }
 
-  const isDisabled = downloading || downloaded || !informe.pdfUrl;
+  const isDisabled = downloading || !informe.pdfUrl;
 
   return (
     <div className="sm:hidden mt-4">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { useAuth } from '../contexts/AuthContext';
+import { useModalLoading } from '../contexts/ModalLoadingContext';
 import { SubscriptionPlan, Usuario } from '../types/enums';
 
 import { useCreditStatus } from './use-credit-status';
@@ -12,6 +13,7 @@ export const useNavbarState = () => {
   const { status, refresh: refreshCredits } = useCreditStatus();
   const { planes, loading: planesLoading } = usePlanes();
   const { needsTermsAcceptance, isVisible: isTutorialVisible } = useTutorial();
+  const { shouldBlockNavigation: shouldBlockNavigationFromModal } = useModalLoading();
   const [planActual, setPlanActual] = useState<Plan | null>(null);
 
   useEffect(() => {
@@ -47,7 +49,8 @@ export const useNavbarState = () => {
     }
   }, [usuario, refreshCredits]);
 
-  const shouldDisableNavigation = needsTermsAcceptance || isTutorialVisible;
+  const shouldDisableNavigation =
+    needsTermsAcceptance || isTutorialVisible || shouldBlockNavigationFromModal;
   const planObjValue = planActual ? (planActual as unknown as SubscriptionPlan) : null;
   const usuarioValue = usuario || ({} as Usuario);
   const creditBalance = (status?.balance ?? usuario?.creditBalance) || 0;

@@ -168,33 +168,435 @@ const calculateAlicuota = (informe: Informe): number => {
   return cpuAlicuota !== undefined ? cpuAlicuota : 0;
 };
 
-export const calculateAllValues = (informe: Informe, editedValues: Record<string, unknown>) => {
-  const superficieParcela = getEditedOrDefaultValue(
-    editedValues,
-    'superficieParcela',
-    informe.edificabilidad?.superficie_parcela || 0
+const extraerValorNumerico = (
+  calculo: Record<string, unknown>,
+  clave: string,
+  valorPorDefecto: number = 0
+): number => {
+  const value = Reflect.get(calculo, clave);
+  if (typeof value === 'number' && !Number.isNaN(value)) {
+    return value;
+  }
+  if (typeof value === 'string') {
+    const parsed = Number.parseFloat(value);
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
+  }
+  return valorPorDefecto;
+};
+
+const extraerValoresTotales = (calculo: Record<string, unknown>) => ({
+  m2TotalesAjustados: extraerValorNumerico(calculo, 'm2_totales_ajustados'),
+  m2Totales: extraerValorNumerico(calculo, 'm2_totales'),
+  montoFinalPlusvalia: extraerValorNumerico(calculo, 'monto_final_plusvalia'),
+});
+
+const extraerValoresFachada = (calculo: Record<string, unknown>) => ({
+  m2Fachada: extraerValorNumerico(calculo, 'm2_fachada'),
+  m2FachadaBonus: extraerValorNumerico(calculo, 'm2_fachada_bonus'),
+});
+
+const extraerValoresRetiro = (calculo: Record<string, unknown>) => ({
+  m2Ret1: extraerValorNumerico(calculo, 'm2_ret_1'),
+  m2Ret2: extraerValorNumerico(calculo, 'm2_ret_2'),
+});
+
+const extraerValoresAdicionales = (calculo: Record<string, unknown>) => ({
+  planoLimite: extraerValorNumerico(calculo, 'plano_limite'),
+  lfiAplicada: extraerValorNumerico(calculo, 'lfi_aplicada'),
+  lfiInicial: extraerValorNumerico(calculo, 'lfi_inicial'),
+  superficieParcela: extraerValorNumerico(calculo, 'superficie_parcela'),
+  areaElmMinima: extraerValorNumerico(calculo, 'area_elm_minima'),
+  m2MaxElm: extraerValorNumerico(calculo, 'm2_max_elm'),
+  ajusteSupUtil: extraerValorNumerico(calculo, 'ajuste_sup_util'),
+  alturaPbMinima: extraerValorNumerico(calculo, 'altura_pb_minima'),
+  cotaPbMaxima: extraerValorNumerico(calculo, 'cota_pb_maxima'),
+  cotaPbMinima: extraerValorNumerico(calculo, 'cota_pb_minima'),
+  largoParcela: extraerValorNumerico(calculo, 'largo_parcela'),
+  distritoNormalizado:
+    typeof calculo['distrito_normalizado'] === 'string'
+      ? calculo['distrito_normalizado']
+      : undefined,
+  esEsquina: typeof calculo['es_esquina'] === 'boolean' ? calculo['es_esquina'] : undefined,
+  esParcelaAngosta:
+    typeof calculo['es_parcela_angosta'] === 'boolean' ? calculo['es_parcela_angosta'] : undefined,
+  esParcelaPequena:
+    typeof calculo['es_parcela_pequena'] === 'boolean' ? calculo['es_parcela_pequena'] : undefined,
+  tipoEdificioInferido:
+    typeof calculo['tipo_edificio_inferido'] === 'string'
+      ? calculo['tipo_edificio_inferido']
+      : undefined,
+});
+
+const extraerValoresCalculo = (calculo: Record<string, unknown>, alturaMax: number) => {
+  return {
+    ...extraerValoresTotales(calculo),
+    ...extraerValoresFachada(calculo),
+    ...extraerValoresRetiro(calculo),
+    ...extraerValoresAdicionales(calculo),
+    alturaMuroFachada: extraerValorNumerico(calculo, 'altura_muro_fachada', alturaMax),
+  };
+};
+
+const calcularValoresA = (
+  m2Totales: number,
+  m2Fachada: number,
+  a1Calculado: number,
+  a2Calculado: number
+) => {
+  const a1Final = m2Fachada > 0 ? m2Fachada : a1Calculado;
+  const a2Final = m2Totales > 0 && m2Fachada > 0 ? m2Totales - m2Fachada : a2Calculado;
+  const a = m2Totales > 0 ? m2Totales : calculateA(a1Final, a2Final);
+  return { a1Final, a2Final, a };
+};
+
+const calcularLfiAfeccionPercent = (
+  lfiAplicada: number,
+  totalCapConstructivaOriginal: number,
+  lfiAfeccionPercentCalculado: number
+) => {
+  if (lfiAplicada > 0 && totalCapConstructivaOriginal > 0) {
+    return (lfiAplicada / totalCapConstructivaOriginal) * 100;
+  }
+  return lfiAfeccionPercentCalculado;
+};
+
+const calcularSuperficieYCapacidad = (
+  valoresCalculo: ReturnType<typeof extraerValoresCalculo>,
+  superficieParcela: number,
+  superficieParcelaAjustada: number,
+  frenteValor: number,
+  informe: Informe
+) => {
+  const superficieParcelaFinal =
+    valoresCalculo.superficieParcela > 0 ? valoresCalculo.superficieParcela : superficieParcela;
+
+  const capacidadConstructiva = calculateCapacidadConstructiva(
+    superficieParcelaAjustada,
+    frenteValor,
+    valoresCalculo.alturaMuroFachada,
+    informe
   );
 
-  const superficieParcelaAjustada = calculateSuperficieParcelaAjustada(superficieParcela);
+  return { superficieParcelaFinal, capacidadConstructiva };
+};
 
-  const frenteValor = getEditedOrDefaultValue(
-    editedValues,
-    'frenteValor',
-    parseFloat(informe.datosCatastrales?.frente || '0')
+const calcularValoresAConCalculo = (
+  valoresCalculo: ReturnType<typeof extraerValoresCalculo>,
+  superficieParcelaFinal: number,
+  fotMedanera: number,
+  capacidadConstructiva: ReturnType<typeof calculateCapacidadConstructiva>,
+  tieneCalculoMotor: boolean
+) => {
+  const m2TotalesDelCalculo =
+    valoresCalculo.m2TotalesAjustados > 0
+      ? valoresCalculo.m2TotalesAjustados
+      : valoresCalculo.m2Totales > 0
+        ? valoresCalculo.m2Totales
+        : 0;
+
+  const m2TotalesParaCalculo =
+    tieneCalculoMotor && m2TotalesDelCalculo > 0
+      ? m2TotalesDelCalculo
+      : capacidadConstructiva.totalCapConstructivaAjustada;
+
+  if (tieneCalculoMotor) {
+    const a1Final =
+      valoresCalculo.m2Fachada > 0
+        ? valoresCalculo.m2Fachada
+        : calculateA1(superficieParcelaFinal, fotMedanera);
+
+    const m2Retiros = (valoresCalculo.m2Ret1 || 0) + (valoresCalculo.m2Ret2 || 0);
+    const a2Final = m2Retiros > 0 ? m2Retiros : Math.max(0, m2TotalesParaCalculo - a1Final);
+
+    const a = m2TotalesParaCalculo;
+
+    return {
+      valoresA: { a1Final, a2Final, a },
+      m2TotalesParaCalculo,
+    };
+  }
+
+  const a1Calculado = calculateA1(superficieParcelaFinal, fotMedanera);
+  const a2Calculado = calculateA2(capacidadConstructiva.totalCapConstructivaAjustada, a1Calculado);
+
+  const valoresA = calcularValoresA(
+    m2TotalesParaCalculo,
+    valoresCalculo.m2Fachada,
+    a1Calculado,
+    a2Calculado
   );
 
-  const fotMedanera = getEditedOrDefaultValue(
-    editedValues,
-    'fotMedanera',
-    informe.edificabilidad?.fot?.fot_medianera || 0
+  return { valoresA, m2TotalesParaCalculo };
+};
+
+const calcularAreasRetiro = (
+  valoresCalculo: ReturnType<typeof extraerValoresCalculo>,
+  capacidadConstructiva: ReturnType<typeof calculateCapacidadConstructiva>,
+  tieneCalculoMotor: boolean
+) => {
+  const areaPrimerRetiroFinal =
+    tieneCalculoMotor && valoresCalculo.m2Ret1 > 0
+      ? valoresCalculo.m2Ret1
+      : tieneCalculoMotor
+        ? 0
+        : capacidadConstructiva.areaPrimerRetiro;
+
+  const areaSegundoRetiroFinal =
+    tieneCalculoMotor && valoresCalculo.m2Ret2 > 0
+      ? valoresCalculo.m2Ret2
+      : tieneCalculoMotor
+        ? 0
+        : capacidadConstructiva.areaSegundoRetiro;
+
+  return { areaPrimerRetiroFinal, areaSegundoRetiroFinal };
+};
+
+const calcularValoresPlusvalia = (
+  valoresCalculo: ReturnType<typeof extraerValoresCalculo>,
+  valoresA: ReturnType<typeof calcularValoresA>,
+  capacidadConstructiva: ReturnType<typeof calculateCapacidadConstructiva>,
+  informe: Informe,
+  m2TotalesParaCalculo: number,
+  tieneCalculoMotor: boolean
+) => {
+  const b = calculatePlusvaliaB(informe);
+  const axb = calculateAxB(valoresA.a, b);
+  const alicuotaValor = calculateAlicuota(informe);
+  const alicuota = alicuotaValor * 100;
+
+  // Obtener porcentaje de afectación LFI desde shp_assets_info si está disponible
+  const shpAssetsInfo = informe.shp_assets_info;
+  const lfiPercentFromStats =
+    shpAssetsInfo?.troneras?.estadisticas?.porcentaje_afectacion_lfi ??
+    shpAssetsInfo?.estadisticas?.porcentaje_afectacion_lfi;
+
+  // Calcular capacidad constructiva inicial
+  const capacidadConstructivaInicial =
+    tieneCalculoMotor && m2TotalesParaCalculo > 0
+      ? m2TotalesParaCalculo
+      : capacidadConstructiva.totalCapConstructivaAjustada;
+
+  // Aplicar ajuste LFI si está disponible y es mayor a 0
+  const factor =
+    typeof lfiPercentFromStats === 'number' && lfiPercentFromStats > 0
+      ? 1 - lfiPercentFromStats / 100
+      : 1;
+
+  const totalCapConstructivaFinal = capacidadConstructivaInicial * factor;
+
+  const lfiAfeccionPercentFinal = calcularLfiAfeccionPercent(
+    valoresCalculo.lfiAplicada,
+    capacidadConstructiva.totalCapConstructivaOriginal,
+    capacidadConstructiva.lfiAfeccionPercent
   );
 
-  const alturaMax = getEditedOrDefaultValue(
-    editedValues,
-    'alturaMax',
-    informe.edificabilidad?.altura_max?.[0] || 0
+  const plusvaliaFinalFinal =
+    tieneCalculoMotor && valoresCalculo.montoFinalPlusvalia > 0
+      ? valoresCalculo.montoFinalPlusvalia
+      : calculatePlusvaliaFinal(axb, alicuotaValor);
+
+  return {
+    b,
+    axb,
+    alicuotaValor,
+    alicuota,
+    totalCapConstructivaFinal,
+    lfiAfeccionPercentFinal,
+    plusvaliaFinalFinal,
+  };
+};
+
+const calcularValoresFinalesDesdeCalculo = (
+  usarCalculosMotor: boolean,
+  valoresCalculo: ReturnType<typeof extraerValoresCalculo>,
+  capacidadConstructiva: ReturnType<typeof calculateCapacidadConstructiva>
+) => {
+  const pisosSinRetiroFinal = usarCalculosMotor
+    ? calculatePisosSinRetiro(valoresCalculo.alturaMuroFachada)
+    : capacidadConstructiva.pisosSinRetiro;
+
+  const totalPisosFinal = usarCalculosMotor
+    ? calculateTotalPisos(valoresCalculo.alturaMuroFachada)
+    : capacidadConstructiva.totalPisos;
+
+  const tipoEdificacionFinal = usarCalculosMotor
+    ? determinarTipoEdificacion(valoresCalculo.alturaMuroFachada)
+    : capacidadConstructiva.tipoEdificacion;
+
+  const areaPlantasTipicasFinal =
+    usarCalculosMotor && valoresCalculo.m2Fachada > 0
+      ? valoresCalculo.m2Fachada
+      : capacidadConstructiva.areaPlantasTipicas;
+
+  return {
+    pisosSinRetiroFinal,
+    totalPisosFinal,
+    tipoEdificacionFinal,
+    areaPlantasTipicasFinal,
+  };
+};
+
+const construirResultadoDesdeCalculo = (
+  superficieParcelaFinal: number,
+  superficieParcelaAjustada: number,
+  frenteValor: number,
+  fotMedanera: number,
+  valoresCalculo: ReturnType<typeof extraerValoresCalculo>,
+  valoresA: ReturnType<typeof calcularValoresA>,
+  capacidadConstructiva: ReturnType<typeof calculateCapacidadConstructiva>,
+  areaPrimerRetiroFinal: number,
+  areaSegundoRetiroFinal: number,
+  totalCapConstructivaFinal: number,
+  lfiAfeccionPercentFinal: number,
+  b: number,
+  axb: number,
+  alicuotaValor: number,
+  alicuota: number,
+  plusvaliaFinalFinal: number,
+  usarCalculosMotor: boolean,
+  valoresFinales: ReturnType<typeof calcularValoresFinalesDesdeCalculo>
+) => {
+  return {
+    superficieParcela: superficieParcelaFinal,
+    superficieParcelaAjustada,
+    frenteValor,
+    fotMedanera,
+    alturaMax: valoresCalculo.alturaMuroFachada,
+    planoLimite: valoresCalculo.planoLimite,
+    pisosSinRetiro: valoresFinales.pisosSinRetiroFinal,
+    totalPisos: valoresFinales.totalPisosFinal,
+    tipoEdificacion: valoresCalculo.distritoNormalizado || valoresFinales.tipoEdificacionFinal,
+    areaPlantasTipicas: valoresFinales.areaPlantasTipicasFinal,
+    areaPrimerRetiro: areaPrimerRetiroFinal,
+    areaSegundoRetiro: areaSegundoRetiroFinal,
+    totalCapConstructiva: totalCapConstructivaFinal,
+    totalCapConstructivaOriginal: usarCalculosMotor
+      ? totalCapConstructivaFinal
+      : capacidadConstructiva.totalCapConstructivaOriginal,
+    lfiAfeccionPercent: lfiAfeccionPercentFinal,
+    a1: valoresA.a1Final,
+    a2: valoresA.a2Final,
+    a: valoresA.a,
+    b,
+    axb,
+    alicuotaValor,
+    alicuota,
+    plusvaliaFinal: plusvaliaFinalFinal,
+    m2FachadaBonus: valoresCalculo.m2FachadaBonus,
+    areaElmMinima: valoresCalculo.areaElmMinima,
+    m2MaxElm: valoresCalculo.m2MaxElm,
+    lfiAplicada: valoresCalculo.lfiAplicada,
+    lfiInicial: valoresCalculo.lfiInicial,
+    ajusteSupUtil: valoresCalculo.ajusteSupUtil,
+    alturaPbMinima: valoresCalculo.alturaPbMinima,
+    cotaPbMaxima: valoresCalculo.cotaPbMaxima,
+    cotaPbMinima: valoresCalculo.cotaPbMinima,
+    largoParcela: valoresCalculo.largoParcela,
+    distritoNormalizado: valoresCalculo.distritoNormalizado,
+    esEsquina: valoresCalculo.esEsquina,
+    esParcelaAngosta: valoresCalculo.esParcelaAngosta,
+    esParcelaPequena: valoresCalculo.esParcelaPequena,
+    tipoEdificioInferido: valoresCalculo.tipoEdificioInferido,
+  };
+};
+
+const calcularValoresDesdeCalculo = (
+  calculo: Record<string, unknown>,
+  informe: Informe,
+  superficieParcela: number,
+  superficieParcelaAjustada: number,
+  frenteValor: number,
+  fotMedanera: number,
+  alturaMax: number
+) => {
+  const valoresCalculo = extraerValoresCalculo(calculo, alturaMax);
+
+  const tieneCalculoMotor =
+    valoresCalculo.m2Totales > 0 ||
+    valoresCalculo.m2TotalesAjustados > 0 ||
+    valoresCalculo.m2Fachada > 0 ||
+    valoresCalculo.m2Ret1 > 0 ||
+    valoresCalculo.montoFinalPlusvalia > 0;
+
+  const { superficieParcelaFinal, capacidadConstructiva } = calcularSuperficieYCapacidad(
+    valoresCalculo,
+    superficieParcela,
+    superficieParcelaAjustada,
+    frenteValor,
+    informe
   );
 
+  const { valoresA, m2TotalesParaCalculo } = calcularValoresAConCalculo(
+    valoresCalculo,
+    superficieParcelaFinal,
+    fotMedanera,
+    capacidadConstructiva,
+    tieneCalculoMotor
+  );
+
+  const { areaPrimerRetiroFinal, areaSegundoRetiroFinal } = calcularAreasRetiro(
+    valoresCalculo,
+    capacidadConstructiva,
+    tieneCalculoMotor
+  );
+
+  const {
+    b,
+    axb,
+    alicuotaValor,
+    alicuota,
+    totalCapConstructivaFinal,
+    lfiAfeccionPercentFinal,
+    plusvaliaFinalFinal,
+  } = calcularValoresPlusvalia(
+    valoresCalculo,
+    valoresA,
+    capacidadConstructiva,
+    informe,
+    m2TotalesParaCalculo,
+    tieneCalculoMotor
+  );
+
+  const usarCalculosMotor = tieneCalculoMotor;
+
+  const valoresFinales = calcularValoresFinalesDesdeCalculo(
+    usarCalculosMotor,
+    valoresCalculo,
+    capacidadConstructiva
+  );
+
+  return construirResultadoDesdeCalculo(
+    superficieParcelaFinal,
+    superficieParcelaAjustada,
+    frenteValor,
+    fotMedanera,
+    valoresCalculo,
+    valoresA,
+    capacidadConstructiva,
+    areaPrimerRetiroFinal,
+    areaSegundoRetiroFinal,
+    totalCapConstructivaFinal,
+    lfiAfeccionPercentFinal,
+    b,
+    axb,
+    alicuotaValor,
+    alicuota,
+    plusvaliaFinalFinal,
+    usarCalculosMotor,
+    valoresFinales
+  );
+};
+
+const calcularValoresSinCalculo = (
+  informe: Informe,
+  superficieParcela: number,
+  superficieParcelaAjustada: number,
+  frenteValor: number,
+  fotMedanera: number,
+  alturaMax: number
+) => {
   const capacidadConstructiva = calculateCapacidadConstructiva(
     superficieParcelaAjustada,
     frenteValor,
@@ -235,6 +637,62 @@ export const calculateAllValues = (informe: Informe, editedValues: Record<string
     alicuota,
     plusvaliaFinal,
   };
+};
+
+export const calculateAllValues = (informe: Informe, editedValues: Record<string, unknown>) => {
+  const informeConCalculo = informe as Informe & { calculo?: Record<string, unknown> };
+  const calculo = informeConCalculo.calculo;
+
+  const superficieParcela = getEditedOrDefaultValue(
+    editedValues,
+    'superficieParcela',
+    (calculo?.['superficie_parcela'] as number | undefined) ||
+      informe.edificabilidad?.superficie_parcela ||
+      0
+  );
+
+  const superficieParcelaAjustada = calculateSuperficieParcelaAjustada(superficieParcela);
+
+  const frenteValor = getEditedOrDefaultValue(
+    editedValues,
+    'frenteValor',
+    parseFloat(informe.datosCatastrales?.frente || '0')
+  );
+
+  const fotMedanera = getEditedOrDefaultValue(
+    editedValues,
+    'fotMedanera',
+    informe.edificabilidad?.fot?.fot_medianera || 0
+  );
+
+  const alturaMax = getEditedOrDefaultValue(
+    editedValues,
+    'alturaMax',
+    (calculo?.['altura_muro_fachada'] as number | undefined) ||
+      informe.edificabilidad?.altura_max?.[0] ||
+      0
+  );
+
+  if (calculo && typeof calculo === 'object') {
+    const valores = calcularValoresDesdeCalculo(
+      calculo,
+      informe,
+      superficieParcela,
+      superficieParcelaAjustada,
+      frenteValor,
+      fotMedanera,
+      alturaMax
+    );
+    return valores;
+  }
+  return calcularValoresSinCalculo(
+    informe,
+    superficieParcela,
+    superficieParcelaAjustada,
+    frenteValor,
+    fotMedanera,
+    alturaMax
+  );
 };
 
 export const generateFachadaUrl = (smp: string, index: number, width: number = 800): string => {

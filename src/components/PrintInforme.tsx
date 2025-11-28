@@ -6,7 +6,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { usePlanes } from '../hooks/use-planes';
 import { prefactibilidad } from '../services/api';
 import { TIPO_PREFA } from '../types/consulta-direccion';
-import { Informe } from '../types/enums';
+import { Informe, PrefaType } from '../types/enums';
 
 import ReportPreview from './reportes/ReportPreview';
 
@@ -141,7 +141,7 @@ const PrintInforme: React.FC = () => {
         center={{ lat: Number(informe.googleMaps.lat), lng: Number(informe.googleMaps.lon) }}
         onGenerateReport={() => {}}
         savedId={informe._id || null}
-        tipoPrefa={TIPO_PREFA.COMPLETA}
+        tipoPrefa={TIPO_PREFA.COMPLETA as PrefaType}
       />
     </div>
   );

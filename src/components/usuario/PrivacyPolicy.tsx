@@ -1,24 +1,42 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
+import api from '../../services/api';
 import { PrivacyPolicyProps } from '../../types/components';
 import ModalBase from '../generales/ModalBase';
+import SafeHtml from '../generales/SafeHtml';
 
-const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onClose }) => (
-  <ModalBase title="Política de Privacidad" onClose={onClose} hideConfirm>
-    <div className="prose max-w-none">
-      <h1>Política de Privacidad</h1>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Donec vel sapien
-        elit. Integer aliquet vel justo at cursus. Suspendisse potenti. Curabitur id dui quis ligula
-        aliquam tincidunt.
-      </p>
-      <p>
-        Sed sed facilisis enim. Pellentesque habitant morbi tristique senectus et netus et malesuada
-        fames ac turpis egestas. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices
-        posuere cubilia curae.
-      </p>
-    </div>
-  </ModalBase>
-);
+const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onClose }) => {
+  const [content, setContent] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const { data } = await api.get('/legal-content/privacy');
+        setContent(data?.content || '');
+      } catch (error) {
+        console.error('Error cargando política de privacidad:', error);
+        setContent('<p>Error al cargar la política de privacidad.</p>');
+      } finally {
+        setLoading(false);
+      }
+    };
+    void loadContent();
+  }, []);
+
+  return (
+    <ModalBase title="Política de Privacidad" onClose={onClose} hideConfirm>
+      <div className="prose max-w-none">
+        {loading ? (
+          <div className="text-center py-8">
+            <p className="text-gray-600 dark:text-gray-400">Cargando...</p>
+          </div>
+        ) : (
+          <SafeHtml html={content} />
+        )}
+      </div>
+    </ModalBase>
+  );
+};
 
 export default PrivacyPolicy;

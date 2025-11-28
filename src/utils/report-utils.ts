@@ -3,6 +3,7 @@ import { crearInformeCompuesto } from '../services/consolidacion-informes';
 import { Informe, InformeCompuesto } from '../types/enums';
 
 import { manejarErrorPDF } from './consulta-direccion-utils';
+import { downloadBlob, generateInformeFilename, generatePDFFromElement } from './download-utils';
 
 export const getReportTitle = (
   isCompoundMode: boolean,
@@ -28,25 +29,58 @@ export const formatTimestamp = (timestamp: string): string => {
   return new Date(timestamp).toLocaleString();
 };
 
-export const downloadReportPDF = async (
+export const downloadReportPDFFromServer = async (
   savedId: string,
   resultado: Informe | null,
   setError: (error: string | null) => void
 ): Promise<void> => {
-  if (!savedId) return;
+  if (!savedId) {
+    setError('No se puede descargar: el informe no está guardado');
+    return;
+  }
 
   try {
     const blob = await prefactibilidad.descargarPDF(savedId);
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `informe-${resultado?.direccion?.direccion || 'prefactibilidad'}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+    const filename = resultado ? generateInformeFilename(resultado) : 'informe-prefactibilidad.pdf';
+    downloadBlob(blob, filename);
   } catch (err) {
     manejarErrorPDF(err, setError);
+  }
+};
+
+export const downloadReportPDFFromClient = async (
+  resultado: Informe | null,
+  setError: (error: string | null) => void
+): Promise<void> => {
+  if (!resultado) {
+    setError('No hay resultado para generar el PDF');
+    return;
+  }
+
+  try {
+    const reportContainer = document.querySelector('[data-report-container]') as HTMLElement;
+    if (!reportContainer) {
+      setError('No se encontró el contenedor del informe');
+      return;
+    }
+
+    const filename = generateInformeFilename(resultado);
+    await generatePDFFromElement(reportContainer, filename);
+  } catch (err) {
+    console.error('Error al generar PDF desde cliente:', err);
+    setError('Error al generar el PDF. Por favor, intente nuevamente.');
+  }
+};
+
+export const downloadReportPDF = async (
+  savedId: string | null,
+  resultado: Informe | null,
+  setError: (error: string | null) => void
+): Promise<void> => {
+  if (savedId) {
+    await downloadReportPDFFromServer(savedId, resultado, setError);
+  } else {
+    await downloadReportPDFFromClient(resultado, setError);
   }
 };
 
@@ -55,7 +89,8 @@ export const consolidarInformesCompuestos = (
   resultados: Informe[],
   setInformeCompuesto: (informe: InformeCompuesto | null) => void,
   setResultado: (resultado: Informe | null) => void,
-  setError: (error: string | null) => void
+  setError: (error: string | null) => void,
+  setResultados?: (resultados: Informe[]) => void
 ): void => {
   try {
     const informeCompuestoNuevo = crearInformeCompuesto(direcciones, resultados);
@@ -69,5 +104,8 @@ export const consolidarInformesCompuestos = (
     setError(msg);
     setInformeCompuesto(null);
     setResultado(null);
+    if (setResultados) {
+      setResultados([]);
+    }
   }
 };

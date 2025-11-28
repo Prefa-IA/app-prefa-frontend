@@ -4,29 +4,41 @@ import { prefactibilidad } from '../services/api';
 import { Informe } from '../types/enums';
 
 import { useInformesDownload } from './use-informes-download';
-import { useInformesPagination } from './use-informes-pagination';
 import { useInformesSearch } from './use-informes-search';
 
-export const useInformesList = () => {
+const ITEMS_PER_PAGE_STORAGE_KEY = 'listaInformes_itemsPerPage';
+
+const useItemsPerPageState = () => {
+  return useState<number>(() => {
+    const saved = localStorage.getItem(ITEMS_PER_PAGE_STORAGE_KEY);
+    const parsed = saved ? Number.parseInt(saved, 10) : 10;
+    return parsed === 10 || parsed === 25 || parsed === 50 ? parsed : 10;
+  });
+};
+
+const useInformesData = (
+  page: number,
+  search: string,
+  itemsPerPage: number,
+  downloadError: string | null,
+  setDownloadError: (error: string | null) => void
+) => {
   const [informes, setInformes] = useState<Informe[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalPages, setTotalPages] = useState(1);
 
-  const { search, searchCooldown, handleSearchSubmit, handleSearchChange } = useInformesSearch();
-  const { page, handlePrevPage, handleNextPage, resetPage } = useInformesPagination(totalPages);
-  const {
-    handleDescargar,
-    downloadingIds,
-    downloadedIds,
-    error: downloadError,
-    setError: setDownloadError,
-  } = useInformesDownload();
+  useEffect(() => {
+    if (downloadError) {
+      setError(downloadError);
+      setDownloadError(null);
+    }
+  }, [downloadError, setDownloadError]);
 
   const cargarInformes = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await prefactibilidad.obtenerInformes(page, search);
+      const data = await prefactibilidad.obtenerInformes(page, search, itemsPerPage);
       setInformes(data.informes);
       setTotalPages(data.totalPages);
     } catch (error) {
@@ -35,7 +47,7 @@ export const useInformesList = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, search]);
+  }, [page, search, itemsPerPage]);
 
   useEffect(() => {
     void cargarInformes();
@@ -51,12 +63,39 @@ export const useInformesList = () => {
     };
   }, [cargarInformes]);
 
-  useEffect(() => {
-    if (downloadError) {
-      setError(downloadError);
-      setDownloadError(null);
-    }
-  }, [downloadError, setDownloadError, setError]);
+  return { informes, loading, error, totalPages, cargarInformes };
+};
+
+export const useInformesList = () => {
+  const [itemsPerPage, setItemsPerPage] = useItemsPerPageState();
+  const [page, setPage] = useState(1);
+  const { search, searchCooldown, handleSearchSubmit, handleSearchChange } = useInformesSearch();
+  const {
+    handleDescargar,
+    downloadingIds,
+    error: downloadError,
+    setError: setDownloadError,
+  } = useInformesDownload();
+
+  const { informes, loading, error, totalPages, cargarInformes } = useInformesData(
+    page,
+    search,
+    itemsPerPage,
+    downloadError,
+    setDownloadError
+  );
+
+  const handlePrevPage = useCallback(() => {
+    if (page > 1) setPage(page - 1);
+  }, [page]);
+
+  const handleNextPage = useCallback(() => {
+    if (page < totalPages) setPage(page + 1);
+  }, [page, totalPages]);
+
+  const resetPage = useCallback(() => {
+    setPage(1);
+  }, []);
 
   const handleSearchSubmitWithReset = useCallback(
     (e: React.FormEvent) => {
@@ -64,6 +103,15 @@ export const useInformesList = () => {
       resetPage();
     },
     [handleSearchSubmit, resetPage]
+  );
+
+  const handleItemsPerPageChange = useCallback(
+    (newLimit: number) => {
+      setItemsPerPage(newLimit);
+      localStorage.setItem(ITEMS_PER_PAGE_STORAGE_KEY, newLimit.toString());
+      resetPage();
+    },
+    [setItemsPerPage, resetPage]
   );
 
   return {
@@ -74,13 +122,14 @@ export const useInformesList = () => {
     totalPages,
     search,
     downloadingIds,
-    downloadedIds,
     searchCooldown,
+    itemsPerPage,
     cargarInformes,
     handleDescargar,
     handleSearchSubmit: handleSearchSubmitWithReset,
     handleSearchChange,
     handlePrevPage,
     handleNextPage,
+    handleItemsPerPageChange,
   };
 };

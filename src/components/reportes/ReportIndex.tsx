@@ -65,7 +65,18 @@ const DynamicIndexItemComponent: React.FC<DynamicIndexItemProps> = ({ item }) =>
 
 const PageNumber: React.FC<PageNumberProps> = ({ pageNumber }) => (
   <div
-    className={`${styles['pageNumber']} mt-4 border rounded w-fit px-3 py-1 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 ml-auto`}
+    className={`${styles['pageNumber']} mt-4 border border-gray-300 rounded w-fit px-3 py-1.5 bg-white ml-auto`}
+    style={{
+      fontSize: '0.875rem',
+      fontWeight: 600,
+      textAlign: 'right',
+      color: '#000000',
+      minWidth: 'fit-content',
+      whiteSpace: 'nowrap',
+      letterSpacing: 'normal',
+      wordSpacing: 'normal',
+      fontVariantNumeric: 'normal',
+    }}
   >
     {pageNumber}
   </div>

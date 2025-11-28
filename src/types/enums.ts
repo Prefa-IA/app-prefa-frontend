@@ -215,6 +215,35 @@ export interface Informe {
   tipoPrefa?: PrefaType;
   pdfUrl?: string;
   esUltimoInforme?: boolean;
+  calculo?: Record<string, unknown>;
+  shp_assets_info?: {
+    capas?: {
+      lib?: {
+        features: number;
+        datos: GeoJSONFeature[];
+      };
+      lfi?: {
+        features: number;
+        datos: GeoJSONFeature[];
+      };
+    };
+    troneras?: {
+      calculadas: number;
+      datos: TroneraFeature[];
+      estadisticas?: {
+        porcentaje_afectacion_lfi?: number;
+        porcentaje_afectacion_lib?: number;
+        total_esquinas?: number;
+        esquinas_con_troneras?: number;
+      };
+    };
+    estadisticas?: {
+      porcentaje_afectacion_lfi?: number;
+      porcentaje_afectacion_lib?: number;
+      total_esquinas?: number;
+      esquinas_con_troneras?: number;
+    };
+  };
 }
 
 export interface InformeCompuesto {
@@ -323,7 +352,7 @@ export interface ReportBrandProps {
 
 // ReportFooter Component Interfaces
 export interface FooterActionsProps {
-  onGenerateReport?: () => void;
+  onGenerateReport?: () => void | Promise<void>;
   savedId?: string | null;
 }
 
@@ -633,6 +662,7 @@ export interface DocumentViewerProps {
     planosIndice: string[];
   };
   pageCounter: number;
+  tipoPrefa?: string;
   pageNumbers?: {
     croquis: number;
     perimetro: number;
@@ -1284,6 +1314,7 @@ export interface SubscriptionPlan {
   // Nuevos campos de créditos y opciones
   creditosMes?: number;
   creditosDia?: number;
+  creditosTotales?: number;
   permiteCompuestas?: boolean;
   watermarkOrg?: boolean;
   watermarkPrefas?: boolean;

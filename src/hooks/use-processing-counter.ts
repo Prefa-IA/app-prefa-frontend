@@ -2,18 +2,20 @@ import { useEffect, useState } from 'react';
 
 import { PROCESSING_CONFIG } from '../types/consulta-direccion';
 
-export const useProcessingCounter = (isProcessing: boolean): number => {
-  const [counter, setCounter] = useState<number>(PROCESSING_CONFIG.INITIAL_COUNTER);
+export const useProcessingCounter = (
+  isProcessing: boolean,
+  numeroDirecciones: number = 1
+): number => {
+  const tiempoInicial = PROCESSING_CONFIG.INITIAL_COUNTER * numeroDirecciones;
+  const [counter, setCounter] = useState<number>(tiempoInicial);
 
   useEffect(() => {
     if (!isProcessing) {
-      // Resetear el contador cuando se detiene el procesamiento
-      setCounter(PROCESSING_CONFIG.INITIAL_COUNTER);
+      setCounter(tiempoInicial);
       return;
     }
 
-    // Inicializar el contador inmediatamente cuando empieza el procesamiento
-    setCounter(PROCESSING_CONFIG.INITIAL_COUNTER);
+    setCounter(tiempoInicial);
 
     const interval = setInterval(() => {
       setCounter((prev) => {
@@ -26,7 +28,7 @@ export const useProcessingCounter = (isProcessing: boolean): number => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isProcessing]);
+  }, [isProcessing, tiempoInicial]);
 
   return counter;
 };

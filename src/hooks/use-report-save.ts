@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 
 import { prefactibilidad } from '../services/api';
 import { TipoPrefa } from '../types/consulta-direccion';
-import { Informe } from '../types/enums';
+import { Informe, PrefaType } from '../types/enums';
 import { manejarErrorGuardado } from '../utils/consulta-direccion-utils';
 
 interface UseReportSaveProps {
@@ -49,9 +49,15 @@ export const useReportSave = ({
       const loadingId = toast.loading('Guardando informe...');
 
       try {
+        if (!tipoPrefa || (tipoPrefa !== 'prefa1' && tipoPrefa !== 'prefa2')) {
+          toast.error('Debes seleccionar un tipo de informe antes de guardar');
+          setError('Tipo de prefactibilidad no válido');
+          return false;
+        }
+
         const informeParaGuardar: Informe = {
           ...resultado,
-          tipoPrefa,
+          tipoPrefa: tipoPrefa as PrefaType,
         };
 
         const response = await prefactibilidad.aceptarInforme(informeParaGuardar);

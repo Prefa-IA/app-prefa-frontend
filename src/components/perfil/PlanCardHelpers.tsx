@@ -14,12 +14,13 @@ export const calculateDiscountInfo = (plan: PlanCardProps['plan']) => {
 };
 
 export const getPlanBenefits = (plan: PlanCardProps['plan']) => {
-  const freeCreditsDisplay = plan.freeCredits
-    ? `${plan.freeCredits.toLocaleString()} créditos gratis`
-    : null;
+  const creditosTotalesDisplay =
+    plan.creditosTotales || plan.creditosMes
+      ? `${(plan.creditosTotales || plan.creditosMes || 0).toLocaleString()} créditos incluidos`
+      : null;
 
   return [
-    freeCreditsDisplay,
+    creditosTotalesDisplay,
     plan.permiteCompuestas ? 'Análisis de múltiples lotes linderos' : null,
     plan.watermarkOrg ? 'Informes con marca de agua de tu empresa' : null,
     plan.watermarkPrefas ? 'Informes con marca de agua de Prefa-IA' : null,

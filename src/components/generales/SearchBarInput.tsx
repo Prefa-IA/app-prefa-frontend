@@ -40,12 +40,12 @@ const SearchBarInput: React.FC<SearchBarInputProps> = ({
         ref={inputRef}
         type="text"
         placeholder={placeholder}
-        className={`${styles['input']} dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500`}
+        className={`${styles['input']} ${hasResult ? styles['hasResult'] : ''} dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500`}
         onChange={onChange}
         value={value}
         onKeyDown={handleKeyDown('Enter', onSearch)}
         onFocus={onFocus}
-        disabled={disabled}
+        disabled={disabled || hasResult}
       />
       {hasResult && onClear ? (
         <button

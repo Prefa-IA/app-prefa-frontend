@@ -22,6 +22,7 @@ interface UseSingleAddressConsultationProps {
   setResultado: (resultado: Informe) => void;
   setCenter: (center: Coordinates) => void;
   setProcessing: (processing: boolean) => void;
+  setIsValidating: (isValidating: boolean) => void;
   agregarDireccion: (direccion: string) => void;
   procesarCalculoPrefactibilidad: (datosParcela: DatosParcela) => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -38,6 +39,7 @@ export const useSingleAddressConsultation = ({
   setResultado,
   setCenter,
   setProcessing,
+  setIsValidating,
   agregarDireccion,
   procesarCalculoPrefactibilidad,
   refreshProfile,
@@ -56,6 +58,7 @@ export const useSingleAddressConsultation = ({
     setResultado,
     setCenter,
     setProcessing,
+    setIsValidating,
     agregarDireccion,
     procesarCalculoPrefactibilidad,
     refreshProfile,

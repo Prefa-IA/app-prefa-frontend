@@ -166,6 +166,23 @@ const consolidateEdificabilidad = (consolidado: Informe, informes: Informe[]): v
   }, 0);
   consolidado.edificabilidad.sup_max_edificable = supMaxEdificableTotal;
 
+  const lfiAfeccionPercentData = informes
+    .map((inf) => {
+      const superficie = inf.edificabilidad?.superficie_parcela || 0;
+      const lfiPercent =
+        (inf.edificabilidad as { lfi_afeccion_percent?: number })?.lfi_afeccion_percent || 0;
+      return { superficie, lfiPercent };
+    })
+    .filter((d) => d.superficie > 0);
+
+  if (lfiAfeccionPercentData.length > 0 && superficieParcelaTotal > 0) {
+    const lfiAfeccionPercentPonderado = lfiAfeccionPercentData.reduce((sum, d) => {
+      return sum + (d.lfiPercent * d.superficie) / superficieParcelaTotal;
+    }, 0);
+    (consolidado.edificabilidad as { lfi_afeccion_percent?: number }).lfi_afeccion_percent =
+      lfiAfeccionPercentPonderado;
+  }
+
   if (consolidado.edificabilidad.plusvalia) {
     const plusvaliaTotals = informes.reduce(
       (totals, inf) => {
@@ -205,6 +222,58 @@ const consolidateGoogleMaps = (consolidado: Informe, informes: Informe[]): void 
   }
 };
 
+const consolidateShpAssetsInfo = (consolidado: Informe, informes: Informe[]): void => {
+  const superficieTotal = informes.reduce((total, inf) => {
+    return total + (inf.edificabilidad?.superficie_parcela || 0);
+  }, 0);
+
+  if (superficieTotal === 0) return;
+
+  const porcentajesLfi: Array<{ superficie: number; porcentaje: number }> = [];
+  const porcentajesLib: Array<{ superficie: number; porcentaje: number }> = [];
+
+  informes.forEach((inf) => {
+    const superficie = inf.edificabilidad?.superficie_parcela || 0;
+    if (superficie === 0) return;
+
+    const shpAssetsInfo = inf.shp_assets_info;
+    const porcentajeLfi =
+      shpAssetsInfo?.troneras?.estadisticas?.porcentaje_afectacion_lfi ??
+      shpAssetsInfo?.estadisticas?.porcentaje_afectacion_lfi ??
+      0;
+    const porcentajeLib =
+      shpAssetsInfo?.troneras?.estadisticas?.porcentaje_afectacion_lib ??
+      shpAssetsInfo?.estadisticas?.porcentaje_afectacion_lib ??
+      0;
+
+    if (typeof porcentajeLfi === 'number' && porcentajeLfi > 0) {
+      porcentajesLfi.push({ superficie, porcentaje: porcentajeLfi });
+    }
+    if (typeof porcentajeLib === 'number' && porcentajeLib > 0) {
+      porcentajesLib.push({ superficie, porcentaje: porcentajeLib });
+    }
+  });
+
+  const porcentajeLfiConsolidado =
+    porcentajesLfi.length > 0
+      ? porcentajesLfi.reduce((sum, p) => sum + (p.porcentaje * p.superficie) / superficieTotal, 0)
+      : 0;
+  const porcentajeLibConsolidado =
+    porcentajesLib.length > 0
+      ? porcentajesLib.reduce((sum, p) => sum + (p.porcentaje * p.superficie) / superficieTotal, 0)
+      : 0;
+
+  if (!consolidado.shp_assets_info) {
+    consolidado.shp_assets_info = {};
+  }
+  if (!consolidado.shp_assets_info.estadisticas) {
+    consolidado.shp_assets_info.estadisticas = {};
+  }
+
+  consolidado.shp_assets_info.estadisticas.porcentaje_afectacion_lfi = porcentajeLfiConsolidado;
+  consolidado.shp_assets_info.estadisticas.porcentaje_afectacion_lib = porcentajeLibConsolidado;
+};
+
 export const consolidarInformes = (informes: Informe[]): Informe => {
   if (informes.length === 0) {
     throw new Error('No hay informes para consolidar');
@@ -226,6 +295,7 @@ export const consolidarInformes = (informes: Informe[]): Informe => {
   consolidateEdificabilidad(consolidado, informes);
   consolidateGeometria(consolidado, informes);
   consolidateGoogleMaps(consolidado, informes);
+  consolidateShpAssetsInfo(consolidado, informes);
 
   return consolidado;
 };

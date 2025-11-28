@@ -19,6 +19,7 @@ interface ParcelDataSectionsContentProps {
   calculatedValues: ReturnType<typeof calculateAllValues>;
   plusvaliaRef: React.RefObject<HTMLDivElement> | undefined;
   lastPageNumber: number;
+  tipoPrefa?: string;
 }
 
 const ParcelDataSectionsContent: React.FC<ParcelDataSectionsContentProps> = ({
@@ -35,6 +36,7 @@ const ParcelDataSectionsContent: React.FC<ParcelDataSectionsContentProps> = ({
   calculatedValues,
   plusvaliaRef,
   lastPageNumber,
+  tipoPrefa,
 }) => (
   <ParcelDataSectionsRenderer
     showFacadeImages={showFacadeImages}
@@ -50,6 +52,7 @@ const ParcelDataSectionsContent: React.FC<ParcelDataSectionsContentProps> = ({
     calculatedValues={calculatedValues}
     plusvaliaRef={plusvaliaRef}
     lastPageNumber={lastPageNumber}
+    {...(tipoPrefa !== undefined ? { tipoPrefa } : {})}
   />
 );
 

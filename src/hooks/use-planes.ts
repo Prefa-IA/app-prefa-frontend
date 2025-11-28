@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 export interface Plan {
+  _id?: string;
   id: string;
   name: string;
   price: number;
@@ -67,8 +68,22 @@ export const usePlanes = () => {
 
 export const separatePlanes = (planes: Plan[], userPlanId?: string) => {
   const normales = planes.filter((p) => !p.isOverage);
+
+  const userPlanIdToMatch: string | undefined = userPlanId
+    ? (() => {
+        const userPlan = planes.find(
+          (p) =>
+            !p.isOverage &&
+            (p.id === userPlanId ||
+              p._id === userPlanId ||
+              p.name.toLowerCase() === userPlanId.toLowerCase())
+        );
+        return userPlan ? userPlan.id : userPlanId;
+      })()
+    : undefined;
+
   const overages = planes.filter(
-    (p) => p.isOverage && (!userPlanId || p.parentPlan === userPlanId)
+    (p) => p.isOverage && (!userPlanIdToMatch || p.parentPlan === userPlanIdToMatch)
   );
   return { normales, overages };
 };

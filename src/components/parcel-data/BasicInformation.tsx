@@ -3,6 +3,7 @@ import React from 'react';
 import useTablePersonalization from '../../hooks/use-table-personalization';
 import { DirectionsSectionProps } from '../../types/components';
 import { BasicInformationProps, Informe, PARCEL_DATA_CONFIG } from '../../types/enums';
+import { getInformeConCalculo } from '../../utils/informe-calculado-helper';
 import { calculateAllValues } from '../../utils/parcel-calculations';
 
 import BasicInformationHeader from './BasicInformationHeader';
@@ -47,7 +48,7 @@ const calculateBreakdowns = (
   individuales.forEach((inf) => {
     const vals = calculateAllValues(inf, {});
     caps.push(vals.totalCapConstructiva.toFixed(2));
-    plusVals.push(vals.plusvaliaFinal.toLocaleString('es-AR'));
+    plusVals.push((vals.plusvaliaFinal ?? 0).toLocaleString('es-AR'));
   });
 
   return {
@@ -237,16 +238,27 @@ const BasicInformation: React.FC<BasicInformationProps> = ({
   pageCounter,
   isBasicSearch: isBasicSearchProp,
 }) => {
+  const informeConCalculo = getInformeConCalculo(informe);
+
+  const informeConsolidadoConCalculo = informeCompuesto
+    ? {
+        ...informeCompuesto,
+        informeConsolidado: getInformeConCalculo(informeCompuesto.informeConsolidado),
+      }
+    : undefined;
+
   const informeAMostrar =
-    esInformeCompuesto && informeCompuesto ? informeCompuesto.informeConsolidado : informe;
+    esInformeCompuesto && informeConsolidadoConCalculo
+      ? informeConsolidadoConCalculo.informeConsolidado
+      : informeConCalculo;
 
   const { parentTableStyle } = useTablePersonalization();
 
   const isBasicSearch = determineIsBasicSearch(isBasicSearchProp, informeAMostrar);
 
   const renderDirecciones = () => {
-    if (esInformeCompuesto && informeCompuesto) {
-      return <DirectionsSection direcciones={informeCompuesto.direcciones} />;
+    if (esInformeCompuesto && informeConsolidadoConCalculo) {
+      return <DirectionsSection direcciones={informeConsolidadoConCalculo.direcciones} />;
     }
     return null;
   };
@@ -257,7 +269,7 @@ const BasicInformation: React.FC<BasicInformationProps> = ({
 
   const { capacityBreakdown, plusvaliaBreakdown } = calculateBreakdowns(
     esInformeCompuesto,
-    informeCompuesto
+    informeConsolidadoConCalculo
   );
 
   const frente = formatMedida(informeAMostrar.datosCatastrales?.frente);
@@ -266,7 +278,7 @@ const BasicInformation: React.FC<BasicInformationProps> = ({
   const basicInfoValues = getBasicInfoValues(
     isBasicSearch,
     esInformeCompuesto,
-    informeCompuesto,
+    informeConsolidadoConCalculo,
     informeAMostrar,
     frente,
     fondo,

@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { toast } from 'react-toastify';
 
 import { Informe } from '../types/enums';
 
@@ -7,17 +8,35 @@ interface UseAddressManagementProps {
   resultados: Informe[];
   setDirecciones: React.Dispatch<React.SetStateAction<string[]>>;
   setResultados: React.Dispatch<React.SetStateAction<Informe[]>>;
+  setDireccion?: (direccion: string) => void;
 }
 
 export const useAddressManagement = ({
+  direcciones,
   setDirecciones,
   setResultados,
+  setDireccion,
 }: UseAddressManagementProps) => {
   const agregarDireccion = useCallback(
     (dir: string) => {
-      setDirecciones((prev) => (prev.includes(dir) ? prev : [...prev, dir]));
+      const direccionNormalizada = dir.trim();
+
+      const direccionYaExiste = direcciones.some(
+        (d) => d.trim().toLowerCase() === direccionNormalizada.toLowerCase()
+      );
+
+      if (direccionYaExiste) {
+        toast.warning('Esta dirección ya está agregada en la lista');
+        return;
+      }
+
+      setDirecciones((prev) => [...prev, direccionNormalizada]);
+
+      if (setDireccion) {
+        setDireccion('');
+      }
     },
-    [setDirecciones]
+    [direcciones, setDirecciones, setDireccion]
   );
 
   const eliminarDireccion = useCallback(

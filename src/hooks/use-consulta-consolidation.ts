@@ -10,6 +10,7 @@ export interface UseConsultaConsolidationProps {
   setInformeCompuesto: React.Dispatch<React.SetStateAction<InformeCompuesto | null>>;
   setResultado: React.Dispatch<React.SetStateAction<Informe | null>>;
   setError: React.Dispatch<React.SetStateAction<string | null>>;
+  setResultados: React.Dispatch<React.SetStateAction<Informe[]>>;
 }
 
 export const useConsultaConsolidation = ({
@@ -19,6 +20,7 @@ export const useConsultaConsolidation = ({
   setInformeCompuesto,
   setResultado,
   setError,
+  setResultados,
 }: UseConsultaConsolidationProps) => {
   const consolidarInformes = useCallback(async () => {
     if (!modoCompuesto || resultados.length === 0) return;
@@ -27,9 +29,18 @@ export const useConsultaConsolidation = ({
       resultados,
       setInformeCompuesto,
       setResultado,
-      setError
+      setError,
+      setResultados
     );
-  }, [modoCompuesto, resultados, direcciones, setInformeCompuesto, setResultado, setError]);
+  }, [
+    modoCompuesto,
+    resultados,
+    direcciones,
+    setInformeCompuesto,
+    setResultado,
+    setError,
+    setResultados,
+  ]);
 
   return { consolidarInformes };
 };

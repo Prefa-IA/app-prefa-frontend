@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { AddressSuggestionsHookReturn } from '../types/address';
 import { DireccionSugerida } from '../types/enums';
@@ -20,14 +20,22 @@ export function useDireccionSugerencias(
 ): AddressSuggestionsHookReturn {
   const [sugerencias, setSugerencias] = useState<DireccionSugerida[]>([]);
   const [buscandoSugerencias, setBuscandoSugerencias] = useState(false);
+  const currentSearchRef = useRef<string>('');
 
   const searchSuggestions = useCallback(
     async (valor: string) => {
+      currentSearchRef.current = valor;
       setBuscandoSugerencias(true);
       try {
         await obtenerSugerenciasDireccion(valor, setSugerencias, setError || (() => null));
-      } finally {
-        setBuscandoSugerencias(false);
+        if (currentSearchRef.current === valor) {
+          setBuscandoSugerencias(false);
+        }
+      } catch (error: unknown) {
+        if (currentSearchRef.current === valor) {
+          setBuscandoSugerencias(false);
+        }
+        throw error;
       }
     },
     [setError]
@@ -40,11 +48,13 @@ export function useDireccionSugerencias(
       if (valor.length < minLength) {
         setSugerencias([]);
         setBuscandoSugerencias(false);
+        currentSearchRef.current = '';
         if (setError) {
           setError(null);
         }
         return;
       }
+
       setBuscandoSugerencias(true);
       debouncedSearch(valor);
     },

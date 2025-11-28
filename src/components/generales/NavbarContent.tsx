@@ -16,7 +16,6 @@ interface NavbarContentProps {
   logout: () => void;
   creditBalance: number;
   planObjValue: SubscriptionPlan | null;
-  usuarioValue: Usuario;
   shouldDisableNavigation: boolean;
 }
 
@@ -25,22 +24,21 @@ const NavbarContent: React.FC<NavbarContentProps> = ({
   logout,
   creditBalance,
   planObjValue,
-  usuarioValue,
   shouldDisableNavigation,
 }) => {
   const navigationProps = shouldDisableNavigation ? { needsTermsAcceptance: true } : {};
 
   return (
-    <Disclosure as="nav" className="bg-white dark:bg-gray-800 shadow print-hidden">
-      {({ open }) => (
+    <Disclosure as="nav" className="bg-white dark:bg-gray-800 shadow print-hidden relative z-40">
+      {({ open, close }) => (
         <>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16 items-center">
-              <div className="flex flex-1">
+              <div className="flex flex-1 min-w-0">
                 <BrandLogo {...navigationProps} />
                 <DesktopNavigation {...navigationProps} />
               </div>
-              <div className="flex ml-auto sm:ml-6 items-center space-x-4 sm:space-x-6 mr-2">
+              <div className="hidden sm:flex ml-auto sm:ml-6 items-center space-x-4 sm:space-x-6 mr-2">
                 {usuario && <CreditsPill saldo={creditBalance} />}
                 <UserSection
                   usuario={usuario}
@@ -50,16 +48,38 @@ const NavbarContent: React.FC<NavbarContentProps> = ({
                 />
                 <ThemeButton />
               </div>
-              <MobileMenuButton open={open} />
+              <div className="flex sm:hidden items-center space-x-2 ml-2">
+                <ThemeButton />
+                <MobileMenuButton open={open} />
+              </div>
             </div>
           </div>
-          <MobileMenu
-            navigation={[...NAVBAR_CONFIG.NAVIGATION]}
-            usuario={usuarioValue}
-            planObj={planObjValue}
-            onLogout={logout}
-            {...navigationProps}
-          />
+          {open && (
+            <>
+              <button
+                type="button"
+                className="fixed inset-0 bg-black/50 z-50 lg:hidden"
+                onClick={() => {
+                  close();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    close();
+                  }
+                }}
+                aria-label="Cerrar menú"
+              />
+              <MobileMenu
+                navigation={[...NAVBAR_CONFIG.NAVIGATION]}
+                usuario={usuario}
+                planObj={planObjValue}
+                onLogout={logout}
+                open={open}
+                onClose={close}
+                {...navigationProps}
+              />
+            </>
+          )}
         </>
       )}
     </Disclosure>

@@ -34,11 +34,11 @@ const PlanCardContent: React.FC<PlanCardContentProps> = ({ plan, badge, badgeCla
 
       {isDiscountActive && (
         <p className="text-sm text-gray-400 dark:text-gray-500 line-through mb-1">
-          ${plan.price.toLocaleString()}
+          ${plan.price.toLocaleString()} ARS
         </p>
       )}
       <p className="text-4xl font-extrabold" style={{ color: '#0284C7' }}>
-        ${discountedPrice.toLocaleString()}
+        ${discountedPrice.toLocaleString()} ARS
       </p>
 
       <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300 mb-6 flex-1">

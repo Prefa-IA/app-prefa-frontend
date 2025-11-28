@@ -5,9 +5,10 @@ import { ToastContainer } from 'react-toastify';
 import OveragesAdmin from './components/admin/OveragesAdmin';
 import BuscarDireccionPage from './components/BuscarDireccionPage';
 import ConsultaDireccion from './components/ConsultaDireccion';
-import FAQPage from './components/FAQPage';
 import ForgotPasswordPage from './components/ForgotPasswordPage';
+import Chatbot from './components/generales/Chatbot';
 import Footer from './components/generales/Footer';
+import GlobalConfirmModal from './components/generales/GlobalConfirmModal';
 import Navbar from './components/generales/Navbar';
 import Home from './components/Home';
 import ListaInformes from './components/ListaInformes';
@@ -23,6 +24,7 @@ import PerfilUsuario from './components/usuario/PerfilUsuario';
 import RegistroForm from './components/usuario/RegistroForm';
 import VerifyEmailPage from './components/VerifyEmailPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ModalLoadingProvider } from './contexts/ModalLoadingContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 
 import 'react-toastify/dist/ReactToastify.css';
@@ -101,7 +103,6 @@ const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         }
       />
-      <Route path="/faq" element={<FAQPage />} />
       <Route path="/print/informe/:id" element={<PrintInforme />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -124,17 +125,21 @@ const App: React.FC = () => {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden flex flex-col">
-            <Navbar />
-            <main className="flex-grow">
-              <AppRoutes />
-            </main>
-            <Footer />
-            <ThemedToast />
-            <TutorialOnboarding />
-          </div>
-        </Router>
+        <ModalLoadingProvider>
+          <Router>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden flex flex-col">
+              <Navbar />
+              <main className="flex-grow">
+                <AppRoutes />
+              </main>
+              <Footer />
+              <Chatbot />
+              <ThemedToast />
+              <GlobalConfirmModal />
+              <TutorialOnboarding />
+            </div>
+          </Router>
+        </ModalLoadingProvider>
       </AuthProvider>
     </ThemeProvider>
   );

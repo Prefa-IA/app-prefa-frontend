@@ -12,6 +12,7 @@ import { getPdfViewerUrl, isPDF } from '../../utils/parcel-calculations';
 import LbiLfiViewerMapLibre from '../lbi-lfi-viewer/LbiLfiViewerMapLibre';
 
 import DataTable from './DataTable';
+import PageNumber from './PageNumber';
 
 interface DocumentViewerSectionsProps {
   informeAMostrar: Informe;
@@ -19,6 +20,7 @@ interface DocumentViewerSectionsProps {
   esInformeCompuesto: boolean;
   documentosVisuales: DocumentosVisuales;
   pageCounter: number;
+  tipoPrefa?: string;
   pageNumbers?: {
     croquis?: number;
     perimetro?: number;
@@ -27,33 +29,92 @@ interface DocumentViewerSectionsProps {
   };
 }
 
+const calculatePageNumbers = (
+  pageCounter: number,
+  pageNumbers:
+    | { croquis?: number; perimetro?: number; lbiLfi?: number; planoIndice?: number }
+    | undefined,
+  hasCroquis: boolean,
+  hasPerimetro: boolean,
+  hasLbiLfi: boolean
+) => {
+  const getPage = (
+    key: 'croquis' | 'perimetro' | 'lbiLfi' | 'planoIndice',
+    current: number
+  ): number => {
+    return (pageNumbers && Reflect.get(pageNumbers, key)) ?? current;
+  };
+
+  const croquisPage = getPage('croquis', pageCounter);
+  const perimetroPage = getPage(
+    'perimetro',
+    hasCroquis && !pageNumbers?.croquis ? croquisPage + 1 : croquisPage
+  );
+  const lbiLfiPage = getPage(
+    'lbiLfi',
+    hasPerimetro && !pageNumbers?.perimetro ? perimetroPage + 1 : perimetroPage
+  );
+  const planoIndicePage = getPage(
+    'planoIndice',
+    hasLbiLfi && !pageNumbers?.lbiLfi ? lbiLfiPage + 1 : lbiLfiPage
+  );
+
+  return { croquisPage, perimetroPage, lbiLfiPage, planoIndicePage };
+};
+
+const shouldShowSection = (hasData: boolean): boolean => {
+  return hasData;
+};
+
 export const SingleInformeSections: React.FC<DocumentViewerSectionsProps> = ({
   informeAMostrar,
   pageNumbers,
   pageCounter,
+  tipoPrefa: _tipoPrefa,
 }) => {
+  const linkImagen = informeAMostrar.edificabilidad?.link_imagen;
+  const hasCroquis = !!linkImagen?.croquis_parcela;
+  const hasPerimetro = !!linkImagen?.perimetro_manzana;
+  const hasLbiLfi = !!(informeAMostrar.googleMaps && informeAMostrar.datosCatastrales?.smp);
+  const hasPlanoIndice = !!linkImagen?.plano_indice;
+
+  const showCroquis = shouldShowSection(hasCroquis);
+  const showPerimetro = shouldShowSection(hasPerimetro);
+  const showLbiLfi = shouldShowSection(hasLbiLfi);
+  const showPlanoIndice = shouldShowSection(hasPlanoIndice);
+
+  const { croquisPage, perimetroPage, lbiLfiPage, planoIndicePage } = calculatePageNumbers(
+    pageCounter,
+    pageNumbers,
+    showCroquis,
+    showPerimetro,
+    showLbiLfi
+  );
+
   return (
     <>
-      {informeAMostrar.edificabilidad?.link_imagen?.croquis_parcela && (
+      {showCroquis && (
         <CroquisSection
-          croquis={informeAMostrar.edificabilidad.link_imagen.croquis_parcela}
-          pageCounter={pageNumbers?.croquis || pageCounter}
+          {...(linkImagen?.croquis_parcela ? { croquis: linkImagen.croquis_parcela } : {})}
+          pageCounter={croquisPage}
         />
       )}
 
-      {informeAMostrar.edificabilidad?.link_imagen?.perimetro_manzana && (
+      {showPerimetro && (
         <PerimetroSection
-          perimetro={informeAMostrar.edificabilidad.link_imagen.perimetro_manzana}
-          informe={informeAMostrar}
-          pageCounter={pageNumbers?.perimetro || pageCounter + 1}
-          lbiLfiPageCounter={pageNumbers?.lbiLfi || pageCounter + 2}
+          {...(linkImagen?.perimetro_manzana ? { perimetro: linkImagen.perimetro_manzana } : {})}
+          pageCounter={perimetroPage}
         />
       )}
 
-      {informeAMostrar.edificabilidad?.link_imagen?.plano_indice && (
+      {showLbiLfi && (
+        <LbiLfiSection informe={informeAMostrar} esCompuesto={false} pageCounter={lbiLfiPage} />
+      )}
+
+      {showPlanoIndice && (
         <PlanoIndiceSection
-          planoIndice={informeAMostrar.edificabilidad.link_imagen.plano_indice}
-          pageCounter={pageNumbers?.planoIndice || pageCounter + 2}
+          {...(linkImagen?.plano_indice ? { planoIndice: linkImagen.plano_indice } : {})}
+          pageCounter={planoIndicePage}
         />
       )}
     </>
@@ -93,10 +154,10 @@ export const CompoundInformeSections: React.FC<DocumentViewerSectionsProps> = ({
   );
 };
 
-const CroquisSection: React.FC<{ croquis: string; pageCounter: number }> = ({
-  croquis,
-  pageCounter,
-}) => {
+const CroquisSection: React.FC<{
+  croquis?: string;
+  pageCounter: number;
+}> = ({ croquis, pageCounter }) => {
   const { parentTableStyle } = useTablePersonalization();
 
   return (
@@ -104,53 +165,53 @@ const CroquisSection: React.FC<{ croquis: string; pageCounter: number }> = ({
       <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-2`} style={parentTableStyle}>
         CROQUIS DE LA PARCELA
       </div>
-      <DocumentItem
-        url={croquis}
-        title="Croquis de la parcela"
-        defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.CROQUIS}
-      />
-      <div className="mt-4 border rounded w-fit px-3 py-1 text-dark dark:text-gray-200 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 ml-auto">
-        {pageCounter}
-      </div>
+      {croquis ? (
+        <DocumentItem
+          url={croquis}
+          title="Croquis de la parcela"
+          defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.CROQUIS}
+        />
+      ) : (
+        <div className="p-8 text-center text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded">
+          No hay croquis disponible para esta parcela
+        </div>
+      )}
+      <PageNumber pageNumber={pageCounter} />
     </div>
   );
 };
 
 const PerimetroSection: React.FC<{
-  perimetro: string;
-  informe: Informe;
+  perimetro?: string;
   pageCounter: number;
-  lbiLfiPageCounter: number;
-}> = ({ perimetro, informe, pageCounter, lbiLfiPageCounter }) => {
+}> = ({ perimetro, pageCounter }) => {
   const { parentTableStyle } = useTablePersonalization();
 
   return (
-    <>
-      <div className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
-        <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-2`} style={parentTableStyle}>
-          PERÍMETRO DE LA MANZANA
-        </div>
+    <div className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
+      <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-2`} style={parentTableStyle}>
+        PERÍMETRO DE LA MANZANA
+      </div>
+      {perimetro ? (
         <DocumentItem
           url={perimetro}
           title="Perímetro de la manzana"
           defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PERIMETRO}
         />
-        <div className="mt-4 border rounded w-fit px-3 py-1 text-dark bg-gray-100 ml-auto">
-          {pageCounter}
+      ) : (
+        <div className="p-8 text-center text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded">
+          No hay perímetro disponible para esta manzana
         </div>
-      </div>
-
-      {informe.googleMaps && informe.datosCatastrales?.smp && (
-        <LbiLfiSection informe={informe} esCompuesto={false} pageCounter={lbiLfiPageCounter ?? 0} />
       )}
-    </>
+      <PageNumber pageNumber={pageCounter} />
+    </div>
   );
 };
 
-const PlanoIndiceSection: React.FC<{ planoIndice: string; pageCounter: number }> = ({
-  planoIndice,
-  pageCounter,
-}) => {
+const PlanoIndiceSection: React.FC<{
+  planoIndice?: string;
+  pageCounter: number;
+}> = ({ planoIndice, pageCounter }) => {
   const { parentTableStyle } = useTablePersonalization();
 
   return (
@@ -158,14 +219,18 @@ const PlanoIndiceSection: React.FC<{ planoIndice: string; pageCounter: number }>
       <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-2`} style={parentTableStyle}>
         PLANO ÍNDICE
       </div>
-      <DocumentItem
-        url={planoIndice}
-        title="Plano índice"
-        defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PLANO_INDICE}
-      />
-      <div className="mt-4 border rounded w-fit px-3 py-1 text-dark bg-gray-100 ml-auto">
-        {pageCounter}
-      </div>
+      {planoIndice ? (
+        <DocumentItem
+          url={planoIndice}
+          title="Plano índice"
+          defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PLANO_INDICE}
+        />
+      ) : (
+        <div className="p-8 text-center text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded">
+          No hay plano índice disponible para esta parcela
+        </div>
+      )}
+      <PageNumber pageNumber={pageCounter} />
     </div>
   );
 };

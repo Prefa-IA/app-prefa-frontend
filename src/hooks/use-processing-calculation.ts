@@ -64,13 +64,20 @@ export const useProcessingCalculation = ({
         const resumenValido = await obtenerResumenValido();
 
         if (resumenValido) {
-          setResultado({ ...informe, iaResumen: resumenValido } as unknown as Informe);
+          const calculoFromResponse = resumenValido['calculo'] as
+            | Record<string, unknown>
+            | undefined;
+          const informeConCalculo = {
+            ...informe,
+            ...resumenValido,
+            calculo: calculoFromResponse || informe.calculo,
+          } as Informe;
+          setResultado(informeConCalculo);
         } else {
           toast.success('Prefactibilidad generada satisfactoriamente.');
           setResultado(informe);
         }
       } catch (err) {
-        console.error('Error en procesamiento:', err);
         toast.error(
           'No fue posible obtener la respuesta del cálculo. Se mostrarán los datos disponibles.'
         );

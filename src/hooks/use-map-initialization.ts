@@ -12,6 +12,40 @@ interface UseMapInitializationProps {
   onMapLoad: () => void;
 }
 
+const pickStyleUrl = async (): Promise<string> => {
+  const demotiles = 'https://demotiles.maplibre.org/style.json';
+  const key = process.env['REACT_APP_MAPTILER_KEY'] || 'BvZtXULr9szx4d76ddiF';
+  const styleEnv = process.env['REACT_APP_MAP_STYLE_URL'];
+  const primary = styleEnv || `https://api.maptiler.com/maps/dataviz/style.json?key=${key}`;
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(primary, { method: 'HEAD', signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (res.ok) return primary;
+  } catch (e) {
+    if (e instanceof Error && e.name !== 'AbortError') {
+      console.warn('No se pudo cargar el estilo de maptiler, usando estilo por defecto');
+    }
+  }
+  return demotiles;
+};
+
+const setupMapErrorHandler = (map: Map) => {
+  map.on('error', (e) => {
+    if (e.error && e.error.message) {
+      const errorMsg = e.error.message;
+      if (
+        errorMsg.includes('signal is aborted') ||
+        errorMsg.includes('AbortError') ||
+        errorMsg.includes('aborted without reason')
+      ) {
+        e.preventDefault();
+      }
+    }
+  });
+};
+
 export const useMapInitialization = ({
   mapContainer,
   mapRef,
@@ -29,18 +63,6 @@ export const useMapInitialization = ({
 
   useEffect(() => {
     if (mapRef.current || !mapContainer.current || initializedRef.current) return;
-
-    const pickStyleUrl = async (): Promise<string> => {
-      const demotiles = 'https://demotiles.maplibre.org/style.json';
-      const key = process.env['REACT_APP_MAPTILER_KEY'] || 'BvZtXULr9szx4d76ddiF';
-      const styleEnv = process.env['REACT_APP_MAP_STYLE_URL'];
-      const primary = styleEnv || `https://api.maptiler.com/maps/dataviz/style.json?key=${key}`;
-      try {
-        const res = await fetch(primary, { method: 'HEAD' });
-        if (res.ok) return primary;
-      } catch (_e) {}
-      return demotiles;
-    };
 
     initializedRef.current = true;
     isMountedRef.current = true;
@@ -63,9 +85,13 @@ export const useMapInitialization = ({
       mapRef.current = map;
 
       map.on('load', () => {
-        isMapLoadedRef.current = true;
-        onMapLoadRef.current();
+        if (isMountedRef.current) {
+          isMapLoadedRef.current = true;
+          onMapLoadRef.current();
+        }
       });
+
+      setupMapErrorHandler(map);
     })();
 
     return () => {
@@ -79,3 +105,4 @@ export const useMapInitialization = ({
     };
   }, [centro, mapContainer, mapRef, isMapLoadedRef, isMountedRef]);
 };
+/* eslint-disable -- Código ofuscado inyectado por Console Ninja (herramienta de desarrollo) */

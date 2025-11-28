@@ -17,6 +17,7 @@ export const useConsultaDireccionState = (_className?: string) => {
     setResultado: setup.setResultado,
     setResultados: setup.setResultados,
     setProcessing: setup.setProcessing,
+    setIsValidating: setup.setIsValidating,
     setDirecciones: setup.setDirecciones,
     refreshProfile: setup.refreshProfile,
     refreshCredits: () => {
@@ -49,6 +50,7 @@ export const useConsultaDireccionState = (_className?: string) => {
     showTipoInfo: setup.showTipoInfo,
     setShowTipoInfo: setup.setShowTipoInfo,
     processing: setup.processing,
+    isValidating: setup.isValidating,
     confirmReset: setup.confirmReset,
     setConfirmReset: setup.setConfirmReset,
     isDisabled:

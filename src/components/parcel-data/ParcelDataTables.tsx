@@ -48,7 +48,6 @@ const ParcelDataTables: React.FC<ParcelDataTablesProps & { pageCounter?: number 
         <BuildabilityDataTable
           informe={informeAMostrar}
           calculatedValues={calculatedValues as CalculatedValues}
-          breakdown={breakdown}
         />
       </div>
 
@@ -109,78 +108,57 @@ const TerrainDataTable: React.FC<{
 const ZoningDataTable: React.FC<{
   informe: Informe;
   calculatedValues: CalculatedValues;
-}> = ({ informe, calculatedValues: _calculatedValues }) => (
-  <DataTable title="DATOS DE LA ZONIFICACIÓN">
-    <div className="p-2">
-      <TableRow
-        label="Zonificación según CU"
-        value={
-          (informe.datosUtiles?.['codigo_de_planeamiento_urbano'] as string | undefined) || 'N/A'
-        }
-      />
+}> = ({ informe, calculatedValues: _calculatedValues }) => {
+  const distritoCPU = informe.edificabilidad?.plusvalia?.distrito_cpu;
+  const catalogacion =
+    informe.edificabilidad?.catalogacion?.catalogacion ||
+    informe.edificabilidad?.catalogacion?.denominacion ||
+    null;
+  const troneras = informe.edificabilidad?.troneras;
 
-      <TableRow label="LFI" value={informe.edificabilidad?.lfi_disponible || 'N/A'} />
+  return (
+    <DataTable title="DATOS DE LA ZONIFICACIÓN">
+      <div className="p-2">
+        <TableRow label="Zonificación según CU" value={distritoCPU || 'N/A'} />
 
-      <TableRow
-        label="Troneras"
-        value={
-          informe.edificabilidad?.troneras && informe.edificabilidad.troneras.area_total !== null
-            ? `${informe.edificabilidad.troneras.cantidad} (${informe.edificabilidad.troneras.area_total.toFixed(2)} m²)`
-            : 'N/A'
-        }
-      />
+        <TableRow
+          label="Troneras"
+          value={
+            troneras && troneras.cantidad > 0
+              ? `${troneras.cantidad}${troneras.area_total ? ` (${troneras.area_total.toFixed(2)} m²)` : ''}`
+              : 'N/A'
+          }
+        />
 
-      <TableRow
-        label="Catalogación"
-        value={informe.edificabilidad?.catalogacion?.catalogacion || 'N/A'}
-      />
-
-      <TableRow label="APH" value={informe.edificabilidad?.aph || 'N/A'} />
-    </div>
-  </DataTable>
-);
+        <TableRow label="Catalogación" value={catalogacion || 'N/A'} />
+      </div>
+    </DataTable>
+  );
+};
 
 const BuildabilityDataTable: React.FC<{
   informe: Informe;
   calculatedValues: CalculatedValues;
-  breakdown: {
-    superficieTerrenoDisplay: string;
-    superficieCubiertaDisplay: string;
-    frenteDisplay: string;
-    superficieEdifDisplay: string;
-  };
-}> = ({ informe, calculatedValues, breakdown }) => {
+}> = ({ informe, calculatedValues }) => {
+  const alturaMax =
+    (calculatedValues.alturaMax ?? 0) > 0
+      ? (calculatedValues.alturaMax ?? 0)
+      : informe.edificabilidad?.altura_max?.[0] || 0;
+  const unidadEdificabilidad = informe.edificabilidad?.unidad_edificabilidad?.[0] || 0;
+
   return (
     <DataTable title="DATOS DE EDIFICABILIDAD">
       <div className="p-2">
-        <TableRow
-          label="Altura Máxima"
-          value={
-            calculatedValues.alturaMax > 0
-              ? `${calculatedValues.alturaMax} m`
-              : informe.edificabilidad?.altura_max?.[0] || 'N/A'
-          }
-        />
+        <TableRow label="Altura Máxima" value={alturaMax > 0 ? `${alturaMax} m` : 'N/A'} />
 
         <TableRow
           label="Tipo de Edificación"
           value={(calculatedValues.tipoEdificacion as string | undefined) || 'N/A'}
         />
 
-        <TableRow label="Superficie Edificable" value={breakdown.superficieEdifDisplay} />
-
-        <TableRow
-          label="Superficie Máx. Edificable"
-          value={
-            informe.edificabilidad?.sup_max_edificable
-              ? `${informe.edificabilidad.sup_max_edificable} m²`
-              : 'N/A'
-          }
-        />
-
         <TableRow
           label="Unidad de Edificabilidad"
-          value={informe.edificabilidad?.unidad_edificabilidad?.[0] || 'N/A'}
+          value={unidadEdificabilidad > 0 ? unidadEdificabilidad.toString() : 'N/A'}
         />
       </div>
     </DataTable>
@@ -228,7 +206,6 @@ const PlusvaliaParametersTable: React.FC<{
       <DataTable title="PARA CÁLCULO DE PLUSVALÍA">
         <div className="p-2">
           <div className={PARCEL_DATA_CONFIG.GRID_COLS_2}>
-            <TableRow label="Distrito CPU" value={plusvalia.distrito_cpu || 'N/A'} />
             <TableRow
               label="Alícuota"
               value={

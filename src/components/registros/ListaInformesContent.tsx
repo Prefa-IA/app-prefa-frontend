@@ -11,7 +11,6 @@ interface ListaInformesContentProps {
   informes: Informe[];
   onDescargar: (informe: Informe) => void;
   downloadingIds: string[];
-  downloadedIds: string[];
 }
 
 const ListaInformesContent: React.FC<ListaInformesContentProps> = ({
@@ -20,7 +19,6 @@ const ListaInformesContent: React.FC<ListaInformesContentProps> = ({
   informes,
   onDescargar,
   downloadingIds,
-  downloadedIds,
 }) => {
   if (loading) {
     return <LoadingState />;
@@ -35,12 +33,7 @@ const ListaInformesContent: React.FC<ListaInformesContentProps> = ({
   }
 
   return (
-    <InformesList
-      informes={informes}
-      onDescargar={onDescargar}
-      downloadingIds={downloadingIds}
-      downloadedIds={downloadedIds}
-    />
+    <InformesList informes={informes} onDescargar={onDescargar} downloadingIds={downloadingIds} />
   );
 };
 

@@ -45,16 +45,14 @@ const LegalNotice: React.FC = () => (
   </div>
 );
 
-const FooterActions: React.FC<FooterActionsProps> = ({ onGenerateReport, savedId }) => {
+const FooterActions: React.FC<FooterActionsProps> = ({ onGenerateReport }) => {
   const [downloading, setDownloading] = useState(false);
-  const [downloaded, setDownloaded] = useState(false);
 
   const handleDownload = async () => {
-    if (!onGenerateReport || downloading || !savedId || downloaded) return;
+    if (!onGenerateReport || downloading) return;
     setDownloading(true);
     try {
-      onGenerateReport();
-      setDownloaded(true);
+      await Promise.resolve(onGenerateReport());
     } finally {
       setDownloading(false);
     }
@@ -74,7 +72,7 @@ const FooterActions: React.FC<FooterActionsProps> = ({ onGenerateReport, savedId
           variant={ButtonVariant.PRIMARY}
           icon={<DownloadIcon />}
           text="Descargar Informe PDF"
-          disabled={downloading || downloaded || !savedId}
+          disabled={downloading}
         />
       </div>
     </>

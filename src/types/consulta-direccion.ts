@@ -1,4 +1,4 @@
-export type TipoPrefa = 'prefa1' | 'prefa2';
+export type TipoPrefa = 'prefa1' | 'prefa2' | '';
 
 export const TIPO_PREFA = {
   SIMPLE: 'prefa1' as TipoPrefa,

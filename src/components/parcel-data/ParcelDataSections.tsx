@@ -68,6 +68,7 @@ const ParcelDataSections: React.FC<ParcelDataSectionsProps> = ({
       calculatedValues={calculatedValues}
       plusvaliaRef={plusvaliaRef}
       lastPageNumber={lastPageNumber}
+      tipoPrefa={tipoPrefa}
     />
   );
 };

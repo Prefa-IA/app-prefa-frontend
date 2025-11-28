@@ -27,6 +27,7 @@ export interface ConsultaDireccionContentBodyProps {
   showTipoInfo: boolean;
   setShowTipoInfo: (show: boolean) => void;
   processing: boolean;
+  isValidating: boolean;
   confirmReset: boolean;
   setConfirmReset: (show: boolean) => void;
   isDisabled: boolean;
@@ -60,6 +61,7 @@ const ConsultaDireccionContentBody: React.FC<ConsultaDireccionContentBodyProps> 
       modalsContentProps={buildModalsContentProps(allProps)}
       processing={props.processing}
       processingCounter={props.processingCounter}
+      isValidating={props.isValidating}
     />
   );
 };

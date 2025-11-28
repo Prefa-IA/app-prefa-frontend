@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { DocumentosVisuales, Informe, InformeCompuesto } from '../../types/enums';
+import { getInformeConCalculo } from '../../utils/informe-calculado-helper';
 import { calculateAllValues } from '../../utils/parcel-calculations';
 
 import BasicInformation from './BasicInformation';
@@ -33,8 +34,22 @@ const ParcelDataContent: React.FC<ParcelDataContentProps> = ({
   pageNumbers,
   context,
 }) => {
+  const informeConCalculo = getInformeConCalculo(informe);
+
+  const informeConsolidadoConCalculo = informeCompuesto
+    ? {
+        ...informeCompuesto,
+        informeConsolidado: getInformeConCalculo(informeCompuesto.informeConsolidado),
+        informesIndividuales: informeCompuesto.informesIndividuales.map((inf) =>
+          getInformeConCalculo(inf)
+        ),
+      }
+    : undefined;
+
   const informeAMostrar =
-    esInformeCompuesto && informeCompuesto ? informeCompuesto.informeConsolidado : informe;
+    esInformeCompuesto && informeConsolidadoConCalculo
+      ? informeConsolidadoConCalculo.informeConsolidado
+      : informeConCalculo;
 
   const lastPageNumber = Math.max(...Object.values(pageNumbers), 2);
 
@@ -42,17 +57,23 @@ const ParcelDataContent: React.FC<ParcelDataContentProps> = ({
     <>
       <GeneralConsiderations pageCounter={pageNumbers['consideraciones_generales'] || 2} />
       <BasicInformation
-        informe={informe}
-        {...(informeCompuesto !== undefined && { informeCompuesto })}
+        informe={informeConCalculo}
+        {...(informeConsolidadoConCalculo !== undefined && {
+          informeCompuesto: informeConsolidadoConCalculo,
+        })}
         esInformeCompuesto={esInformeCompuesto}
         calculatedValues={{
           totalCapConstructiva: calculatedValues.totalCapConstructiva,
-          plusvaliaFinal: calculatedValues.plusvaliaFinal,
+          plusvaliaFinal: calculatedValues.plusvaliaFinal ?? 0,
         }}
         pageCounter={0}
       />
       <ParcelDataTables
         informe={informeAMostrar}
+        {...(informeConsolidadoConCalculo !== undefined && {
+          informeCompuesto: informeConsolidadoConCalculo,
+        })}
+        esInformeCompuesto={esInformeCompuesto}
         calculatedValues={calculatedValues}
         pageCounter={pageNumbers['datos_parcela'] || 3}
       />
@@ -60,8 +81,8 @@ const ParcelDataContent: React.FC<ParcelDataContentProps> = ({
         tipoPrefa={tipoPrefa}
         context={context}
         fachadaImages={fachadaImages}
-        informe={informe}
-        informeCompuesto={informeCompuesto}
+        informe={informeConCalculo}
+        informeCompuesto={informeConsolidadoConCalculo}
         esInformeCompuesto={esInformeCompuesto}
         documentosVisuales={documentosVisuales}
         pageNumbers={pageNumbers}
