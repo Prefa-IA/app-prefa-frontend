@@ -4,9 +4,9 @@ import {
   DynamicIndexItemProps,
   DynamicIndexListProps,
   DynamicReportIndexProps,
-  PageNumberProps,
 } from '../../types/enums';
 import { generateDynamicIndex, getVisibleIndexItems } from '../../utils/index-utils';
+import PageNumber from '../parcel-data/PageNumber';
 
 import styles from '../../styles/ReportIndex.module.css';
 
@@ -38,19 +38,41 @@ const ReportIndex: React.FC<DynamicReportIndexProps> = ({
 
 const IndexTitle: React.FC = () => <div className={styles['title']}>ÍNDICE</div>;
 
-const DynamicIndexList: React.FC<DynamicIndexListProps> = ({ items }) => (
-  <div className={styles['indexList']}>
-    {items.map((item, index) => (
-      <React.Fragment key={`${item.id}-${index}`}>
-        <DynamicIndexItemComponent item={item} />
-        {item.subItems &&
-          item.subItems.map((subItem, subIndex) => (
-            <DynamicIndexItemComponent key={`${subItem.id}-${subIndex}`} item={subItem} />
-          ))}
-      </React.Fragment>
-    ))}
-  </div>
-);
+const DynamicIndexList: React.FC<DynamicIndexListProps> = ({ items }) => {
+  // Aplanar todos los items (principales y subitems) en una lista única
+  const allItems: (typeof items)[0][] = [];
+
+  items.forEach((item) => {
+    // Agregar el item principal
+    allItems.push(item);
+
+    // Si tiene subitems, agregarlos también
+    if (item.subItems && item.subItems.length > 0) {
+      item.subItems.forEach((subItem) => {
+        allItems.push(subItem);
+      });
+    }
+  });
+
+  // Ordenar todos los items por número de página
+  // Si tienen la misma página, ordenar por nivel (items principales primero, luego subitems)
+  const sortedItems = [...allItems].sort((a, b) => {
+    // Primero ordenar por número de página
+    if (a.pagina !== b.pagina) {
+      return a.pagina - b.pagina;
+    }
+    // Si tienen la misma página, ordenar por nivel (menor nivel = item principal primero)
+    return a.nivel - b.nivel;
+  });
+
+  return (
+    <div className={styles['indexList']}>
+      {sortedItems.map((item, index) => (
+        <DynamicIndexItemComponent key={`${item.id}-${index}`} item={item} />
+      ))}
+    </div>
+  );
+};
 
 const DynamicIndexItemComponent: React.FC<DynamicIndexItemProps> = ({ item }) => (
   <div className={styles['indexItem']}>
@@ -60,25 +82,6 @@ const DynamicIndexItemComponent: React.FC<DynamicIndexItemProps> = ({ item }) =>
     <span className={styles['indexText']} style={{ minWidth: '30px', textAlign: 'right' }}>
       {item.pagina}
     </span>
-  </div>
-);
-
-const PageNumber: React.FC<PageNumberProps> = ({ pageNumber }) => (
-  <div
-    className={`${styles['pageNumber']} mt-4 border border-gray-300 rounded w-fit px-3 py-1.5 bg-white ml-auto`}
-    style={{
-      fontSize: '0.875rem',
-      fontWeight: 600,
-      textAlign: 'right',
-      color: '#000000',
-      minWidth: 'fit-content',
-      whiteSpace: 'nowrap',
-      letterSpacing: 'normal',
-      wordSpacing: 'normal',
-      fontVariantNumeric: 'normal',
-    }}
-  >
-    {pageNumber}
   </div>
 );
 

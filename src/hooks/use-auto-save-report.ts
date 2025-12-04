@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { TipoPrefa } from '../types/consulta-direccion';
 import { Informe } from '../types/enums';
+import { validarDatosCompletos } from '../utils/report-utils';
 
 import { useReportSave } from './use-report-save';
 
@@ -47,6 +48,13 @@ export const useAutoSaveReport = ({
     }
 
     if (isSaving) {
+      return;
+    }
+
+    const datosCompletos = validarDatosCompletos(resultado);
+    const datosIncompletos = Boolean(resultado.datosIncompletos) || !datosCompletos;
+
+    if (datosIncompletos) {
       return;
     }
 

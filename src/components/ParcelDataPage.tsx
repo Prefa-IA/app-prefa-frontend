@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+import { useMapData } from '../hooks/use-map-data';
 import { useParcelPageNumbers } from '../hooks/use-parcel-page-numbers';
 import { useParcelWatermark } from '../hooks/use-parcel-watermark';
 import { obtenerDocumentosVisuales } from '../services/consolidacion-informes';
+import { MapData } from '../types/components';
 import { DocumentosVisuales, ParcelDataPageProps } from '../types/enums';
 import { calculateAllValues } from '../utils/parcel-calculations';
 
@@ -21,15 +23,33 @@ const ParcelDataPage: React.FC<ParcelDataPageProps> = ({
   const informeAMostrar =
     esInformeCompuesto && informeCompuesto ? informeCompuesto.informeConsolidado : informe;
 
-  const calculatedValues = calculateAllValues(informeAMostrar, {});
+  const smp = informeAMostrar.datosCatastrales?.smp || '';
+  const geometriaParcela = informeAMostrar.geometria?.features?.[0]?.geometry
+    ? (informeAMostrar.geometria.features[0].geometry as GeoJSON.Geometry)
+    : null;
+  const mapDataRef = useRef<MapData | null>(null);
+
+  const handleDataLoaded = () => {
+    // No necesitamos hacer nada aquí, solo necesitamos las estadísticas
+  };
+
+  const { estadisticas } = useMapData({
+    smp,
+    geometriaParcela,
+    mapDataRef,
+    onDataLoaded: handleDataLoaded,
+  });
+
+  const calculatedValues = useMemo(
+    () => calculateAllValues(informeAMostrar, {}, estadisticas || undefined),
+    [informeAMostrar, estadisticas]
+  );
 
   const [documentosVisuales, setDocumentosVisuales] = useState<DocumentosVisuales>({
     croquis: [],
     perimetros: [],
     planosIndice: [],
   });
-
-  const smp = informeAMostrar.datosCatastrales?.smp || '';
 
   useEffect(() => {
     if (esInformeCompuesto && informeCompuesto) {

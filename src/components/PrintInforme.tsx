@@ -33,7 +33,8 @@ const getOrgDataUri = (
 const ensureWatermarkStyle = (
   usarOrg: boolean,
   usarPrefa: boolean,
-  orgUrl: string | null
+  orgUrl: string | null,
+  theme: string
 ): void => {
   const prefaUrl = `url(/logo.png)`;
   const styleElState = {
@@ -46,6 +47,8 @@ const ensureWatermarkStyle = (
     styleElState.current = newStyleEl;
   }
   const styleEl = styleElState.current;
+  // Aplicar filtro invert en modo oscuro solo para el logo de PREFA-IA
+  const filter = theme === 'dark' && !usarOrg && usarPrefa ? 'filter: invert(1);' : '';
   if (usarOrg && orgUrl) {
     styleEl.innerHTML = `${MEDIA_SCREEN_PRINT}
       body::before {
@@ -56,7 +59,7 @@ const ensureWatermarkStyle = (
   } else if (usarPrefa) {
     styleEl.innerHTML = `${MEDIA_SCREEN_PRINT}
       body::before {
-        content:''; position:fixed; top:0; left:0; width:100%; height:500vh; min-height:500vh; pointer-events:none; opacity:0.1; transform:none; background-repeat:repeat; background-position:left top; background-size:400px 144px; z-index:0; background-image:${prefaUrl};
+        content:''; position:fixed; top:0; left:0; width:100%; height:500vh; min-height:500vh; pointer-events:none; opacity:0.1; transform:none; background-repeat:repeat; background-position:left top; background-size:400px 144px; z-index:0; background-image:${prefaUrl}; ${filter}
       }
     }`;
     document.body.classList.add(...WATERMARK_CLASSES.split(' '));
@@ -115,12 +118,12 @@ const PrintInforme: React.FC = () => {
     const orgDataUri = usarOrg ? getOrgDataUri(usuario, theme) : null;
     const orgUrl = orgDataUri ? `url(${orgDataUri})` : null;
 
-    ensureWatermarkStyle(usarOrg, usarPrefa, orgUrl);
+    ensureWatermarkStyle(usarOrg, usarPrefa, orgUrl, theme);
     applyDiagonalWatermark();
 
     const obs = new MutationObserver(() => {
       const exists = document.querySelector(WATERMARK_STYLE_SELECTOR);
-      if (!exists) ensureWatermarkStyle(usarOrg, usarPrefa, orgUrl);
+      if (!exists) ensureWatermarkStyle(usarOrg, usarPrefa, orgUrl, theme);
     });
     obs.observe(document.head, { childList: true });
 

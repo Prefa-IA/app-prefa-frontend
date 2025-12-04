@@ -91,7 +91,7 @@ const areNeighbors = (infA: Informe, infB: Informe, aSmp: string, bSmp: string):
   return areLinderasNeighbors(infA, infB, aSmp, bSmp);
 };
 
-const validateLinderas = (informes: Informe[]): void => {
+export const validateLinderas = (informes: Informe[]): void => {
   const smpsSeleccionados = informes.map((inf) => inf.datosCatastrales?.smp).filter(Boolean);
 
   const smpsArray = Array.from(smpsSeleccionados);

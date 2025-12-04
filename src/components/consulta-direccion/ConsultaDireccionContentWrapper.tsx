@@ -6,6 +6,7 @@ import { Informe } from '../../types/enums';
 import ConsultaMainContent from './ConsultaMainContent';
 import ConsultaModalsContent from './ConsultaModalsContent';
 import ConsultaReportContent from './ConsultaReportContent';
+import { CreditCostsBox } from './index';
 import ProcessingOverlay from './ProcessingOverlay';
 import ValidatingOverlay from './ValidatingOverlay';
 
@@ -69,9 +70,18 @@ const ConsultaDireccionContentWrapper: React.FC<ConsultaDireccionContentWrapperP
   processingCounter,
   isValidating,
 }) => (
-  <div className={`flex flex-col items-center justify-center w-full ${className || ''}`}>
-    <ConsultaMainContent {...mainContentProps} />
-    <ConsultaReportContent {...reportContentProps} />
+  <div className={`flex flex-col w-full items-center ${className || ''}`}>
+    <div className="w-full flex justify-center items-start mt-8">
+      <div className="w-full max-w-6xl">
+        <CreditCostsBox />
+      </div>
+    </div>
+    <div className="w-full flex justify-center items-start">
+      <ConsultaMainContent {...mainContentProps} />
+    </div>
+    <div className="w-full order-3">
+      <ConsultaReportContent {...reportContentProps} />
+    </div>
     {isValidating && <ValidatingOverlay />}
     {processing && <ProcessingOverlay seconds={processingCounter} />}
     <ConsultaModalsContent {...modalsContentProps} />

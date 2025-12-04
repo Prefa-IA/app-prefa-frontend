@@ -4,9 +4,16 @@ import { PROCESSING_CONFIG } from '../types/consulta-direccion';
 
 export const useProcessingCounter = (
   isProcessing: boolean,
-  numeroDirecciones: number = 1
+  numeroDirecciones: number = 1,
+  modoCompuesto: boolean = false
 ): number => {
-  const tiempoInicial = PROCESSING_CONFIG.INITIAL_COUNTER * numeroDirecciones;
+  const tiempoInicial: number = modoCompuesto
+    ? numeroDirecciones === 2
+      ? 120
+      : numeroDirecciones === 3
+        ? 180
+        : PROCESSING_CONFIG.INITIAL_COUNTER
+    : PROCESSING_CONFIG.INITIAL_COUNTER * numeroDirecciones;
   const [counter, setCounter] = useState<number>(tiempoInicial);
 
   useEffect(() => {

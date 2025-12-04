@@ -4,6 +4,8 @@ import useTablePersonalization from '../../hooks/use-table-personalization';
 import { FacadeImageGridProps, FacadeImageItemProps } from '../../types/components';
 import { FacadeImagesProps, PARCEL_DATA_CONFIG } from '../../types/enums';
 
+import PageNumber from './PageNumber';
+
 const FacadeImages: React.FC<FacadeImagesProps> = ({ fachadaImages, pageCounter }) => {
   const { parentTableStyle } = useTablePersonalization();
 
@@ -15,9 +17,7 @@ const FacadeImages: React.FC<FacadeImagesProps> = ({ fachadaImages, pageCounter 
 
       {fachadaImages.length > 0 ? <FacadeImageGrid images={fachadaImages} /> : <NoImagesMessage />}
 
-      <div className="mt-4 border rounded w-fit px-3 py-1 text-dark dark:text-gray-200 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 ml-auto">
-        {pageCounter}
-      </div>
+      <PageNumber pageNumber={pageCounter} />
     </div>
   );
 };

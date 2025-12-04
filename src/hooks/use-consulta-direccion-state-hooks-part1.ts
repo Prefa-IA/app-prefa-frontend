@@ -62,12 +62,10 @@ export const useConsultaDireccionStateHooksPart1 = (
     setLoading: props.setLoading,
     setError: props.setError,
     setResultados: props.setResultados,
-    refreshProfile: async () => {
-      await props.refreshProfile();
-    },
-    refreshCredits: () => {
-      void props.refreshCredits();
-    },
+    setProcessing: props.setProcessing,
+    setIsValidating: props.setIsValidating,
+    refreshProfile: props.refreshProfile,
+    refreshCredits: props.refreshCredits,
   });
 
   const { consolidarInformes } = useConsultaConsolidation({

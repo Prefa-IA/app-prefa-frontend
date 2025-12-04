@@ -9,6 +9,7 @@ import { calculateAllValues } from '../../utils/parcel-calculations';
 import BasicInformationHeader from './BasicInformationHeader';
 import BasicInfoTable from './BasicInfoTable';
 import NormativeParametersTable from './NormativeParametersTable';
+import PageNumber from './PageNumber';
 
 const determineIsBasicSearch = (
   isBasicSearchProp: boolean | undefined,
@@ -173,20 +174,11 @@ const formatMixturaUso = (mixturaUso: unknown): string => {
   return String(mixturaUso);
 };
 
-const formatLfiAfeccionPercent = (lfiAfeccionPercent: number | null | undefined): string => {
-  if (lfiAfeccionPercent === null || lfiAfeccionPercent === undefined) return 'N/A';
-  return `${lfiAfeccionPercent}%`;
-};
-
 const getParametrosNormativos = (informeAMostrar: Informe) => {
   const esAPHFinal = getEsAPHFinal(informeAMostrar);
   const manzanaTipica = formatManzanaTipica(informeAMostrar.edificabilidad?.tipica);
   const zonaEspecial = getZonaEspecial(informeAMostrar.edificabilidad?.distrito_especial);
   const mixturaUsoDisplay = formatMixturaUso(informeAMostrar.edificabilidad?.mixtura_uso);
-  const edificabilidad = informeAMostrar.edificabilidad as unknown as Record<string, unknown>;
-  const lfiAfeccionPercent = formatLfiAfeccionPercent(
-    edificabilidad['lfi_afeccion_percent'] as number | null | undefined
-  );
 
   const afectaciones = informeAMostrar.edificabilidad?.afectaciones;
   const riesgoHidricoRaw = afectaciones?.riesgo_hidrico;
@@ -226,7 +218,6 @@ const getParametrosNormativos = (informeAMostrar: Informe) => {
     zonaEspecialDisplay: zonaEspecial || 'N/A',
     enrase: informeAMostrar.edificabilidad?.enrase,
     mixturaUsoDisplay,
-    lfiAfeccionPercent,
   };
 };
 
@@ -303,7 +294,7 @@ const BasicInformation: React.FC<BasicInformationProps> = ({
 
       <NormativeParametersTable parametros={parametros} />
 
-      {pageCounter > 0 && <div className="text-right text-sm mt-8">{pageCounter}</div>}
+      {pageCounter > 0 && <PageNumber pageNumber={pageCounter} />}
     </div>
   );
 };

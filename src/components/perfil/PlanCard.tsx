@@ -55,11 +55,15 @@ const PlanCard: React.FC<PlanCardProps> = ({ plan, loading = false, onSelect }) 
       {onSelect && (
         <button
           onClick={onSelect}
-          disabled={loading}
+          disabled={loading || plan.purchaseEnabled === false}
           className="w-full text-white py-2 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ backgroundColor: '#0369A1' }}
         >
-          {loading ? 'Procesando...' : 'Elegir Plan'}
+          {loading
+            ? 'Procesando...'
+            : plan.purchaseEnabled === false
+              ? 'No disponible'
+              : 'Elegir Plan'}
         </button>
       )}
     </div>

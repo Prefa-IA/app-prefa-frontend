@@ -3,6 +3,8 @@ import React from 'react';
 import useTablePersonalization from '../../hooks/use-table-personalization';
 import { GeneralConsiderationsProps, PARCEL_DATA_CONFIG } from '../../types/enums';
 
+import PageNumber from './PageNumber';
+
 const GeneralConsiderations: React.FC<GeneralConsiderationsProps> = ({ pageCounter }) => {
   const { parentTableStyle } = useTablePersonalization();
 
@@ -59,9 +61,7 @@ const GeneralConsiderations: React.FC<GeneralConsiderationsProps> = ({ pageCount
           información provista por el presente informe previo a alguna toma de decisión o acción.
         </p>
       </div>
-      <div className="mt-4 border rounded w-fit px-3 py-1 text-dark dark:text-gray-200 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 ml-auto">
-        {pageCounter}
-      </div>
+      <PageNumber pageNumber={pageCounter} />
     </div>
   );
 };

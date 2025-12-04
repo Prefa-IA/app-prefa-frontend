@@ -1,12 +1,9 @@
 import { useCallback, useRef } from 'react';
+import { toast } from 'react-toastify';
 
 import { useAuth } from '../contexts/AuthContext';
 import { Informe } from '../types/enums';
-import {
-  buscarInformeExistente,
-  normalizarDireccion,
-  verificarEnHistorial,
-} from '../utils/buscar-direccion-helpers';
+import { verificarEnHistorial } from '../utils/buscar-direccion-helpers';
 import { validarDireccionConNumero } from '../utils/consulta-direccion-utils';
 import { Coordinates, updateMapCenter } from '../utils/map-utils';
 
@@ -27,33 +24,20 @@ export const useBuscarDireccion = ({
   const isSearchingRef = useRef(false);
   const lastSearchedRef = useRef<string>('');
 
-  const buscarInformeExistenteMemo = useCallback(
-    async (direccion: string): Promise<Informe | null> => {
-      return buscarInformeExistente(direccion, normalizarDireccion);
-    },
-    []
-  );
-
   const shouldSkipCredits = useCallback(
     async (fromHistory: boolean, direccion: string): Promise<boolean> => {
       if (fromHistory) return true;
       const enHistorial = await verificarEnHistorial(direccion);
-      if (enHistorial) return true;
-
-      try {
-        const informeExistente = await buscarInformeExistenteMemo(direccion);
-        return !!informeExistente;
-      } catch {
-        return false;
-      }
+      return enHistorial;
     },
-    [buscarInformeExistenteMemo]
+    []
   );
 
   const handleSuccessfulSearch = useCallback(
     async (data: Informe, skipCredits: boolean, direccion: string) => {
       updateMapCenter(data, setCenter);
-      if (!skipCredits) {
+      const enHistorial = await verificarEnHistorial(direccion);
+      if (!enHistorial) {
         try {
           const { addAddressToHistory } = await import('../services/address-history');
           await addAddressToHistory(direccion);
@@ -62,6 +46,11 @@ export const useBuscarDireccion = ({
         }
       }
       await refreshProfile();
+      if (skipCredits) {
+        toast.info('Dirección encontrada. No se consumieron créditos.');
+      } else {
+        toast.success('Búsqueda completada exitosamente.');
+      }
       return data;
     },
     [setCenter, refreshProfile]

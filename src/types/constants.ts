@@ -77,4 +77,4 @@ export const PLAN_COLOR_MAP: Record<
   },
 };
 
-export const REPORT_TITLES = ['INFORME DE', 'FACTIBILIDAD', 'CONSTRUCTIVA'];
+export const REPORT_TITLES = ['INFORME DE', 'PREFACTIBILIDAD', 'CONSTRUCTIVA'];

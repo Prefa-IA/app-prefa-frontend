@@ -19,7 +19,7 @@ const PerfilUsuario: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8" data-tutorial="mi-perfil">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
       <PerfilUsuarioContent
         logoUrl={state.logoUrl}
         editMode={state.editMode}

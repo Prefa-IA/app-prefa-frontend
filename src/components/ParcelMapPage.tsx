@@ -8,6 +8,7 @@ import {
   PlanoContainerProps,
 } from '../types/enums';
 
+import PageNumber from './parcel-data/PageNumber';
 import ParcelaPlano from './ParcelaPlano';
 
 import styles from '../styles/ParcelMapPage.module.css';
@@ -18,7 +19,7 @@ const ParcelMapPage: React.FC<ParcelMapPageProps> = ({ informe }) => {
       <TitleSection />
       <PlanoSection informe={informe} />
       <ParcelInfo geometria={informe.geometria} />
-      <PageNumber />
+      <PageNumber pageNumber={PARCEL_MAP_CONFIG.PAGE_NUMBER} />
     </div>
   );
 };
@@ -76,31 +77,6 @@ const ParcelInfoItem: React.FC<ParcelInfoItemProps> = ({ label, value }) => (
   <p>
     {label}: {value}
   </p>
-);
-
-const PageNumber: React.FC = () => (
-  <div
-    className={styles['pageNumber']}
-    style={{
-      fontSize: '0.875rem',
-      fontWeight: 600,
-      textAlign: 'right',
-      color: '#000000',
-      backgroundColor: '#ffffff',
-      border: '1px solid #d1d5db',
-      borderRadius: '0.375rem',
-      padding: '0.375rem 0.75rem',
-      marginTop: '1rem',
-      marginLeft: 'auto',
-      width: 'fit-content',
-      whiteSpace: 'nowrap',
-      letterSpacing: 'normal',
-      wordSpacing: 'normal',
-      fontVariantNumeric: 'normal',
-    }}
-  >
-    {PARCEL_MAP_CONFIG.PAGE_NUMBER}
-  </div>
 );
 
 export default ParcelMapPage;

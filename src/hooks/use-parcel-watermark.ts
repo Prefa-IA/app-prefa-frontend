@@ -33,10 +33,12 @@ export const useParcelWatermark = () => {
 
     const prefaDataUri = `url(/logo.png)`;
     const bg = usarOrg && orgDataUri ? `url(${orgDataUri})` : prefaDataUri;
+    // Aplicar filtro invert en modo oscuro solo para el logo de PREFA-IA
+    const filter = theme === 'dark' && !usarOrg ? 'filter: invert(1);' : '';
 
     const styleEl = document.createElement('style');
     styleEl.setAttribute('data-watermark', 'parcel');
-    styleEl.innerHTML = `#parcel-page-root::before { content:''; position:absolute; top:0; left:0; width:100vw; height:100%; pointer-events:none; opacity:0.1; transform:none; background-repeat:repeat; background-position:left top; background-size:500px 500px; background-image:${bg}; z-index:0; }`;
+    styleEl.innerHTML = `#parcel-page-root::before { content:''; position:absolute; top:0; left:0; width:100vw; height:100%; pointer-events:none; opacity:0.1; transform:none; background-repeat:repeat; background-position:left top; background-size:500px 500px; background-image:${bg}; z-index:0; ${filter} }`;
     document.head.appendChild(styleEl);
 
     return () => {

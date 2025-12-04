@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 
 export const useSearchCounter = (isSearching: boolean): number => {
-  const [counter, setCounter] = useState<number>(10);
+  const [counter, setCounter] = useState<number>(20);
 
   useEffect(() => {
     if (!isSearching) {
-      setCounter(10);
+      setCounter(20);
       return;
     }
 
-    setCounter(10);
+    setCounter(20);
 
     const interval = setInterval(() => {
       setCounter((prev) => {

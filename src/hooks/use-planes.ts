@@ -25,6 +25,7 @@ export interface Plan {
   isOverage?: boolean;
   showDiscountSticker?: boolean;
   parentPlan?: string | null;
+  purchaseEnabled?: boolean;
 }
 
 // Cache simple de módulo para evitar llamadas duplicadas entre montajes

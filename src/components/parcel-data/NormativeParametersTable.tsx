@@ -19,7 +19,6 @@ interface NormativeParametersTableProps {
     zonaEspecialDisplay: string;
     enrase: boolean | undefined;
     mixturaUsoDisplay: string;
-    lfiAfeccionPercent: string;
   };
 }
 
@@ -41,7 +40,6 @@ const NormativeParametersTable: React.FC<NormativeParametersTableProps> = ({ par
           <TableRow label="Zona Especial" value={parametros.zonaEspecialDisplay} />
           <TableRow label="Enrase" value={parametros.enrase ? 'Sí' : 'No'} />
           <TableRow label="Mixtura de Uso" value={parametros.mixturaUsoDisplay} />
-          <TableRow label="% Afección LFI/LBI" value={parametros.lfiAfeccionPercent} />
         </div>
       </div>
     </DataTable>

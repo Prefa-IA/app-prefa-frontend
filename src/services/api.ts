@@ -76,7 +76,7 @@ const obtenerCoordenadas = async (direccion: string) => {
     : `${direccion}, Ciudad Autónoma de Buenos Aires, Argentina`;
 
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(direccionCompleta)}&key=${googleMapsKey}`;
-  const response = await axios.get(url);
+  const response = await axios.get(url, { timeout: 20000 });
 
   if (!response.data.results || response.data.results.length === 0) {
     throw new Error('No se pudieron obtener las coordenadas para la dirección especificada');
@@ -374,11 +374,15 @@ export const prefactibilidad = {
       }
       const coordenadas = await obtenerCoordenadas(direccion);
 
-      const response = await api.post<Informe>('/prefactibilidad/consultar', {
-        direccion,
-        coordenadas,
-        ...opts,
-      });
+      const response = await api.post<Informe>(
+        '/prefactibilidad/consultar',
+        {
+          direccion,
+          coordenadas,
+          ...opts,
+        },
+        { timeout: 40000 }
+      );
       return response.data;
     } catch (err: unknown) {
       const error = err as { code?: string };
@@ -402,10 +406,16 @@ export const prefactibilidad = {
       })
     );
 
-    const response = await api.post<Informe[]>('/prefactibilidad/consultar-compuestas', {
-      direcciones: direccionesConCoordenadas,
-      prefaCompleta: opts.prefaCompleta,
-    });
+    const timeout = direcciones.length === 2 ? 120000 : direcciones.length === 3 ? 180000 : 120000;
+
+    const response = await api.post<Informe[]>(
+      '/prefactibilidad/consultar-compuestas',
+      {
+        direcciones: direccionesConCoordenadas,
+        prefaCompleta: opts.prefaCompleta,
+      },
+      { timeout }
+    );
     return response.data;
   },
 
@@ -463,7 +473,8 @@ export const prefactibilidad = {
   validar: async (direccion: string, coordenadas: { lat: number; lon: number }) => {
     const { data } = await api.post<{ tieneAPH: boolean; tieneEnrase: boolean }>(
       '/prefactibilidad/validar',
-      { direccion, coordenadas }
+      { direccion, coordenadas },
+      { timeout: 30000 }
     );
     return data;
   },
@@ -517,6 +528,20 @@ export const support = {
     const response = await api.post('/support/ticket', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
+    return response.data;
+  },
+};
+
+export interface RedSocial {
+  _id: string;
+  nombre: string;
+  logo: 'facebook' | 'twitter' | 'instagram' | 'linkedin' | 'youtube' | 'tiktok' | 'whatsapp';
+  url: string;
+}
+
+export const redesSociales = {
+  obtenerRedesActivas: async (): Promise<RedSocial[]> => {
+    const response = await api.get<RedSocial[]>('/redes-sociales/public');
     return response.data;
   },
 };

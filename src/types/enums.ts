@@ -216,6 +216,8 @@ export interface Informe {
   pdfUrl?: string;
   esUltimoInforme?: boolean;
   calculo?: Record<string, unknown>;
+  datosIncompletos?: boolean;
+  datosFaltantes?: string[];
   shp_assets_info?: {
     capas?: {
       lib?: {
@@ -611,6 +613,7 @@ export interface BasicInformationProps {
   calculatedValues: {
     totalCapConstructiva: number;
     plusvaliaFinal: number;
+    lfiAfeccionPercent?: number;
   };
   pageCounter: number;
   isBasicSearch?: boolean;
@@ -628,6 +631,7 @@ export interface ParcelDataTablesProps {
     alturaMax: number;
     pisosSinRetiro: number;
     totalPisos: number;
+    totalPisosFormatted: string;
     tipoEdificacion: string;
     areaPlantasTipicas: number;
     areaPrimerRetiro: number;
@@ -1329,6 +1333,7 @@ export interface SubscriptionPlan {
   };
   discountPct?: number;
   discountUntil?: string;
+  purchaseEnabled?: boolean;
 }
 
 export interface PaymentData {

@@ -1,7 +1,8 @@
 import React from 'react';
 
 import useTablePersonalization from '../../hooks/use-table-personalization';
-import { LbiLfiSectionProps } from '../../types/components';
+// Sección LFI Y LIB oculta temporalmente
+// import { LbiLfiSectionProps } from '../../types/components';
 import {
   DocumentosVisuales,
   Informe,
@@ -9,8 +10,9 @@ import {
   PARCEL_DATA_CONFIG,
 } from '../../types/enums';
 import { getPdfViewerUrl, isPDF } from '../../utils/parcel-calculations';
-import LbiLfiViewerMapLibre from '../lbi-lfi-viewer/LbiLfiViewerMapLibre';
 
+// Sección LFI Y LIB oculta temporalmente
+// import LbiLfiViewerMapLibre from '../lbi-lfi-viewer/LbiLfiViewerMapLibre';
 import DataTable from './DataTable';
 import PageNumber from './PageNumber';
 
@@ -75,21 +77,22 @@ export const SingleInformeSections: React.FC<DocumentViewerSectionsProps> = ({
   const linkImagen = informeAMostrar.edificabilidad?.link_imagen;
   const hasCroquis = !!linkImagen?.croquis_parcela;
   const hasPerimetro = !!linkImagen?.perimetro_manzana;
-  const hasLbiLfi = !!(informeAMostrar.googleMaps && informeAMostrar.datosCatastrales?.smp);
+  // Sección LFI Y LIB oculta temporalmente
+  // const hasLbiLfi = !!(informeAMostrar.googleMaps && informeAMostrar.datosCatastrales?.smp);
   const hasPlanoIndice = !!linkImagen?.plano_indice;
 
   const showCroquis = shouldShowSection(hasCroquis);
   const showPerimetro = shouldShowSection(hasPerimetro);
-  const showLbiLfi = shouldShowSection(hasLbiLfi);
+  // Sección LFI Y LIB oculta temporalmente
+  const showLbiLfi = false;
   const showPlanoIndice = shouldShowSection(hasPlanoIndice);
 
-  const { croquisPage, perimetroPage, lbiLfiPage, planoIndicePage } = calculatePageNumbers(
-    pageCounter,
-    pageNumbers,
-    showCroquis,
-    showPerimetro,
-    showLbiLfi
-  );
+  const {
+    croquisPage,
+    perimetroPage,
+    lbiLfiPage: _lbiLfiPage,
+    planoIndicePage,
+  } = calculatePageNumbers(pageCounter, pageNumbers, showCroquis, showPerimetro, showLbiLfi);
 
   return (
     <>
@@ -107,9 +110,11 @@ export const SingleInformeSections: React.FC<DocumentViewerSectionsProps> = ({
         />
       )}
 
+      {/* Sección LFI Y LIB oculta temporalmente
       {showLbiLfi && (
         <LbiLfiSection informe={informeAMostrar} esCompuesto={false} pageCounter={lbiLfiPage} />
       )}
+      */}
 
       {showPlanoIndice && (
         <PlanoIndiceSection
@@ -122,8 +127,8 @@ export const SingleInformeSections: React.FC<DocumentViewerSectionsProps> = ({
 };
 
 export const CompoundInformeSections: React.FC<DocumentViewerSectionsProps> = ({
-  informeCompuesto,
-  esInformeCompuesto,
+  informeCompuesto: _informeCompuesto,
+  esInformeCompuesto: _esInformeCompuesto,
   documentosVisuales,
   pageCounter,
 }) => {
@@ -141,6 +146,7 @@ export const CompoundInformeSections: React.FC<DocumentViewerSectionsProps> = ({
         pageCounter={pageCounter + 2}
       />
 
+      {/* Sección LFI Y LIB oculta temporalmente
       {informeCompuesto?.informeConsolidado?.googleMaps &&
         informeCompuesto?.informeConsolidado?.datosCatastrales?.smp && (
           <LbiLfiSection
@@ -150,6 +156,7 @@ export const CompoundInformeSections: React.FC<DocumentViewerSectionsProps> = ({
             pageCounter={pageCounter + 3}
           />
         )}
+      */}
     </>
   );
 };
@@ -260,9 +267,7 @@ const CompoundCroquisSection: React.FC<{ croquis: string[]; pageCounter: number 
           </div>
         </DataTable>
       ))}
-      <div className="mt-4 border rounded w-fit px-3 py-1 text-dark bg-gray-100 ml-auto">
-        {pageCounter}
-      </div>
+      <PageNumber pageNumber={pageCounter} />
     </div>
   );
 };
@@ -292,9 +297,7 @@ const CompoundPerimetrosSection: React.FC<{ perimetros: string[]; pageCounter: n
           </div>
         </DataTable>
       ))}
-      <div className="mt-4 border rounded w-fit px-3 py-1 text-dark bg-gray-100 ml-auto">
-        {pageCounter}
-      </div>
+      <PageNumber pageNumber={pageCounter} />
     </div>
   );
 };
@@ -324,9 +327,7 @@ const CompoundPlanosIndiceSection: React.FC<{ planosIndice: string[]; pageCounte
           </div>
         </DataTable>
       ))}
-      <div className="mt-4 border rounded w-fit px-3 py-1 text-dark bg-gray-100 ml-auto">
-        {pageCounter}
-      </div>
+      <PageNumber pageNumber={pageCounter} />
     </div>
   );
 };
@@ -413,6 +414,8 @@ const PdfViewer: React.FC<{ url: string; title: string; className?: string }> = 
   );
 };
 
+// Sección LFI Y LIB oculta temporalmente
+/*
 interface EstadisticaItem {
   smp: string;
   estadisticas?: {
@@ -474,7 +477,10 @@ const StatsOverlay: React.FC<{ statsList: EstadisticaItem[] }> = ({ statsList })
     </div>
   );
 };
+*/
 
+// Sección LFI Y LIB oculta temporalmente
+/*
 const LbiLfiSection: React.FC<LbiLfiSectionProps> = ({
   informe,
   informesIndividuales = [],
@@ -517,11 +523,8 @@ const LbiLfiSection: React.FC<LbiLfiSectionProps> = ({
         />
         {esCompuesto && <StatsOverlay statsList={statsList} />}
       </div>
-      {pageCounter && (
-        <div className="mt-4 border rounded w-fit px-3 py-1 text-dark dark:text-gray-200 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 ml-auto">
-          {pageCounter}
-        </div>
-      )}
+      {pageCounter && <PageNumber pageNumber={pageCounter} />}
     </div>
   );
 };
+*/

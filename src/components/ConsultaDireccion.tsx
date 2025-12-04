@@ -14,7 +14,11 @@ const ConsultaDireccion: React.FC<ConsultaDireccionProps> = ({ className }) => {
   const numeroDirecciones =
     state.modoCompuesto && state.direcciones.length > 0 ? state.direcciones.length : 1;
 
-  const processingCounter = useProcessingCounter(state.processing, numeroDirecciones);
+  const processingCounter = useProcessingCounter(
+    state.processing,
+    numeroDirecciones,
+    state.modoCompuesto
+  );
   const hasActiveQuery =
     !!state.resultado || state.resultados.length > 0 || state.processing || state.loading;
   const { navConfirm, setNavConfirm } = useNavigationGuard(hasActiveQuery);

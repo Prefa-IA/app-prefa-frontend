@@ -1,4 +1,4 @@
-export const TOTAL_TUTORIAL_STEPS = 6;
+export const TOTAL_TUTORIAL_STEPS = 7;
 export const TERMS_STEP_INDEX = -1;
 
 export interface TutorialStepContent {
@@ -21,15 +21,21 @@ export const TUTORIAL_STEPS: TutorialStepContent[] = [
     highlightElement: '[data-tutorial="analisis-prefactibilidad"]',
   },
   {
+    title: 'Chatbot de Ayuda',
+    description:
+      '¿Tienes alguna pregunta? Nuestro chatbot Prefa está disponible 24/7 para ayudarte. Haz clic en el botón flotante en la esquina inferior derecha para iniciar una conversación.',
+    highlightElement: '[data-tutorial="chatbot"]',
+  },
+  {
     title: 'Buscar Dirección',
     description:
-      'Utiliza esta herramienta para buscar direcciones y generar consultas. Recuerda que recibes 50 créditos de bienvenida que se renuevan automáticamente el día 1 de cada mes.',
+      'Utiliza esta herramienta para buscar direcciones y generar consultas de prefactibilidad. Cada consulta consume créditos según su tipo.',
     highlightElement: '[data-tutorial="buscar-direccion"]',
   },
   {
     title: 'Registros',
     description:
-      'Accede a tus registros y direcciones guardadas. Puedes activar o desactivar el modo compuesto con el toggle para realizar consultas más complejas.',
+      'Accede a tus registros y direcciones guardadas. Aquí puedes ver y gestionar todos tus informes de prefactibilidad generados.',
     highlightElement: '[data-tutorial="registros"]',
   },
   {
@@ -49,16 +55,18 @@ export const TUTORIAL_STEPS: TutorialStepContent[] = [
 export const STEP_ROUTES: Record<number, string | null> = {
   0: null,
   1: '/consultar',
-  2: '/buscar',
-  3: '/informes',
-  4: '/perfil',
-  5: '/suscripciones',
+  2: null,
+  3: '/buscar',
+  4: '/informes',
+  5: '/perfil',
+  6: '/suscripciones',
 };
 
 export const STEP_SELECTORS: Record<number, string> = {
   1: '[data-tutorial="analisis-prefactibilidad"]',
-  2: '[data-tutorial="buscar-direccion"]',
-  3: '[data-tutorial="registros"]',
-  4: '[data-tutorial="mi-perfil"]',
-  5: '[data-tutorial="planes"]',
+  2: '[data-tutorial="chatbot"]',
+  3: '[data-tutorial="buscar-direccion"]',
+  4: '[data-tutorial="registros"]',
+  5: '[data-tutorial="mi-perfil"]',
+  6: '[data-tutorial="planes"]',
 };

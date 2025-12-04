@@ -41,7 +41,7 @@ export const buscarInformeExistente = async (
 };
 
 export const verificarEnHistorial = async (direccion: string): Promise<boolean> => {
-  const historial = await listAddressHistory();
+  const historial = await listAddressHistory(true);
   const direccionNormalizada = direccion.trim().toLowerCase();
   return historial.some((item) => item.address.trim().toLowerCase() === direccionNormalizada);
 };

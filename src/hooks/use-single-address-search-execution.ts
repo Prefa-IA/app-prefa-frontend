@@ -6,6 +6,11 @@ import { TIPO_PREFA, TipoPrefa } from '../types/consulta-direccion';
 import { Informe } from '../types/enums';
 import { manejarErrorConsulta } from '../utils/consulta-direccion-utils';
 import { Coordinates, updateMapCenter } from '../utils/map-utils';
+import {
+  generarMensajeDatosFaltantes,
+  obtenerDatosFaltantes,
+  validarDatosCompletos,
+} from '../utils/report-utils';
 
 interface DatosParcela {
   smp?: string;
@@ -64,6 +69,17 @@ export const useSingleAddressSearchExecution = ({
     void refreshProfile();
     refreshCredits();
     updateMapCenter(response, setCenter);
+
+    const datosCompletos = validarDatosCompletos(response);
+    const datosIncompletos = Boolean(response.datosIncompletos) || !datosCompletos;
+
+    if (datosIncompletos) {
+      const datosFaltantes = obtenerDatosFaltantes(response);
+      const mensaje = generarMensajeDatosFaltantes(datosFaltantes);
+      toast.warning(mensaje, {
+        autoClose: 5000,
+      });
+    }
 
     if (!('inProgress' in response && response.inProgress)) {
       await procesarCalculoPrefactibilidad(response as unknown as DatosParcela);

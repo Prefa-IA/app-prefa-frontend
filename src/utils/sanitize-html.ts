@@ -37,18 +37,19 @@ const containsScriptInjection = (str: string): boolean => {
 };
 
 const escapeHtml = (text: string): string => {
-  const ESCAPE_MAP: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
-  };
+  const ESCAPE_MAP = new Map<string, string>([
+    ['&', '&amp;'],
+    ['<', '&lt;'],
+    ['>', '&gt;'],
+    ['"', '&quot;'],
+    ["'", '&#039;'],
+  ]);
   const VALID_ESCAPE_CHARS = new Set(['&', '<', '>', '"', "'"]);
 
   const getEscapedChar = (char: string): string => {
     if (VALID_ESCAPE_CHARS.has(char)) {
-      return ESCAPE_MAP[char] || char;
+      const escaped = ESCAPE_MAP.get(char);
+      return escaped !== undefined ? escaped : char;
     }
     return char;
   };

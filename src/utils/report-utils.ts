@@ -1,9 +1,12 @@
+import { toast } from 'react-toastify';
+
 import { prefactibilidad } from '../services/api';
 import { crearInformeCompuesto } from '../services/consolidacion-informes';
 import { Informe, InformeCompuesto } from '../types/enums';
 
 import { manejarErrorPDF } from './consulta-direccion-utils';
 import { downloadBlob, generateInformeFilename, generatePDFFromElement } from './download-utils';
+import { calculateAllValues } from './parcel-calculations';
 
 export const getReportTitle = (
   isCompoundMode: boolean,
@@ -29,6 +32,131 @@ export const formatTimestamp = (timestamp: string): string => {
   return new Date(timestamp).toLocaleString();
 };
 
+const DATO_FRENTE = 'frente';
+const DATO_FONDO = 'fondo';
+const DATO_TIPO_EDIFICACION = 'tipo de edificación';
+const DATO_CAPACIDAD_CONSTRUCTIVA = 'capacidad constructiva';
+const DATO_PLUSVALIA_TOTAL = 'plusvalía total estimada';
+
+const validarMedida = (valor: string | undefined): boolean => {
+  return Boolean(valor && valor !== 'N/A' && Number.parseFloat(valor) > 0);
+};
+
+const validarTipoEdificacion = (tipoEdificacion: string): boolean => {
+  return tipoEdificacion !== 'No clasificado' && tipoEdificacion !== 'N/A';
+};
+
+const validarValoresCalculados = (
+  calculatedValues: ReturnType<typeof calculateAllValues>
+): boolean => {
+  const totalCapConstructiva = (calculatedValues.totalCapConstructiva || 0) > 0;
+  const plusvaliaFinal = (calculatedValues.plusvaliaFinal || 0) > 0;
+  const tipoEdificacion = String(calculatedValues.tipoEdificacion || '');
+  const tipoEdificacionValido = validarTipoEdificacion(tipoEdificacion);
+
+  return totalCapConstructiva && plusvaliaFinal && tipoEdificacionValido;
+};
+
+export const validarDatosCompletos = (informe: Informe): boolean => {
+  const frenteValido = validarMedida(informe.datosCatastrales?.frente);
+  const fondoValido = validarMedida(informe.datosCatastrales?.fondo);
+  const calculatedValues = calculateAllValues(informe, {});
+  const valoresCalculadosValidos = validarValoresCalculados(calculatedValues);
+
+  return frenteValido && fondoValido && valoresCalculadosValidos;
+};
+
+const mapearDatosFaltantesBackend = (datosFaltantes: string[]): string[] => {
+  return datosFaltantes;
+};
+
+const validarDatosCalculados = (
+  calculatedValues: ReturnType<typeof calculateAllValues>
+): { totalCapConstructiva: boolean; plusvaliaFinal: boolean } => {
+  const totalCapConstructiva = (calculatedValues.totalCapConstructiva || 0) > 0;
+  const plusvaliaFinal = (calculatedValues.plusvaliaFinal || 0) > 0;
+  return { totalCapConstructiva, plusvaliaFinal };
+};
+
+const obtenerDatosFaltantesCalculados = (
+  datosMapeados: string[],
+  calculatedValues: ReturnType<typeof calculateAllValues>
+): string[] => {
+  const datosFaltantesCalculados: string[] = [];
+  const { totalCapConstructiva, plusvaliaFinal } = validarDatosCalculados(calculatedValues);
+
+  if (!totalCapConstructiva && !datosMapeados.includes(DATO_CAPACIDAD_CONSTRUCTIVA)) {
+    datosFaltantesCalculados.push(DATO_CAPACIDAD_CONSTRUCTIVA);
+  }
+  if (!plusvaliaFinal && !datosMapeados.includes(DATO_PLUSVALIA_TOTAL)) {
+    datosFaltantesCalculados.push(DATO_PLUSVALIA_TOTAL);
+  }
+
+  return datosFaltantesCalculados;
+};
+
+const validarFrenteYFondo = (informe: Informe): string[] => {
+  const datosFaltantes: string[] = [];
+  const frenteValido = validarMedida(informe.datosCatastrales?.frente);
+  const fondoValido = validarMedida(informe.datosCatastrales?.fondo);
+
+  if (!frenteValido) datosFaltantes.push(DATO_FRENTE);
+  if (!fondoValido) datosFaltantes.push(DATO_FONDO);
+
+  return datosFaltantes;
+};
+
+const validarValoresCalculadosParaFaltantes = (
+  calculatedValues: ReturnType<typeof calculateAllValues>
+): string[] => {
+  const datosFaltantes: string[] = [];
+  const { totalCapConstructiva, plusvaliaFinal } = validarDatosCalculados(calculatedValues);
+  const tipoEdificacion = String(calculatedValues.tipoEdificacion || '');
+  const tipoEdificacionValido = validarTipoEdificacion(tipoEdificacion);
+
+  if (!totalCapConstructiva) datosFaltantes.push(DATO_CAPACIDAD_CONSTRUCTIVA);
+  if (!plusvaliaFinal) datosFaltantes.push(DATO_PLUSVALIA_TOTAL);
+  if (!tipoEdificacionValido) datosFaltantes.push(DATO_TIPO_EDIFICACION);
+
+  return datosFaltantes;
+};
+
+const obtenerDatosFaltantesDesdeInforme = (informe: Informe): string[] => {
+  const datosFaltantesMedidas = validarFrenteYFondo(informe);
+  const calculatedValues = calculateAllValues(informe, {});
+  const datosFaltantesCalculados = validarValoresCalculadosParaFaltantes(calculatedValues);
+
+  return [...datosFaltantesMedidas, ...datosFaltantesCalculados];
+};
+
+export const obtenerDatosFaltantes = (informe: Informe): string[] => {
+  if (informe.datosFaltantes && informe.datosFaltantes.length > 0) {
+    const datosMapeados = mapearDatosFaltantesBackend(informe.datosFaltantes);
+    const calculatedValues = calculateAllValues(informe, {});
+    const datosFaltantesCalculados = obtenerDatosFaltantesCalculados(
+      datosMapeados,
+      calculatedValues
+    );
+
+    return [...datosMapeados, ...datosFaltantesCalculados];
+  }
+
+  return obtenerDatosFaltantesDesdeInforme(informe);
+};
+
+export const generarMensajeDatosFaltantes = (datosFaltantes: string[]): string => {
+  if (datosFaltantes.length === 0) {
+    return 'No se consumieron los créditos porque no se encontraron los datos necesarios para completar el informe.';
+  }
+
+  const datosTexto =
+    datosFaltantes.length === 1
+      ? datosFaltantes[0]
+      : datosFaltantes.slice(0, -1).join(', ') + ' y ' + datosFaltantes[datosFaltantes.length - 1];
+
+  return `No se consumieron los créditos porque no se encontraron los siguientes datos: ${datosTexto}.`;
+};
+
 export const downloadReportPDFFromServer = async (
   savedId: string,
   resultado: Informe | null,
@@ -43,6 +171,19 @@ export const downloadReportPDFFromServer = async (
     const blob = await prefactibilidad.descargarPDF(savedId);
     const filename = resultado ? generateInformeFilename(resultado) : 'informe-prefactibilidad.pdf';
     downloadBlob(blob, filename);
+
+    if (resultado) {
+      const datosCompletos = validarDatosCompletos(resultado);
+      const datosIncompletos = Boolean(resultado.datosIncompletos) || !datosCompletos;
+
+      if (datosIncompletos) {
+        const datosFaltantes = obtenerDatosFaltantes(resultado);
+        const mensaje = generarMensajeDatosFaltantes(datosFaltantes);
+        toast.warning(mensaje, {
+          autoClose: 5000,
+        });
+      }
+    }
   } catch (err) {
     manejarErrorPDF(err, setError);
   }
@@ -64,8 +205,19 @@ export const downloadReportPDFFromClient = async (
       return;
     }
 
+    const datosCompletos = validarDatosCompletos(resultado);
+    const datosIncompletos = Boolean(resultado.datosIncompletos) || !datosCompletos;
+
     const filename = generateInformeFilename(resultado);
     await generatePDFFromElement(reportContainer, filename);
+
+    if (datosIncompletos) {
+      const datosFaltantes = obtenerDatosFaltantes(resultado);
+      const mensaje = generarMensajeDatosFaltantes(datosFaltantes);
+      toast.warning(mensaje, {
+        autoClose: 5000,
+      });
+    }
   } catch (err) {
     console.error('Error al generar PDF desde cliente:', err);
     setError('Error al generar el PDF. Por favor, intente nuevamente.');

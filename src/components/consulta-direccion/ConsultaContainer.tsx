@@ -6,7 +6,7 @@ const ConsultaContainer: React.FC<ConsultaContainerProps & { 'data-tutorial'?: s
   children,
   ...props
 }) => (
-  <div className="w-[95%] lg:w-[63%] max-w-8xl mt-8" {...props}>
+  <div className="w-full max-w-6xl mt-8" {...props}>
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-6">
       {children}
     </div>

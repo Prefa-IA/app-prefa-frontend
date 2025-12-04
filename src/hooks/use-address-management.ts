@@ -21,6 +21,11 @@ export const useAddressManagement = ({
     (dir: string) => {
       const direccionNormalizada = dir.trim();
 
+      if (direcciones.length >= 3) {
+        toast.warning('Solo se pueden agregar hasta 3 direcciones en prefactibilidades compuestas');
+        return;
+      }
+
       const direccionYaExiste = direcciones.some(
         (d) => d.trim().toLowerCase() === direccionNormalizada.toLowerCase()
       );

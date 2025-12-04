@@ -54,7 +54,6 @@
 }
 
 .footerBorder {
-  border-top: 2px solid var(--color-accent, #10b981);
   padding-top: 1.5rem;
   margin-top: 1.5rem;
 }

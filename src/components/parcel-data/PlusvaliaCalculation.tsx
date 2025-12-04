@@ -48,6 +48,10 @@ const PlusvaliaCalculation: React.FC<PlusvaliaCalculationProps> = ({
           label="TOTAL CAPACIDAD CONSTRUCTIVA"
           value={`${Number(calculatedValues['totalCapConstructiva'] ?? 0).toFixed(2)} m²`}
         />
+        <TableRow
+          label="TOTAL SUPERFICIE VENDIBLE"
+          value={`${(Number(calculatedValues['totalCapConstructiva'] ?? 0) * 0.8).toFixed(2)} m²`}
+        />
       </div>
       <PlusvaliaFinalTable calculatedValues={calculatedValues} />
 
@@ -78,7 +82,11 @@ const CapacidadConstructivaTable: React.FC<CapacidadConstructivaTableProps> = ({
 
           <TableRow
             label="Total de Pisos"
-            value={(calculatedValues['totalPisos'] as number | undefined)?.toString() || 'N/A'}
+            value={
+              (calculatedValues['totalPisosFormatted'] as string | undefined) ||
+              (calculatedValues['totalPisos'] as number | undefined)?.toString() ||
+              'N/A'
+            }
           />
 
           <TableRow

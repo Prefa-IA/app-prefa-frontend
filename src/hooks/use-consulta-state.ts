@@ -24,10 +24,11 @@ export interface UseConsultaStateProps {
   setConfirmReset: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
+// PENDIENTE PREFACTIBILIDADES COMPUESTAS
 export const useConsultaState = ({
   resultado,
   resultados,
-  informeCompuesto,
+  informeCompuesto: _informeCompuesto,
   setModoCompuesto,
   setDirecciones,
   setResultados,
@@ -38,26 +39,20 @@ export const useConsultaState = ({
   setConfirmReset,
 }: UseConsultaStateProps): UseConsultaStateReturn => {
   const toggleModoCompuesto = useCallback(() => {
-    if (resultado || resultados.length > 0 || informeCompuesto) return;
-
+    // Prefactibilidades compuestas deshabilitadas temporalmente
+    // Solo permitir desactivar si ya está activo
     setModoCompuesto((prevModo) => {
-      const nuevoModo = !prevModo;
-      if (!nuevoModo) {
+      if (prevModo) {
+        // Permitir desactivar
         setDirecciones([]);
         setResultados([]);
         setInformeCompuesto(null);
+        return false;
       }
-      return nuevoModo;
+      // No permitir activar - mantener desactivado
+      return false;
     });
-  }, [
-    resultado,
-    resultados,
-    informeCompuesto,
-    setModoCompuesto,
-    setDirecciones,
-    setResultados,
-    setInformeCompuesto,
-  ]);
+  }, [setModoCompuesto, setDirecciones, setResultados, setInformeCompuesto]);
 
   const resetConsulta = useCallback(() => {
     setResultado(null);

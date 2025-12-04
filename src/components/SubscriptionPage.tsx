@@ -180,11 +180,15 @@ const OverageCard: React.FC<{
     {onSelect && (
       <button
         onClick={() => void onSelect(plan)}
-        disabled={loading && selected === plan.id}
+        disabled={(loading && selected === plan.id) || plan.purchaseEnabled === false}
         className="w-full text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
         style={{ backgroundColor: '#0369A1' }}
       >
-        {loading && selected === plan.id ? 'Procesando...' : 'Comprar Paquete'}
+        {loading && selected === plan.id
+          ? 'Procesando...'
+          : plan.purchaseEnabled === false
+            ? 'No disponible'
+            : 'Comprar Paquete'}
       </button>
     )}
   </div>
@@ -282,7 +286,7 @@ const SubscriptionFooter: React.FC<{ onShowInfo: () => void }> = ({ onShowInfo }
         onClick={onShowInfo}
         className="inline-block text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 text-base font-medium"
       >
-        ¿Cuántos créditos consume cada prefactibilidad?
+        ¿Cuántos créditos consume cada consulta?
       </button>
     </Container>
   </footer>

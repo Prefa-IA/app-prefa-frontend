@@ -7,6 +7,9 @@ interface UseTutorialEffectsProps {
   isVisible: boolean;
 }
 
+const CHATBOT_STEP_INDEX = 2;
+const MI_PERFIL_STEP_INDEX = 5;
+
 export const useTutorialEffects = ({ currentStep, isVisible }: UseTutorialEffectsProps) => {
   useEffect(() => {
     if (currentStep === TERMS_STEP_INDEX && isVisible) {
@@ -19,6 +22,32 @@ export const useTutorialEffects = ({ currentStep, isVisible }: UseTutorialEffect
       return () => window.removeEventListener('beforeunload', handleBeforeUnload);
     }
     return undefined;
+  }, [currentStep, isVisible]);
+
+  useEffect(() => {
+    if (currentStep === CHATBOT_STEP_INDEX && isVisible) {
+      window.dispatchEvent(new CustomEvent('close-chatbot'));
+    }
+  }, [currentStep, isVisible]);
+
+  useEffect(() => {
+    if (currentStep === MI_PERFIL_STEP_INDEX && isVisible) {
+      const openUserMenu = () => {
+        const menuButton = document.querySelector(
+          '[data-tutorial="user-menu-button"]'
+        ) as HTMLElement;
+        if (menuButton) {
+          const menuItems = document.querySelector('[data-tutorial="mi-perfil"]');
+          if (!menuItems || !menuItems.closest('[role="menu"]')) {
+            menuButton.click();
+          }
+        }
+      };
+      const timeouts = [100, 300, 500, 800, 1200];
+      timeouts.forEach((delay) => {
+        setTimeout(openUserMenu, delay);
+      });
+    }
   }, [currentStep, isVisible]);
 
   useEffect(() => {

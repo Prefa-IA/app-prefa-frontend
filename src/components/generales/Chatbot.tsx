@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { ChatAlt2Icon, XIcon } from '@heroicons/react/outline';
 
 import api from '../../services/api';
@@ -39,6 +39,31 @@ const useChatbotQuestions = () => {
   return { questions, loading };
 };
 
+const useChatbotEvents = (
+  isOpen: boolean,
+  handleOpen: () => void,
+  handleClose: () => void
+): void => {
+  useEffect(() => {
+    const handleOpenChatbot = () => {
+      if (!isOpen) {
+        handleOpen();
+      }
+    };
+    const handleCloseChatbot = () => {
+      if (isOpen) {
+        handleClose();
+      }
+    };
+    window.addEventListener('open-chatbot', handleOpenChatbot);
+    window.addEventListener('close-chatbot', handleCloseChatbot);
+    return () => {
+      window.removeEventListener('open-chatbot', handleOpenChatbot);
+      window.removeEventListener('close-chatbot', handleCloseChatbot);
+    };
+  }, [isOpen, handleOpen, handleClose]);
+};
+
 interface ChatbotButtonProps {
   onOpen: () => void;
 }
@@ -46,6 +71,7 @@ interface ChatbotButtonProps {
 const ChatbotButton: React.FC<ChatbotButtonProps> = ({ onOpen }) => (
   <button
     onClick={onOpen}
+    data-tutorial="chatbot"
     className="fixed bottom-4 right-4 md:bottom-[4rem] md:right-[2rem] z-50 bg-primary-600 hover:bg-primary-700 text-white rounded-full p-3 md:p-[1.15rem] shadow-lg transition-all hover:scale-110 scale-[0.966] md:scale-[1.15]"
     aria-label="Abrir chatbot"
   >
@@ -177,6 +203,7 @@ interface ChatbotWindowProps {
   messages: ChatMessage[];
   isTyping: boolean;
   showQuestions: boolean;
+  showGreeting: boolean;
   onQuestionClick: (question: ChatbotQuestion) => Promise<void>;
 }
 
@@ -186,29 +213,32 @@ const ChatbotWindow: React.FC<ChatbotWindowProps> = ({
   messages,
   isTyping,
   showQuestions,
+  showGreeting,
   onQuestionClick,
 }) => (
   <div className="fixed inset-0 md:inset-auto md:bottom-[4rem] md:right-[2rem] z-50 w-full md:w-[30.8rem] md:max-w-[calc(100vw-3rem)] bg-white dark:bg-gray-800 md:rounded-2xl shadow-2xl border-0 md:border border-gray-200 dark:border-gray-700 flex flex-col h-full md:h-[650px] overflow-hidden">
     <ChatbotHeader onClose={onClose} />
     <div className="flex-1 overflow-y-auto p-4 md:p-5 bg-gray-50/50 dark:bg-gray-900/50">
       <div className="space-y-4">
-        <div className="flex justify-start">
-          <div className="max-w-[85%] rounded-2xl rounded-tl-sm p-4 shadow-sm bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600">
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">
-              Hola, soy Prefa, ¿cómo puedo ayudarte el día de hoy?
-            </p>
-          </div>
-        </div>
-        {messages.length > 0 && <ChatMessages messages={messages} isTyping={isTyping} />}
-        {isTyping && messages.length === 0 && (
+        {isTyping && messages.length === 0 && !showGreeting && (
           <div className="flex justify-start">
             <div className="bg-gray-100 dark:bg-gray-700 rounded-2xl rounded-tl-sm p-4 border border-gray-200 dark:border-gray-600 shadow-sm">
               <TypingIndicator />
             </div>
           </div>
         )}
+        {showGreeting && (
+          <div className="flex justify-start">
+            <div className="max-w-[85%] rounded-2xl rounded-tl-sm p-4 shadow-sm bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                Hola, soy Prefa, ¿cómo puedo ayudarte el día de hoy?
+              </p>
+            </div>
+          </div>
+        )}
+        {messages.length > 0 && <ChatMessages messages={messages} isTyping={isTyping} />}
       </div>
-      {showQuestions && !isTyping && (
+      {showQuestions && !isTyping && showGreeting && (
         <div className="mt-6">
           <QuestionsMasonry questions={questions} onQuestionClick={onQuestionClick} />
         </div>
@@ -222,9 +252,33 @@ const Chatbot: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [showQuestions, setShowQuestions] = useState(true);
+  const [showGreeting, setShowGreeting] = useState(false);
   const { questions, loading } = useChatbotQuestions();
 
-  const handleQuestionClick = async (question: ChatbotQuestion) => {
+  const handleOpen = useCallback(() => {
+    setIsOpen(true);
+    setMessages([]);
+    setIsTyping(true);
+    setShowQuestions(true);
+    setShowGreeting(false);
+
+    setTimeout(() => {
+      setIsTyping(false);
+      setShowGreeting(true);
+    }, 2000);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+    setMessages([]);
+    setIsTyping(false);
+    setShowQuestions(true);
+    setShowGreeting(false);
+  }, []);
+
+  useChatbotEvents(isOpen, handleOpen, handleClose);
+
+  const handleQuestionClick = useCallback(async (question: ChatbotQuestion) => {
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
       type: 'user',
@@ -248,45 +302,63 @@ const Chatbot: React.FC = () => {
     setMessages((prev) => [...prev, botMessage]);
     setIsTyping(false);
     setShowQuestions(true);
-  };
-
-  const handleOpen = () => {
-    setIsOpen(true);
-    setMessages([]);
-    setIsTyping(false);
-    setShowQuestions(true);
-    setIsTyping(true);
-
-    setTimeout(() => {
-      setIsTyping(false);
-    }, 2000);
-  };
-
-  const handleClose = () => {
-    setIsOpen(false);
-    setMessages([]);
-    setIsTyping(false);
-    setShowQuestions(true);
-  };
+  }, []);
 
   if (loading || questions.length === 0) {
     return null;
   }
 
   return (
-    <>
-      {!isOpen && <ChatbotButton onOpen={handleOpen} />}
-      {isOpen && (
-        <ChatbotWindow
-          onClose={handleClose}
-          questions={questions}
-          messages={messages}
-          isTyping={isTyping}
-          showQuestions={showQuestions}
-          onQuestionClick={handleQuestionClick}
-        />
-      )}
-    </>
+    <ChatbotRenderer
+      isOpen={isOpen}
+      questions={questions}
+      messages={messages}
+      isTyping={isTyping}
+      showQuestions={showQuestions}
+      showGreeting={showGreeting}
+      onOpen={handleOpen}
+      onClose={handleClose}
+      onQuestionClick={handleQuestionClick}
+    />
+  );
+};
+
+interface ChatbotRendererProps {
+  isOpen: boolean;
+  questions: ChatbotQuestion[];
+  messages: ChatMessage[];
+  isTyping: boolean;
+  showQuestions: boolean;
+  showGreeting: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  onQuestionClick: (question: ChatbotQuestion) => Promise<void>;
+}
+
+const ChatbotRenderer: React.FC<ChatbotRendererProps> = ({
+  isOpen,
+  questions,
+  messages,
+  isTyping,
+  showQuestions,
+  showGreeting,
+  onOpen,
+  onClose,
+  onQuestionClick,
+}) => {
+  if (!isOpen) {
+    return <ChatbotButton onOpen={onOpen} />;
+  }
+  return (
+    <ChatbotWindow
+      onClose={onClose}
+      questions={questions}
+      messages={messages}
+      isTyping={isTyping}
+      showQuestions={showQuestions}
+      showGreeting={showGreeting}
+      onQuestionClick={onQuestionClick}
+    />
   );
 };
 

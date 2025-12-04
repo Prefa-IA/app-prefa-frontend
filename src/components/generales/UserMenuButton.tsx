@@ -12,7 +12,10 @@ interface UserMenuButtonProps {
 }
 
 const UserMenuButton: React.FC<UserMenuButtonProps> = ({ usuario, planObj }) => (
-  <Menu.Button className="flex items-center text-sm rounded-full focus:outline-none">
+  <Menu.Button
+    className="flex items-center text-sm rounded-full focus:outline-none"
+    data-tutorial="user-menu-button"
+  >
     {usuario.personalizacion?.logo ? (
       <div className="flex items-center">
         <img

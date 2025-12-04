@@ -8,11 +8,13 @@ import { Step2BuscarDireccion } from './steps/Step2BuscarDireccion';
 import { Step3Registros } from './steps/Step3Registros';
 import { Step4MiPerfil } from './steps/Step4MiPerfil';
 import { Step5Planes } from './steps/Step5Planes';
+import { Step6Chatbot } from './steps/Step6Chatbot';
 import { StepTermsConditions } from './steps/StepTermsConditions';
 
 const STEP_COMPONENTS = [
   Step0Welcome,
   Step1AnalisisPrefactibilidad,
+  Step6Chatbot,
   Step2BuscarDireccion,
   Step3Registros,
   Step4MiPerfil,

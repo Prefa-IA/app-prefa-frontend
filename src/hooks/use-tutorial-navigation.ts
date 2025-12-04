@@ -27,7 +27,7 @@ export const useTutorialNavigation = ({ currentStep, isVisible }: UseTutorialNav
     if (targetRoute && location.pathname !== targetRoute && !hasNavigated) {
       setHasNavigated(true);
       navigate(targetRoute);
-      setTimeout(() => setHasNavigated(false), 500);
+      setTimeout(() => setHasNavigated(false), 1000);
     }
   }, [currentStep, isVisible, navigate, location.pathname, hasNavigated]);
 

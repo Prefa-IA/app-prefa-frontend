@@ -5,6 +5,7 @@ import { prefactibilidad } from '../services/api';
 import { PROCESSING_CONFIG, TipoPrefa } from '../types/consulta-direccion';
 import { Informe, InformeCompuesto } from '../types/enums';
 import { isValidProcessingResponse } from '../utils/consulta-direccion-utils';
+import { validarDatosCompletos } from '../utils/report-utils';
 
 interface ProcessingResponse {
   [key: string]: unknown;
@@ -74,7 +75,12 @@ export const useProcessingCalculation = ({
           } as Informe;
           setResultado(informeConCalculo);
         } else {
-          toast.success('Prefactibilidad generada satisfactoriamente.');
+          const datosCompletos = validarDatosCompletos(informe);
+          const datosIncompletos = Boolean(informe.datosIncompletos) || !datosCompletos;
+
+          if (!datosIncompletos) {
+            toast.success('Prefactibilidad generada satisfactoriamente.');
+          }
           setResultado(informe);
         }
       } catch (err) {

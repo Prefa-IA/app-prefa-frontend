@@ -6,6 +6,7 @@ import { calculateAllValues } from '../../utils/parcel-calculations';
 
 import DataTable, { TableRow } from './DataTable';
 import OptimizationsTable from './OptimizationsTable';
+import PageNumber from './PageNumber';
 import { calculateDisplayValues } from './ParcelDataDisplayCalculations';
 
 type CalculatedValues = ReturnType<typeof calculateAllValues>;
@@ -55,16 +56,7 @@ const ParcelDataTables: React.FC<ParcelDataTablesProps & { pageCounter?: number 
 
       <OptimizationsTable informe={informeAMostrar} />
 
-      <PlusvaliaParametersTable
-        informe={informeAMostrar}
-        calculatedValues={calculatedValues as CalculatedValues}
-      />
-
-      {pageCounter && (
-        <div className="mt-4 border rounded w-fit px-3 py-1 text-dark dark:text-gray-200 bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 ml-auto">
-          {pageCounter}
-        </div>
-      )}
+      {pageCounter && <PageNumber pageNumber={pageCounter} />}
 
       <ObservationsSection informe={informeAMostrar} />
     </>
@@ -165,61 +157,43 @@ const BuildabilityDataTable: React.FC<{
   );
 };
 
+const hasValidAfectaciones = (afectaciones: Informe['edificabilidad']['afectaciones']): boolean => {
+  if (!afectaciones) return false;
+  return Object.values(afectaciones).some((value) => typeof value === 'number' && value > 0);
+};
+
+const AfectacionesTable: React.FC<{
+  afectaciones: NonNullable<Informe['edificabilidad']['afectaciones']>;
+}> = ({ afectaciones }) => (
+  <DataTable title="AFECTACIONES">
+    <div className="p-2">
+      <div className={PARCEL_DATA_CONFIG.GRID_COLS_2}>
+        <TableRow label="Apertura" value={afectaciones.apertura || 'N/A'} />
+        <TableRow label="CI Digital" value={afectaciones.ci_digital || 'N/A'} />
+        <TableRow label="Ensanche" value={afectaciones.ensanche || 'N/A'} />
+        <TableRow label="LEP" value={afectaciones.lep || 'N/A'} />
+        <TableRow label="Riesgo Hídrico" value={afectaciones.riesgo_hidrico || 'N/A'} />
+      </div>
+    </div>
+  </DataTable>
+);
+
 const RestrictionsTable: React.FC<{
   informe: Informe;
 }> = ({ informe }) => {
+  const { parentTableStyle } = useTablePersonalization();
   const afectaciones = informe.edificabilidad?.afectaciones;
-  const hasAfectaciones =
-    afectaciones &&
-    Object.values(afectaciones).some((value) => typeof value === 'number' && value > 0);
+  const hasAfectaciones = hasValidAfectaciones(afectaciones);
 
   if (!hasAfectaciones) return null;
 
   return (
     <div className="mt-6">
-      <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-4`}>RESTRICCIONES</div>
+      <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-4`} style={parentTableStyle}>
+        RESTRICCIONES
+      </div>
 
-      <DataTable title="AFECTACIONES">
-        <div className="p-2">
-          <div className={PARCEL_DATA_CONFIG.GRID_COLS_2}>
-            <TableRow label="Apertura" value={afectaciones.apertura || 'N/A'} />
-            <TableRow label="CI Digital" value={afectaciones.ci_digital || 'N/A'} />
-            <TableRow label="Ensanche" value={afectaciones.ensanche || 'N/A'} />
-            <TableRow label="LEP" value={afectaciones.lep || 'N/A'} />
-            <TableRow label="Riesgo Hídrico" value={afectaciones.riesgo_hidrico || 'N/A'} />
-          </div>
-        </div>
-      </DataTable>
-    </div>
-  );
-};
-
-const PlusvaliaParametersTable: React.FC<{
-  informe: Informe;
-  calculatedValues: CalculatedValues;
-}> = ({ informe, calculatedValues }) => {
-  const plusvalia = informe.edificabilidad?.plusvalia;
-  if (!plusvalia) return null;
-
-  return (
-    <div className="mt-6">
-      <DataTable title="PARA CÁLCULO DE PLUSVALÍA">
-        <div className="p-2">
-          <div className={PARCEL_DATA_CONFIG.GRID_COLS_2}>
-            <TableRow
-              label="Alícuota"
-              value={
-                calculatedValues.alicuota
-                  ? `${calculatedValues.alicuota}%`
-                  : plusvalia.alicuota
-                    ? `${plusvalia.alicuota}%`
-                    : 'N/A'
-              }
-            />
-            <TableRow label="Incidencia UVA" value={plusvalia.incidencia_uva || 'N/A'} />
-          </div>
-        </div>
-      </DataTable>
+      {afectaciones && <AfectacionesTable afectaciones={afectaciones} />}
     </div>
   );
 };
