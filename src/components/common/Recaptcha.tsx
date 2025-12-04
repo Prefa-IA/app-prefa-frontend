@@ -78,6 +78,7 @@ export const Recaptcha: React.FC<RecaptchaProps> = ({
           console.error('Error reseteando reCAPTCHA:', error);
         }
       }
+      widgetIdRef.current = null;
     };
   }, [isLoaded, siteKey, onVerify, onError, widgetIdRef]);
 

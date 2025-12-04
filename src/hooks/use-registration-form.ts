@@ -28,6 +28,7 @@ export const useRegistrationForm = () => {
     captchaToken,
     captchaValidated,
     recaptchaWidgetIdRef,
+    resetKey,
     handleCaptchaVerify,
     handleCaptchaError,
     resetCaptcha,
@@ -53,8 +54,6 @@ export const useRegistrationForm = () => {
       navigate(safePath);
     } catch (error: unknown) {
       console.error(error);
-      const errorObj = error as { response?: { data?: { error?: string } } };
-      toast.error(errorObj?.response?.data?.error || 'Error al registrar usuario');
       resetCaptcha();
     } finally {
       setIsSubmitting(false);
@@ -76,6 +75,7 @@ export const useRegistrationForm = () => {
     captchaValidated,
     isSubmitting,
     recaptchaWidgetIdRef,
+    resetKey,
     handleSubmit,
     handleCaptchaVerify,
     handleCaptchaError,

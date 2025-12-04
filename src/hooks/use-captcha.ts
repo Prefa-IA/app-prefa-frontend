@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 export const useCaptcha = () => {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaValidated, setCaptchaValidated] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
   const recaptchaWidgetIdRef = useRef<number | null>(null);
 
   const handleCaptchaVerify = (token: string) => {
@@ -20,6 +21,7 @@ export const useCaptcha = () => {
   const resetCaptcha = () => {
     setCaptchaToken(null);
     setCaptchaValidated(false);
+    setResetKey((prev) => prev + 1);
     if (
       recaptchaWidgetIdRef.current !== null &&
       typeof window !== 'undefined' &&
@@ -31,12 +33,14 @@ export const useCaptcha = () => {
         console.error('Error reseteando reCAPTCHA:', err);
       }
     }
+    recaptchaWidgetIdRef.current = null;
   };
 
   return {
     captchaToken,
     captchaValidated,
     recaptchaWidgetIdRef,
+    resetKey,
     handleCaptchaVerify,
     handleCaptchaError,
     resetCaptcha,

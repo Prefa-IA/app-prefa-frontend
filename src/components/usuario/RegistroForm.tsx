@@ -28,6 +28,7 @@ const RegistroForm: React.FC = () => {
     captchaValidated,
     isSubmitting,
     recaptchaWidgetIdRef,
+    resetKey,
     handleSubmit,
     handleCaptchaVerify,
     handleCaptchaError,
@@ -69,6 +70,7 @@ const RegistroForm: React.FC = () => {
           onCaptchaVerify={handleCaptchaVerify}
           onCaptchaError={handleCaptchaError}
           recaptchaWidgetIdRef={recaptchaWidgetIdRef}
+          resetKey={resetKey}
           isSubmitting={isSubmitting}
         />
         {mostrarTyC && <TermsModal onClose={closeModal} />}
@@ -91,6 +93,7 @@ const RegistrationForm: React.FC<
     onCaptchaVerify: (token: string) => void;
     onCaptchaError: () => void;
     recaptchaWidgetIdRef: React.MutableRefObject<number | null>;
+    resetKey: number;
     isSubmitting: boolean;
   }
 > = ({
@@ -107,6 +110,7 @@ const RegistrationForm: React.FC<
   onCaptchaVerify,
   onCaptchaError,
   recaptchaWidgetIdRef,
+  resetKey,
   isSubmitting,
 }) => {
   const recaptchaSiteKey = process.env['REACT_APP_RECAPTCHA_SITE_KEY'] || '';
@@ -148,6 +152,7 @@ const RegistrationForm: React.FC<
       {recaptchaSiteKey && !captchaValidated && (
         <div className="flex justify-center my-4">
           <Recaptcha
+            key={resetKey}
             siteKey={recaptchaSiteKey}
             onVerify={(token) => {
               onCaptchaVerify(token);

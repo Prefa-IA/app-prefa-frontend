@@ -11,7 +11,9 @@ const shouldIgnoreError = (errorMessage: string, errorSource: string): boolean =
     errorMessage.includes('Cross-Origin-Opener-Policy') ||
     errorSource.includes('recaptcha') ||
     errorSource.includes('gsi') ||
-    errorSource.includes('accounts.google.com')
+    errorSource.includes('accounts.google.com') ||
+    errorMessage.includes('ERR_BAD_REQUEST') ||
+    errorMessage.includes('403')
   );
 };
 
@@ -26,6 +28,8 @@ const shouldIgnoreRejection = (reason: unknown, errorName: string): boolean => {
     reasonString.includes('AbortError') ||
     reasonString.includes('signal is aborted') ||
     reasonString.includes('aborted without reason') ||
+    reasonString.includes('ERR_BAD_REQUEST') ||
+    reasonString.includes('403') ||
     errorName === 'AbortError' ||
     errorName === 'AbortController'
   );
