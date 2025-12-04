@@ -65,14 +65,14 @@ const NombreCompletoField: React.FC<{
   error?: string | undefined;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }> = ({ value, error, onChange }) => (
-  <div>
-    <label htmlFor="nombreCompleto" className="block text-sm font-medium mb-1">
+    <div>
+      <label htmlFor="nombreCompleto" className="block text-sm font-medium mb-1">
       Nombre y apellido completos <span className="text-red-500">*</span>
-    </label>
-    <input
-      id="nombreCompleto"
-      name="nombreCompleto"
-      placeholder="Juan Pérez"
+      </label>
+      <input
+        id="nombreCompleto"
+        name="nombreCompleto"
+        placeholder="Juan Pérez"
       value={value}
       onChange={onChange}
       className={`w-full px-3 py-2 border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${
@@ -81,31 +81,31 @@ const NombreCompletoField: React.FC<{
       maxLength={100}
     />
     {error && <p className="mt-1 text-sm text-red-500 dark:text-red-400">{error}</p>}
-  </div>
+    </div>
 );
 
 const CondicionIVAField: React.FC<{
   value: string;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }> = ({ value, onChange }) => (
-  <div>
-    <label htmlFor="condicionIVA" className="block text-sm font-medium mb-1">
+    <div>
+      <label htmlFor="condicionIVA" className="block text-sm font-medium mb-1">
       Condición fiscal <span className="text-red-500">*</span>
-    </label>
-    <select
-      id="condicionIVA"
-      name="condicionIVA"
+      </label>
+      <select
+        id="condicionIVA"
+        name="condicionIVA"
       value={value}
       onChange={onChange}
-      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-    >
-      {IVA_CONDITIONS.map((opt) => (
-        <option key={opt} value={opt}>
-          {opt}
-        </option>
-      ))}
-    </select>
-  </div>
+        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+      >
+        {IVA_CONDITIONS.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </select>
+    </div>
 );
 
 const CuitField: React.FC<{
@@ -113,13 +113,13 @@ const CuitField: React.FC<{
   error?: string | undefined;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }> = ({ value, error, onChange }) => (
-  <div>
-    <label htmlFor="cuit" className="block text-sm font-medium mb-1">
+    <div>
+      <label htmlFor="cuit" className="block text-sm font-medium mb-1">
       CUIT/CUIL <span className="text-red-500">*</span>
-    </label>
-    <input
-      id="cuit"
-      name="cuit"
+      </label>
+      <input
+        id="cuit"
+        name="cuit"
       type="text"
       placeholder="20123456789"
       value={value}
@@ -166,8 +166,8 @@ const BillingPersonalInfoFields: React.FC<BillingPersonalInfoFieldsProps> = ({
         {...(errors.cuit ? { error: errors.cuit } : {})}
         onChange={handleInputChange}
       />
-    </>
-  );
+  </>
+);
 };
 
 export default BillingPersonalInfoFields;
