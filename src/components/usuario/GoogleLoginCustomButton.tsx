@@ -6,6 +6,7 @@ interface GoogleLoginCustomButtonProps {
   clientId: string | undefined;
   initializedRef: React.RefObject<boolean>;
   onButtonClick: () => void;
+  onBeforeClick?: () => void;
 }
 
 const GoogleLoginCustomButton: React.FC<GoogleLoginCustomButtonProps> = ({
@@ -14,8 +15,13 @@ const GoogleLoginCustomButton: React.FC<GoogleLoginCustomButtonProps> = ({
   clientId,
   initializedRef,
   onButtonClick,
+  onBeforeClick,
 }) => {
   const handleButtonClick = () => {
+    if (onBeforeClick) {
+      onBeforeClick();
+    }
+
     if (!clientId) {
       console.error('REACT_APP_GOOGLE_CLIENT_ID no está configurado');
       return;

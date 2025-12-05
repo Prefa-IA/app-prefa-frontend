@@ -11,6 +11,7 @@ import { createFormHandler } from '../../utils/form-utils';
 import { sanitizePath } from '../../utils/url-sanitizer';
 import { Recaptcha } from '../common/Recaptcha';
 
+import GoogleLoginButton from './GoogleLoginButton';
 import TermsAndConditions from './TermsAndConditions';
 
 import styles from '../../styles/RegistroForm.module.css';
@@ -32,6 +33,7 @@ const RegistroForm: React.FC = () => {
     handleSubmit,
     handleCaptchaVerify,
     handleCaptchaError,
+    resetCaptcha,
     toggleTyC,
     openModal,
     closeModal,
@@ -72,6 +74,7 @@ const RegistroForm: React.FC = () => {
           recaptchaWidgetIdRef={recaptchaWidgetIdRef}
           resetKey={resetKey}
           isSubmitting={isSubmitting}
+          resetCaptcha={resetCaptcha}
         />
         {mostrarTyC && <TermsModal onClose={closeModal} />}
       </div>
@@ -81,22 +84,96 @@ const RegistroForm: React.FC = () => {
 
 const FormHeader: React.FC = () => <></>;
 
-const RegistrationForm: React.FC<
-  RegistrationFormProps & {
-    aceptoTyC: boolean;
-    onToggleTyC: () => void;
-    onOpenTyC: () => void;
-    showPass: boolean;
-    setShowPass: React.Dispatch<React.SetStateAction<boolean>>;
-    captchaToken: string | null;
-    captchaValidated: boolean;
-    onCaptchaVerify: (token: string) => void;
-    onCaptchaError: () => void;
-    recaptchaWidgetIdRef: React.MutableRefObject<number | null>;
-    resetKey: number;
-    isSubmitting: boolean;
+interface RegistrationFormExtendedProps extends RegistrationFormProps {
+  aceptoTyC: boolean;
+  onToggleTyC: () => void;
+  onOpenTyC: () => void;
+  showPass: boolean;
+  setShowPass: React.Dispatch<React.SetStateAction<boolean>>;
+  captchaToken: string | null;
+  captchaValidated: boolean;
+  onCaptchaVerify: (token: string) => void;
+  onCaptchaError: () => void;
+  recaptchaWidgetIdRef: React.MutableRefObject<number | null>;
+  resetKey: number;
+  isSubmitting: boolean;
+  resetCaptcha: () => void;
+}
+
+const TermsCheckbox: React.FC<{
+  aceptoTyC: boolean;
+  onToggleTyC: () => void;
+  onOpenTyC: () => void;
+}> = ({ aceptoTyC, onToggleTyC, onOpenTyC }) => (
+  <div className="flex items-center text-sm dark:text-gray-300">
+    <input
+      id="aceptoTyC"
+      type="checkbox"
+      checked={aceptoTyC}
+      onChange={onToggleTyC}
+      className="mr-2 dark:bg-gray-900 dark:border-gray-600"
+    />
+    <label htmlFor="aceptoTyC" className="">
+      Acepto los{' '}
+      <button
+        type="button"
+        className="text-primary-600 dark:text-primary-400 underline"
+        onClick={onOpenTyC}
+      >
+        Términos y Condiciones
+      </button>
+    </label>
+  </div>
+);
+
+const RecaptchaSection: React.FC<{
+  recaptchaSiteKey: string;
+  captchaValidated: boolean;
+  resetKey: number;
+  onCaptchaVerify: (token: string) => void;
+  onCaptchaError: () => void;
+  recaptchaWidgetIdRef: React.MutableRefObject<number | null>;
+}> = ({
+  recaptchaSiteKey,
+  captchaValidated,
+  resetKey,
+  onCaptchaVerify,
+  onCaptchaError,
+  recaptchaWidgetIdRef,
+}) => {
+  if (!recaptchaSiteKey || captchaValidated) {
+    return null;
   }
-> = ({
+
+  return (
+    <div className="flex justify-center my-4">
+      <Recaptcha
+        key={resetKey}
+        siteKey={recaptchaSiteKey}
+        onVerify={onCaptchaVerify}
+        onError={onCaptchaError}
+        widgetIdRef={recaptchaWidgetIdRef}
+      />
+    </div>
+  );
+};
+
+const SocialLoginSection: React.FC<{ resetCaptcha: () => void }> = ({ resetCaptcha }) => (
+  <>
+    <div className="my-0.5 flex items-center mt-4">
+      <div className="flex-grow border-t border-gray-300 dark:border-gray-700" />
+      <span className="px-3 text-xs text-gray-500">o</span>
+      <div className="flex-grow border-t border-gray-300 dark:border-gray-700" />
+    </div>
+    <GoogleLoginButton
+      className="flex justify-center"
+      onSuccessNavigate="/consultar"
+      onBeforeClick={resetCaptcha}
+    />
+  </>
+);
+
+const RegistrationForm: React.FC<RegistrationFormExtendedProps> = ({
   datos,
   onSubmit,
   onChange,
@@ -112,16 +189,12 @@ const RegistrationForm: React.FC<
   recaptchaWidgetIdRef,
   resetKey,
   isSubmitting,
+  resetCaptcha,
 }) => {
   const recaptchaSiteKey = process.env['REACT_APP_RECAPTCHA_SITE_KEY'] || '';
 
   return (
-    <form
-      className={styles['form']}
-      onSubmit={(e) => {
-        void onSubmit(e);
-      }}
-    >
+    <form className={styles['form']} onSubmit={(e) => void onSubmit(e)}>
       <div className={styles['inputGroup']}>
         <FormFields
           datos={datos}
@@ -130,39 +203,17 @@ const RegistrationForm: React.FC<
           setShowPass={setShowPass}
         />
       </div>
-      <div className="flex items-center text-sm dark:text-gray-300">
-        <input
-          id="aceptoTyC"
-          type="checkbox"
-          checked={aceptoTyC}
-          onChange={onToggleTyC}
-          className="mr-2 dark:bg-gray-900 dark:border-gray-600"
-        />
-        <label htmlFor="aceptoTyC" className="">
-          Acepto los{' '}
-          <button
-            type="button"
-            className="text-primary-600 dark:text-primary-400 underline"
-            onClick={onOpenTyC}
-          >
-            Términos y Condiciones
-          </button>
-        </label>
-      </div>
-      {recaptchaSiteKey && !captchaValidated && (
-        <div className="flex justify-center my-4">
-          <Recaptcha
-            key={resetKey}
-            siteKey={recaptchaSiteKey}
-            onVerify={(token) => {
-              onCaptchaVerify(token);
-            }}
-            onError={onCaptchaError}
-            widgetIdRef={recaptchaWidgetIdRef}
-          />
-        </div>
-      )}
+      <TermsCheckbox aceptoTyC={aceptoTyC} onToggleTyC={onToggleTyC} onOpenTyC={onOpenTyC} />
+      <RecaptchaSection
+        recaptchaSiteKey={recaptchaSiteKey}
+        captchaValidated={captchaValidated}
+        resetKey={resetKey}
+        onCaptchaVerify={onCaptchaVerify}
+        onCaptchaError={onCaptchaError}
+        recaptchaWidgetIdRef={recaptchaWidgetIdRef}
+      />
       <SubmitButton disabled={!aceptoTyC || !captchaToken || isSubmitting} />
+      <SocialLoginSection resetCaptcha={resetCaptcha} />
       <p className="text-center text-gray-900 dark:text-gray-100 mt-4">
         ¿Ya tenés cuenta?{' '}
         <Link

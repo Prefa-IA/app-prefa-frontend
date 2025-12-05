@@ -79,6 +79,7 @@ export const useRegistrationForm = () => {
     handleSubmit,
     handleCaptchaVerify,
     handleCaptchaError,
+    resetCaptcha,
     toggleTyC,
     openModal,
     closeModal,

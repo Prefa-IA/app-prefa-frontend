@@ -96,7 +96,7 @@ const PlansPanel: React.FC<{
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-10 justify-items-stretch">
       {planes
         .slice()
-        .sort((a, b) => (b.price ?? 0) - (a.price ?? 0))
+        .sort((a, b) => (a.price ?? 0) - (b.price ?? 0))
         .map((p) => (
           <PlanCard
             key={p.id}

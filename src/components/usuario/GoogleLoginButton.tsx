@@ -10,6 +10,7 @@ const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
   className = '',
   onSuccessNavigate = '/consultar',
   variant = 'customRed',
+  onBeforeClick,
 }) => {
   const divRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -28,15 +29,19 @@ const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
     return <div className={className} ref={divRef} />;
   }
 
-  return (
-    <GoogleLoginCustomButton
-      className={className}
-      buttonRef={buttonRef}
-      clientId={clientId}
-      initializedRef={initializedRef}
-      onButtonClick={() => {}}
-    />
-  );
+  const customButtonProps: React.ComponentProps<typeof GoogleLoginCustomButton> = {
+    className,
+    buttonRef,
+    clientId,
+    initializedRef,
+    onButtonClick: () => {},
+  };
+
+  if (onBeforeClick) {
+    customButtonProps.onBeforeClick = onBeforeClick;
+  }
+
+  return <GoogleLoginCustomButton {...customButtonProps} />;
 };
 
 export default GoogleLoginButton;

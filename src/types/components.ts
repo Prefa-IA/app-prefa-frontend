@@ -68,6 +68,7 @@ export interface GoogleLoginButtonProps {
   className?: string;
   onSuccessNavigate?: string;
   variant?: 'googleDefault' | 'customRed';
+  onBeforeClick?: () => void;
 }
 
 export interface PrefaInfoModalProps {
