@@ -85,26 +85,97 @@ const applyDiagonalWatermark = (): void => {
   }
 };
 
-const PrintInforme: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const [informe, setInforme] = useState<Informe | null>(null);
+const getGatewayUrl = (): string => {
+  const currentHost = window.location.hostname;
+  return currentHost.includes('docker.internal')
+    ? `http://${currentHost}:4000/api`
+    : `http://localhost:4000/api`;
+};
 
-  const { usuario } = useAuth();
-  const { planes } = usePlanes();
-  const { theme } = useTheme();
+const loadInformeInPrintMode = async (id: string, token: string): Promise<Informe> => {
+  const gatewayUrl = getGatewayUrl();
+  console.log(`[PrintInforme] Modo print - cargando desde ${gatewayUrl}`);
+
+  const response = await fetch(`${gatewayUrl}/prefactibilidad/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error(`Informe no encontrado (ID: ${id})`);
+    }
+    throw new Error(`Error ${response.status}: ${response.statusText}`);
+  }
+
+  return response.json();
+};
+
+const formatErrorMessage = (err: unknown, id: string): string => {
+  if (!(err instanceof Error)) {
+    return 'Error al cargar el informe';
+  }
+
+  const errorMessage = err.message;
+  if (errorMessage.includes('404') || errorMessage.includes('not found')) {
+    return `Informe no encontrado (ID: ${id}). Verifica que el informe exista y pertenezca a tu cuenta.`;
+  }
+  if (errorMessage.includes('Network Error') || errorMessage.includes('Failed to fetch')) {
+    return 'Error de conexión. No se pudo conectar con el servidor. Verifica que la API esté disponible.';
+  }
+  if (errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
+    return 'No autorizado. El token de autenticación puede haber expirado.';
+  }
+  return errorMessage;
+};
+
+const useInformeData = (id: string | undefined) => {
+  const [informe, setInforme] = useState<Informe | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!id) return;
+      if (!id) {
+        setError('ID de informe no proporcionado');
+        setLoading(false);
+        return;
+      }
+
       try {
-        const data = await prefactibilidad.obtenerInforme(id);
+        setLoading(true);
+        setError(null);
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('Token de autenticación no disponible');
+        }
+
+        const isPrintMode = window.location.pathname.startsWith('/print/');
+        const data = isPrintMode
+          ? await loadInformeInPrintMode(id, token)
+          : await prefactibilidad.obtenerInforme(id);
+
         setInforme(data);
-      } catch (err) {
-        console.error('Error cargando informe', err);
+      } catch (err: unknown) {
+        console.error('[PrintInforme] Error cargando informe', err);
+        setError(formatErrorMessage(err, id));
+      } finally {
+        setLoading(false);
       }
     };
     void fetchData();
   }, [id]);
+
+  return { informe, loading, error };
+};
+
+const useWatermarkSetup = () => {
+  const { usuario } = useAuth();
+  const { planes } = usePlanes();
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (!usuario || planes.length === 0) return;
@@ -131,8 +202,34 @@ const PrintInforme: React.FC = () => {
       obs.disconnect();
     };
   }, [usuario, planes, theme]);
+};
 
-  if (!informe) return null;
+const LoadingState: React.FC = () => (
+  <div className="print-page" data-pdf-loading="true">
+    <div style={{ padding: '20px', textAlign: 'center' }}>Cargando informe...</div>
+  </div>
+);
+
+const ErrorState: React.FC<{ error: string | null }> = ({ error }) => (
+  <div className="print-page" data-pdf-error="true">
+    <div style={{ padding: '20px', textAlign: 'center', color: 'red' }}>
+      Error: {error || 'No se pudo cargar el informe'}
+    </div>
+  </div>
+);
+
+const PrintInforme: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const { informe, loading, error } = useInformeData(id);
+  useWatermarkSetup();
+
+  if (loading) {
+    return <LoadingState />;
+  }
+
+  if (error || !informe) {
+    return <ErrorState error={error} />;
+  }
 
   return (
     <div className="print-page">

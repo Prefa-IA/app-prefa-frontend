@@ -77,7 +77,7 @@ export const DownloadButton: React.FC<{
     return null;
   }
 
-  const isDisabled = downloading || !informe.pdfUrl;
+  const isDisabled = downloading;
 
   return (
     <div className="hidden sm:flex mt-2 sm:mt-0 sm:ml-2 flex-shrink-0 w-full sm:w-auto">
@@ -163,7 +163,7 @@ export const DownloadButtonMobile: React.FC<{
     return null;
   }
 
-  const isDisabled = downloading || !informe.pdfUrl;
+  const isDisabled = downloading;
 
   return (
     <div className="sm:hidden mt-4">
