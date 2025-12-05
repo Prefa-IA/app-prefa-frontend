@@ -1,23 +1,26 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { 
-  LoginCredentials, 
-  LoginFormProps, 
-  LoginFieldProps,
-  LOGIN_CONFIG 
-} from '../../types/enums';
-import { createFormHandler } from '../../utils/formUtils';
-import Logo from '../generales/Logo';
-import styles from '../../styles/LoginForm.module.css';
+import { Link, useNavigate } from 'react-router-dom';
 import { EyeIcon, EyeOffIcon } from '@heroicons/react/outline';
+
+import { useAuth } from '../../contexts/AuthContext';
+import {
+  ExtendedLoginFieldProps,
+  LoginFieldsProps,
+  LoginFormComponentProps,
+} from '../../types/components';
+import { LOGIN_CONFIG, LoginCredentials, LoginFormProps } from '../../types/enums';
+import { createFormHandler } from '../../utils/form-utils';
+
+import GoogleLoginButton from './GoogleLoginButton';
+
+import styles from '../../styles/LoginForm.module.css';
 
 const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: '',
-    password: ''
+    password: '',
   });
   const [showPass, setShowPass] = useState(false);
 
@@ -38,12 +41,17 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   const handleChange = createFormHandler(setCredentials);
 
   return (
-    <div className={styles.container}>
-      <div className={`${styles.formContainer} bg-white p-8 rounded shadow`}>
-        <LoginHeader />
+    <div
+      className={`${styles['container']} min-h-screen pt-[90px] flex justify-center items-center w-full`}
+    >
+      <div
+        className={`${styles['formContainer']} bg-white dark:bg-gray-800 p-4 sm:p-8 rounded shadow`}
+      >
         <LoginFormComponent
           credentials={credentials}
-          onSubmit={handleSubmit}
+          onSubmit={(e) => {
+            void handleSubmit(e);
+          }}
           onChange={handleChange}
           showPass={showPass}
           setShowPass={setShowPass}
@@ -53,53 +61,69 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   );
 };
 
-const LoginHeader: React.FC = () => (
-  <div className={styles.logoContainer}>
-    <Logo width={250} height={40} className={styles.logo} />
-  </div>
-);
-
-interface LoginFormComponentProps {
-  credentials: LoginCredentials;
-  onSubmit: (e: React.FormEvent) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  showPass: boolean;
-  setShowPass: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
 const LoginFormComponent: React.FC<LoginFormComponentProps> = ({
   credentials,
   onSubmit,
   onChange,
   showPass,
-  setShowPass
+  setShowPass,
 }) => {
   const navigate = useNavigate();
   return (
-    <form className={styles.form} onSubmit={onSubmit}>
-      <div className={styles.fieldsContainer}>
-        <LoginFields credentials={credentials} onChange={onChange} showPass={showPass} setShowPass={setShowPass} />
+    <form
+      className={styles['form']}
+      onSubmit={(e) => {
+        void onSubmit(e);
+      }}
+    >
+      <div className={styles['fieldsContainer']}>
+        <LoginFields
+          credentials={credentials}
+          onChange={onChange}
+          showPass={showPass}
+          setShowPass={setShowPass}
+        />
       </div>
       <SubmitButton />
-      <hr />
-      <p className="text-center">¿Todavía no tenés cuenta? <Link to="/registro" className={styles.switchLink}>Registrate</Link></p>
+      <div className="my-0.5 flex items-center">
+        <div className="flex-grow border-t border-gray-300 dark:border-gray-700" />
+        <span className="px-3 text-xs text-gray-500">o</span>
+        <div className="flex-grow border-t border-gray-300 dark:border-gray-700" />
+      </div>
+      <GoogleLoginButton className="flex justify-center" onSuccessNavigate="/consultar" />
+      <p className="text-center text-gray-900 dark:text-gray-100 mt-4">
+        ¿Todavía no tenés cuenta?{' '}
+        <Link to="/registro" className="text-primary-600 dark:text-primary-400 hover:underline">
+          Registrate
+        </Link>
+      </p>
       <div className="mt-2 text-sm flex flex-row justify-between">
-        <button type="button" className="text-blue-900 w-1/2 hover:underline" onClick={() => navigate('/forgot-password')}>¿Olvidaste tu contraseña?</button>
+        <button
+          type="button"
+          className="text-primary-600 dark:text-primary-400 w-1/2 hover:underline"
+          onClick={() => navigate('/forgot-password')}
+        >
+          ¿Olvidaste tu contraseña?
+        </button>
         <div className="border-l border-gray-400 h-10 mx-4" />
-        <button type="button" className="text-blue-900 w-1/2 hover:underline" onClick={() => navigate('/resend-verification')}>Reenviar correo de verificación</button>
+        <button
+          type="button"
+          className="text-primary-600 dark:text-primary-400 w-1/2 hover:underline"
+          onClick={() => navigate('/resend-verification')}
+        >
+          Reenviar correo de verificación
+        </button>
       </div>
     </form>
   );
 };
 
-interface LoginFieldsProps {
-  credentials: LoginCredentials;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  showPass: boolean;
-  setShowPass: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-const LoginFields: React.FC<LoginFieldsProps> = ({ credentials, onChange, showPass, setShowPass }) => (
+const LoginFields: React.FC<LoginFieldsProps> = ({
+  credentials,
+  onChange,
+  showPass,
+  setShowPass,
+}) => (
   <>
     {LOGIN_CONFIG.FIELDS.map((field) => (
       <LoginField
@@ -114,8 +138,6 @@ const LoginFields: React.FC<LoginFieldsProps> = ({ credentials, onChange, showPa
   </>
 );
 
-type ExtendedLoginFieldProps = LoginFieldProps & { showPass:boolean; setShowPass:React.Dispatch<React.SetStateAction<boolean>> };
-
 const LoginField: React.FC<ExtendedLoginFieldProps> = ({
   id,
   name,
@@ -127,10 +149,10 @@ const LoginField: React.FC<ExtendedLoginFieldProps> = ({
   autoComplete,
   required = false,
   showPass,
-  setShowPass
+  setShowPass,
 }) => (
-  <div className={styles.fieldContainer}>
-    <label htmlFor={id} className={styles.label}>
+  <div className={styles['fieldContainer']}>
+    <label htmlFor={id} className={`${styles['label']} dark:text-gray-300`}>
       {label}
     </label>
     <div className="relative">
@@ -139,15 +161,23 @@ const LoginField: React.FC<ExtendedLoginFieldProps> = ({
         name={name}
         type={type === 'password' && showPass ? 'text' : type}
         required={required}
-        className={styles.input}
+        className={`${styles['input']} dark:bg-gray-900 dark:border-gray-600 dark:text-gray-100`}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
         autoComplete={autoComplete}
       />
       {type === 'password' && (
-        <button type="button" className="absolute inset-y-0 right-3 flex items-center" onClick={() => setShowPass(!showPass)}>
-          {showPass ? <EyeOffIcon className="w-5 h-5 text-gray-500" /> : <EyeIcon className="w-5 h-5 text-gray-500" />}
+        <button
+          type="button"
+          className="absolute inset-y-0 right-3 flex items-center"
+          onClick={() => setShowPass(!showPass)}
+        >
+          {showPass ? (
+            <EyeOffIcon className="w-5 h-5 text-gray-500" />
+          ) : (
+            <EyeIcon className="w-5 h-5 text-gray-500" />
+          )}
         </button>
       )}
     </div>
@@ -156,10 +186,13 @@ const LoginField: React.FC<ExtendedLoginFieldProps> = ({
 
 const SubmitButton: React.FC = () => (
   <div>
-    <button type="submit" className={styles.submitButton}>
+    <button
+      type="submit"
+      className="inline-flex w-full justify-center items-center px-3 py-2 sm:px-4 sm:py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200 shadow-md hover:shadow-lg"
+    >
       {LOGIN_CONFIG.SUBMIT_TEXT}
     </button>
   </div>
 );
 
-export default LoginForm; 
+export default LoginForm;

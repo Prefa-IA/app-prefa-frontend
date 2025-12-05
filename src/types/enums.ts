@@ -2,6 +2,8 @@ export interface Usuario {
   id: string;
   email: string;
   nombre: string;
+  acceptedTerms?: boolean;
+  googleId?: string | null;
   personalizacion?: {
     fondoEncabezadosPrincipales?: string;
     colorTextoTablasPrincipales?: string;
@@ -11,7 +13,6 @@ export interface Usuario {
     tipografia?: string;
     logo?: string; // Logo en base64 o URL
   };
-  consultasDisponibles?: number;
   suscripcion?: {
     fechaFin?: string;
     // Referencia al plan
@@ -21,11 +22,13 @@ export interface Usuario {
   };
 
   // Sistema de créditos
+  creditBalance?: number;
   creditsUsedDay?: number;
   creditsUsedMonth?: number;
   creditsDayReset?: string;
   creditsMonthReset?: string;
   promoCreditsLeft?: number;
+  tutorialStatus?: 'finish' | 'omit' | null;
 }
 
 export interface LoginCredentials {
@@ -39,7 +42,7 @@ export interface RegistroData {
   nombre: string;
   repeatPassword?: string;
   acceptedTerms: boolean;
-  // Eliminamos referencia a logo en el registro inicial, ahora podrá cargarse posteriormente en la personalización del perfil
+  recaptchaToken?: string;
 }
 
 export interface Coordenadas {
@@ -67,7 +70,7 @@ export interface DatosCatastrales {
   alturaMaximaPlanoLimite: string;
   fot: string;
   fos: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface DatosUtiles {
@@ -77,7 +80,7 @@ export interface DatosUtiles {
   comisaria: string;
   comisariaVecinal: string;
   seccionCatastral: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface GeometriaFeature {
@@ -94,7 +97,7 @@ export interface GeometriaFeature {
   };
 }
 
-interface Geometria {
+export interface Geometria {
   type: string;
   features: GeometriaFeature[];
 }
@@ -194,7 +197,7 @@ export interface Entorno {
     linea: string;
     distancia: number;
   }>;
-  servicios: any[];
+  servicios: Array<Record<string, unknown>>;
   restricciones: string[];
 }
 
@@ -210,6 +213,39 @@ export interface Informe {
   entorno: Entorno;
   timestamp: string;
   tipoPrefa?: PrefaType;
+  pdfUrl?: string;
+  esUltimoInforme?: boolean;
+  calculo?: Record<string, unknown>;
+  datosIncompletos?: boolean;
+  datosFaltantes?: string[];
+  shp_assets_info?: {
+    capas?: {
+      lib?: {
+        features: number;
+        datos: GeoJSONFeature[];
+      };
+      lfi?: {
+        features: number;
+        datos: GeoJSONFeature[];
+      };
+    };
+    troneras?: {
+      calculadas: number;
+      datos: TroneraFeature[];
+      estadisticas?: {
+        porcentaje_afectacion_lfi?: number;
+        porcentaje_afectacion_lib?: number;
+        total_esquinas?: number;
+        esquinas_con_troneras?: number;
+      };
+    };
+    estadisticas?: {
+      porcentaje_afectacion_lfi?: number;
+      porcentaje_afectacion_lib?: number;
+      total_esquinas?: number;
+      esquinas_con_troneras?: number;
+    };
+  };
 }
 
 export interface InformeCompuesto {
@@ -231,6 +267,7 @@ export interface SearchBarProps {
   hasResult?: boolean;
   onClear?: () => void;
   disabled?: boolean;
+  singleModeIcon?: boolean;
 }
 
 export interface Sugerencia {
@@ -239,8 +276,8 @@ export interface Sugerencia {
 
 export interface ChangeLogEntry {
   fieldName: string;
-  originalValue: any;
-  newValue: any;
+  originalValue: unknown;
+  newValue: unknown;
   timestamp: Date;
 }
 
@@ -255,7 +292,7 @@ export interface ReportPreviewProps {
     lng: number;
   };
   onGenerateReport: () => void;
-  onAcceptReport: () => Promise<boolean>;
+  savedId?: string | null;
   tipoPrefa: PrefaType;
 }
 
@@ -268,7 +305,7 @@ export interface ReportHeaderProps {
 export interface ReportFooterProps {
   informe: Informe;
   onGenerateReport?: () => void;
-  onAcceptReport?: () => Promise<boolean>;
+  savedId?: string | null;
   changeLog?: ChangeLogEntry[];
 }
 
@@ -317,8 +354,8 @@ export interface ReportBrandProps {
 
 // ReportFooter Component Interfaces
 export interface FooterActionsProps {
-  onAcceptReport?: () => Promise<boolean>;
-  onGenerateReport?: () => void;
+  onGenerateReport?: () => void | Promise<void>;
+  savedId?: string | null;
 }
 
 export interface ActionButtonProps {
@@ -346,6 +383,7 @@ export interface FormField {
   placeholder: string;
   required: boolean;
   autoComplete?: string;
+  maxLength?: number;
 }
 
 export interface RegistrationFormProps {
@@ -373,24 +411,24 @@ export enum ButtonVariant {
   PRIMARY = 'primary',
   SECONDARY = 'secondary',
   SUCCESS = 'success',
-  DANGER = 'danger'
+  DANGER = 'danger',
 }
 
 export enum InputType {
   TEXT = 'text',
   EMAIL = 'email',
-  PASSWORD = 'password'
+  PASSWORD = 'password',
 }
 
 export const SEARCH_CONFIG = {
   MIN_CHARS_FOR_SUGGESTIONS: 3,
-  PLACEHOLDER_DEFAULT: 'Ingrese una dirección de CABA (ej. Corrientes 1234)'
+  PLACEHOLDER_DEFAULT: 'Ingrese una dirección de CABA (ej. Corrientes 1234)',
 } as const;
 
 export const REPORT_CONFIG = {
   BRAND_NAME: 'PreFactibilidad',
   BRAND_SUFFIX: 'BA',
-  COMPOUND_LABEL: 'Compuesta'
+  COMPOUND_LABEL: 'Compuesta',
 } as const;
 
 // PerfilUsuario Component Interfaces
@@ -494,13 +532,13 @@ export const PROFILE_CONFIG = {
   ACTIONS: {
     MANAGE_SUBSCRIPTION: {
       title: 'Gestionar suscripción',
-      description: 'Actualizar plan o método de pago'
+      description: 'Actualizar plan o método de pago',
     },
     EDIT_PROFILE: {
       title: 'Editar perfil',
-      description: 'Actualizar información personal'
-    }
-  }
+      description: 'Actualizar información personal',
+    },
+  },
 } as const;
 
 export const PARCEL_MAP_CONFIG = {
@@ -508,27 +546,30 @@ export const PARCEL_MAP_CONFIG = {
   PAGE_NUMBER: 4,
   CANVAS_DIMENSIONS: {
     WIDTH: 800,
-    HEIGHT: 600
+    HEIGHT: 600,
   },
   STYLE: {
     WIDTH: '100%',
-    HEIGHT: '500px'
-  }
+    HEIGHT: '500px',
+  },
 } as const;
 
 export const NAVBAR_CONFIG = {
   BRAND_NAME: 'PreFactibilidad BA',
   NAVIGATION: [
     { name: 'Inicio', href: '/' },
-    { name: 'Consultar', href: '/consultar' },
-    { name: 'Mis Informes', href: '/informes' },
-    { name: 'FAQ', href: '/faq' }
-  ]
+    { name: 'Generar informe', href: '/consultar' },
+    { name: 'Buscar dirección', href: '/buscar' },
+    { name: 'Registros', href: '/informes' },
+    { name: 'Precios', href: '/suscripciones' },
+  ],
 } as const;
 
+const LOGIN_TITLE = 'Iniciar sesión';
+
 export const LOGIN_CONFIG = {
-  TITLE: 'Iniciar sesión',
-  SUBMIT_TEXT: 'Iniciar sesión',
+  TITLE: LOGIN_TITLE,
+  SUBMIT_TEXT: LOGIN_TITLE,
   FIELDS: [
     {
       id: 'email',
@@ -537,7 +578,7 @@ export const LOGIN_CONFIG = {
       label: 'Email',
       placeholder: 'Correo@ejemplo.com',
       autoComplete: 'email',
-      required: true
+      required: true,
     },
     {
       id: 'password',
@@ -546,9 +587,9 @@ export const LOGIN_CONFIG = {
       label: 'Contraseña',
       placeholder: 'Contraseña',
       autoComplete: 'current-password',
-      required: true
-    }
-  ]
+      required: true,
+    },
+  ],
 } as const;
 
 // ParcelDataPage Component Interfaces
@@ -558,6 +599,7 @@ export interface ParcelDataPageProps {
   esInformeCompuesto?: boolean;
   tipoPrefa: PrefaType;
   onChangeLogUpdate?: (changeLog: ChangeLogEntry[]) => void;
+  plusvaliaRef?: React.RefObject<HTMLDivElement>;
 }
 
 export interface GeneralConsiderationsProps {
@@ -571,8 +613,10 @@ export interface BasicInformationProps {
   calculatedValues: {
     totalCapConstructiva: number;
     plusvaliaFinal: number;
+    lfiAfeccionPercent?: number;
   };
   pageCounter: number;
+  isBasicSearch?: boolean;
 }
 
 export interface ParcelDataTablesProps {
@@ -581,11 +625,28 @@ export interface ParcelDataTablesProps {
   esInformeCompuesto?: boolean;
   calculatedValues: {
     superficieParcela: number;
+    superficieParcelaAjustada: number;
     frenteValor: number;
     fotMedanera: number;
     alturaMax: number;
+    pisosSinRetiro: number;
+    totalPisos: number;
+    totalPisosFormatted: string;
     tipoEdificacion: string;
+    areaPlantasTipicas: number;
+    areaPrimerRetiro: number;
+    areaSegundoRetiro: number;
+    totalCapConstructiva: number;
+    totalCapConstructivaOriginal: number;
+    lfiAfeccionPercent: number;
+    a1: number;
+    a2: number;
+    a: number;
+    b: number;
+    axb: number;
+    alicuotaValor: number;
     alicuota: number;
+    plusvaliaFinal: number;
   };
   pageCounter: number;
 }
@@ -605,6 +666,7 @@ export interface DocumentViewerProps {
     planosIndice: string[];
   };
   pageCounter: number;
+  tipoPrefa?: string;
   pageNumbers?: {
     croquis: number;
     perimetro: number;
@@ -617,6 +679,7 @@ export interface PlusvaliaCalculationProps {
   informe: Informe;
   informeCompuesto?: InformeCompuesto;
   esInformeCompuesto?: boolean;
+  plusvaliaRef?: React.RefObject<HTMLDivElement>;
   calculatedValues: {
     superficieParcela: number;
     superficieParcelaAjustada: number;
@@ -657,7 +720,12 @@ export interface TableRowProps {
   isAlternate?: boolean;
 }
 
-// Document Viewer Interfaces
+export interface DocumentosVisuales {
+  croquis: string[];
+  perimetros: string[];
+  planosIndice: string[];
+}
+
 export interface DocumentItemProps {
   url: string;
   title: string;
@@ -675,12 +743,13 @@ export interface PdfViewerProps {
 export const PARCEL_DATA_CONFIG = {
   PAGE_BREAK_CLASS: 'page-break my-8',
   TABLE_HEADER_CLASS: 'text-center p-3 font-bold',
-  TABLE_BORDER_CLASS: 'rounded-lg overflow-hidden bg-white',
-  TABLE_CONTAINER_CLASS: 'mb-6 bg-white rounded-lg',
+  TABLE_BORDER_CLASS: 'rounded-lg overflow-hidden bg-white dark:bg-gray-800',
+  TABLE_CONTAINER_CLASS: 'mb-6 bg-white dark:bg-gray-800 rounded-lg',
   GRID_COLS_2: 'grid grid-cols-2 text-sm',
-  GRID_COLS_3: 'grid grid-cols-3 gap-4 mb-8',
+  GRID_COLS_3: 'grid grid-cols-1 md:grid-cols-3 gap-4 mb-8',
   GRID_COLS_5: 'grid grid-cols-5 text-sm',
   GRID_COLS_6: 'grid grid-cols-6 text-sm',
+  GRID_COLS_7: 'grid grid-cols-7 text-sm',
   TABLE_ROW_CLASS: 'hover:opacity-90 transition-colors duration-200',
   TABLE_CELL_LABEL: 'border-b border-r p-3 font-semibold bg-gray-50 text-gray-800',
   TABLE_CELL_VALUE: 'border-b p-3 text-gray-700',
@@ -688,21 +757,21 @@ export const PARCEL_DATA_CONFIG = {
     CROQUIS: '/images/default_croquis.jpg',
     PERIMETRO: '/images/default_perimetro.jpg',
     PLANO_INDICE: '/images/default_plano_indice.jpg',
-    FACHADA: '/images/default_fachada.jpg'
+    FACHADA: '/images/default_fachada.jpg',
   },
   CALCULATIONS: {
     PATIOS_ADJUSTMENT: 25,
     CAPACITY_PERCENTAGE: 0.8,
-    FLOOR_HEIGHT: 3
+    FLOOR_HEIGHT: 3,
   },
   PERSONALIZATION: {
     DEFAULT_COLORS: {
       PRIMARY: '#0284c7',
-      SECONDARY: '#0369a1', 
-      ACCENT: '#f0f9ff'
+      SECONDARY: '#0369a1',
+      ACCENT: '#f0f9ff',
     },
-    DEFAULT_FONT: 'Inter, system-ui, sans-serif'
-  }
+    DEFAULT_FONT: 'Inter, system-ui, sans-serif',
+  },
 } as const;
 
 // ListaInformes Component Interfaces
@@ -731,7 +800,7 @@ export interface HomeProps {
 }
 
 export interface HeroSectionProps {
-  usuario: any;
+  usuario: Usuario | null;
 }
 
 export interface FeatureSectionProps {
@@ -741,7 +810,7 @@ export interface FeatureSectionProps {
 export interface FeatureItem {
   name: string;
   description: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }
 
 export interface FeatureCardProps {
@@ -785,6 +854,7 @@ export interface SearchSectionProps {
   hasResult?: boolean;
   onClear?: () => void;
   disabled?: boolean;
+  singleModeIcon?: boolean;
 }
 
 export interface AddressManagementProps {
@@ -804,7 +874,7 @@ export interface ReportSectionProps {
   loading: boolean;
   center: { lat: number; lng: number };
   onGenerateReport: () => void;
-  onAcceptReport: () => Promise<boolean>;
+  savedId?: string | null;
   tipoPrefa: PrefaType;
 }
 
@@ -836,28 +906,30 @@ export interface SearchButtonProps {
 
 // Configuration Constants for Components
 export const LISTA_INFORMES_CONFIG = {
-  TITLE: 'Mis Informes',
-  SUBTITLE: 'Historial de tus consultas. Descargá tus informes en PDF cuando quieras.',
+  TITLE: 'Registros',
+  SUBTITLE: 'Consultá tus informes y direcciones guardadas.',
   EMPTY_STATE: {
     TITLE: 'No hay informes',
-    DESCRIPTION: 'Aún no has generado ningún informe de prefactibilidad.'
+    DESCRIPTION: 'Aún no has generado ningún informe de prefactibilidad.',
   },
-  BUTTON_TEXT: 'Descargar PDF'
+  BUTTON_TEXT: 'Descargar PDF',
 } as const;
 
 export const HOME_CONFIG = {
   HERO: {
     TITLE: 'Prefactibilidad al instante,',
     SUBTITLE: 'para profesionales del rubro.',
-    DESCRIPTION: 'Obtené el potencial constructivo de cualquier terreno en CABA en minutos, de forma rápida y precisa.',
+    DESCRIPTION:
+      'Obtené el potencial constructivo de cualquier terreno en CABA en minutos, de forma rápida y precisa.',
     CTA_PRIMARY: 'Empezar ahora',
     CTA_REGISTER: 'Comenzar gratis',
-    CTA_LOGIN: 'Iniciar sesión'
+    CTA_LOGIN: 'Iniciar sesión',
   },
   FEATURES: {
     SUBTITLE: 'Las herramientas que potencian tu análisis.',
-    DESCRIPTION: 'Obtené la información que necesitás para tomar decisiones estratégicas en minutos.'
-  }
+    DESCRIPTION:
+      'Obtené la información que necesitás para tomar decisiones estratégicas en minutos.',
+  },
 } as const;
 
 export const CONSULTA_DIRECCION_CONFIG = {
@@ -866,7 +938,7 @@ export const CONSULTA_DIRECCION_CONFIG = {
   MAP: {
     DEFAULT_CENTER: { lat: -34.6037, lng: -58.3816 },
     ZOOM: 15,
-    CONTAINER_STYLE: { width: '100%', height: '200px' }
+    CONTAINER_STYLE: { width: '100%', height: '200px' },
   },
   MESSAGES: {
     LOGIN_REQUIRED: 'Debe iniciar sesión para realizar consultas.',
@@ -875,16 +947,17 @@ export const CONSULTA_DIRECCION_CONFIG = {
     ERROR_GENERAL: 'Error al consultar la dirección. Por favor intente nuevamente.',
     ERROR_PDF: 'Error al generar el informe PDF.',
     ERROR_SAVE: 'Error al guardar el informe.',
-    NO_ADDRESSES_FOUND: 'No se encontraron direcciones en CABA. Por favor, especifique una dirección válida dentro de Ciudad Autónoma de Buenos Aires.',
-    ERROR_SUGGESTIONS: 'Error al buscar direcciones. Por favor, intente nuevamente.'
-  }
+    NO_ADDRESSES_FOUND:
+      'No se encontraron direcciones en CABA. Por favor, especifique una dirección válida dentro de Ciudad Autónoma de Buenos Aires.',
+    ERROR_SUGGESTIONS: 'Error al buscar direcciones. Por favor, intente nuevamente.',
+  },
 } as const;
 
 export const ADDRESS_LIST_CONFIG = {
   TITLE: 'Direcciones agregadas:',
   EMPTY_MESSAGE: 'No hay direcciones agregadas',
   BUTTON_TEXT: 'Consultar prefactibilidad compuesta',
-  BUTTON_LOADING: 'Consultando...'
+  BUTTON_LOADING: 'Consultando...',
 } as const;
 
 // LbiLfiViewer Component Interfaces
@@ -898,10 +971,10 @@ export interface LbiLfiViewerProps {
 
 export interface GeoJSONFeature {
   type: string;
-  properties: any;
+  properties: Record<string, unknown>;
   geometry: {
     type: string;
-    coordinates: any;
+    coordinates: unknown;
   };
 }
 
@@ -924,7 +997,7 @@ export interface TroneraFeature {
   type: string;
   geometry: {
     type: string;
-    coordinates: any;
+    coordinates: unknown;
   };
   properties: {
     tipo: string;
@@ -983,7 +1056,7 @@ export const LBI_LFI_CONFIG = {
   MAP: {
     DEFAULT_HEIGHT: '500px',
     DEFAULT_ZOOM: 18,
-    BOUNDS_PADDING: 0.1
+    BOUNDS_PADDING: 0.1,
   },
   MESSAGES: {
     LOADING_MAP: '🗺️ Inicializando mapa...',
@@ -992,65 +1065,70 @@ export const LBI_LFI_CONFIG = {
     CALCULATING_METRICS: 'Calculando métricas...',
     NO_DATA: 'No se encontraron datos SHP para el código SMP',
     ERROR_INIT: 'Error al inicializar el mapa',
-    ERROR_LOAD: 'Error al cargar datos'
+    ERROR_LOAD: 'Error al cargar datos',
   },
   STYLES: {
     SUPERFICIE_EDIFICABLE: {
-      fillColor: "#FFD700",
-      color: "#DAA520",
+      fillColor: '#FFD700',
+      color: '#DAA520',
       weight: 2,
       opacity: 0.9,
       fillOpacity: 0.4,
-      className: 'superficie-edificable-3d'
+      className: 'superficie-edificable-3d',
     },
     LIB: {
-      color: "#F97316",
+      color: '#F97316',
       weight: 4,
       opacity: 0.9,
-      className: 'lib-line'
+      className: 'lib-line',
     },
     LFI: {
-      color: "#3B82F6",
+      color: '#3B82F6',
       weight: 4,
       opacity: 0.9,
-      className: 'lfi-line'
+      className: 'lfi-line',
     },
     MAPA_MANZANAS: {
-      fillColor: "#F3F4F6",
-      color: "#9CA3AF",
+      fillColor: '#F3F4F6',
+      color: '#9CA3AF',
       weight: 1,
       opacity: 0.8,
       fillOpacity: 0.15,
-      className: 'manzana-contexto'
+      className: 'manzana-contexto',
     },
     BANDA_MINIMA: {
-      color: "#9333EA",
+      color: '#9333EA',
       weight: 3,
       opacity: 0.8,
-      dashArray: "10, 5",
-      className: 'banda-minima'
+      dashArray: '10, 5',
+      className: 'banda-minima',
     },
     TRONERAS: {
-      fillColor: "#22C55E",
-      color: "#16A34A",
+      fillColor: '#22C55E',
+      color: '#16A34A',
       weight: 3,
       opacity: 1,
       fillOpacity: 0.7,
-      className: 'tronera-3d'
-    }
+      className: 'tronera-3d',
+    },
   },
   LEGEND: {
     ITEMS: [
       { color: '#E5E7EB', opacity: 0.2, border: '1px solid #6B7280', label: 'Manzanas' },
       { color: '#10B981', opacity: 0.25, border: '1px solid #047857', label: 'Tejido urbano' },
       { color: '#DC2626', opacity: 0.3, border: '2px solid #B91C1C', label: 'APH' },
-      { color: '#FFD700', opacity: 0.4, border: '2px solid #DAA520', label: 'Superficie edificable' },
+      {
+        color: '#FFD700',
+        opacity: 0.4,
+        border: '2px solid #DAA520',
+        label: 'Superficie edificable',
+      },
       { color: 'transparent', opacity: 1, border: '2px solid #F97316', label: 'LIB' },
       { color: 'transparent', opacity: 1, border: '2px solid #3B82F6', label: 'LFI' },
       { color: 'transparent', opacity: 1, border: '2px dashed #9333EA', label: 'Banda Mínima' },
-      { color: '#22C55E', opacity: 0.8, border: '2px solid #16A34A', label: 'Troneras' }
-    ]
-  }
+      { color: '#22C55E', opacity: 0.8, border: '2px solid #16A34A', label: 'Troneras' },
+    ],
+  },
 } as const;
 
 // Dynamic Report Index Component Interfaces
@@ -1069,11 +1147,7 @@ export interface DynamicReportIndexProps {
   informeCompuesto?: InformeCompuesto;
   esInformeCompuesto?: boolean;
   fachadaImages?: string[];
-  documentosVisuales?: {
-    croquis: string[];
-    perimetros: string[];
-    planosIndice: string[];
-  };
+  documentosVisuales?: DocumentosVisuales;
 }
 
 export interface DynamicIndexListProps {
@@ -1096,11 +1170,7 @@ export interface IndexGenerationContext {
   esInformeCompuesto: boolean;
   informeCompuesto?: InformeCompuesto;
   fachadaImages: string[];
-  documentosVisuales: {
-    croquis: string[];
-    perimetros: string[];
-    planosIndice: string[];
-  };
+  documentosVisuales: DocumentosVisuales;
   hasEdificabilidad: boolean;
   hasGeometria: boolean;
   hasEntorno: boolean;
@@ -1125,7 +1195,7 @@ export enum IndexSectionType {
   CALCULO_CAPACIDAD = 'calculo_capacidad',
   IMAGENES_FACHADA = 'imagenes_fachada',
   DOCUMENTOS_VISUALES = 'documentos_visuales',
-  CALCULO_PLUSVALIA = 'calculo_plusvalia'
+  CALCULO_PLUSVALIA = 'calculo_plusvalia',
 }
 
 export const DYNAMIC_INDEX_CONFIG = {
@@ -1133,7 +1203,7 @@ export const DYNAMIC_INDEX_CONFIG = {
     {
       id: 'consideraciones_generales',
       title: 'CONSIDERACIONES GENERALES',
-      shouldInclude: () => true
+      shouldInclude: () => true,
     },
     {
       id: 'datos_parcela',
@@ -1143,86 +1213,94 @@ export const DYNAMIC_INDEX_CONFIG = {
         {
           id: 'informacion_basica',
           title: 'INFORMACIÓN BÁSICA',
-          shouldInclude: () => true
+          shouldInclude: () => true,
         },
         {
           id: 'segun_codigo_urbanistico',
           title: 'SEGÚN CÓDIGO URBANÍSTICO',
-          shouldInclude: (informe: Informe) => !!(informe.edificabilidad && Object.keys(informe.edificabilidad).length > 0)
+          shouldInclude: (informe: Informe) =>
+            !!(informe.edificabilidad && Object.keys(informe.edificabilidad).length > 0),
         },
         {
           id: 'restricciones',
           title: 'RESTRICCIONES',
-          shouldInclude: (informe: Informe) => !!(informe.entorno?.restricciones?.length > 0 || informe.edificabilidad?.afectaciones)
+          shouldInclude: (informe: Informe) =>
+            !!(informe.entorno?.restricciones?.length > 0 || informe.edificabilidad?.afectaciones),
         },
         {
           id: 'optimizaciones',
           title: 'OPTIMIZACIONES',
-          shouldInclude: (informe: Informe, context: IndexGenerationContext) => context.hasTroneras
+          shouldInclude: (_informe: Informe, context: IndexGenerationContext) =>
+            context.hasTroneras,
         },
         {
           id: 'para_calculo_plusvalia',
           title: 'PARA CÁLCULO DE PLUSVALÍA',
-          shouldInclude: (informe: Informe) => !!(informe.edificabilidad?.plusvalia)
-        }
-      ]
+          shouldInclude: (_informe: Informe) => !!_informe.edificabilidad?.plusvalia,
+        },
+      ],
     },
     {
       id: 'entorno_fachada',
       title: 'ENTORNO / IMAGEN DE LA FACHADA',
-      shouldInclude: (informe: Informe, context: IndexGenerationContext) => context.hasEntorno || context.fachadaImages.length > 0
+      shouldInclude: (_informe: Informe, context: IndexGenerationContext) =>
+        context.hasEntorno || context.fachadaImages.length > 0,
     },
     {
       id: 'croquis_parcela',
       title: 'CROQUIS DE LA PARCELA',
-      shouldInclude: (informe: Informe, context: IndexGenerationContext) => 
-        context.documentosVisuales.croquis.length > 0 || !!(informe.edificabilidad?.link_imagen?.croquis_parcela)
+      shouldInclude: (informe: Informe, context: IndexGenerationContext) =>
+        context.documentosVisuales.croquis.length > 0 ||
+        !!informe.edificabilidad?.link_imagen?.croquis_parcela,
     },
     {
       id: 'perimetro_manzana',
       title: 'PERÍMETRO DE LA MANZANA',
-      shouldInclude: (informe: Informe, context: IndexGenerationContext) => 
-        context.documentosVisuales.perimetros.length > 0 || !!(informe.edificabilidad?.link_imagen?.perimetro_manzana)
+      shouldInclude: (informe: Informe, context: IndexGenerationContext) =>
+        context.documentosVisuales.perimetros.length > 0 ||
+        !!informe.edificabilidad?.link_imagen?.perimetro_manzana,
     },
     {
       id: 'lbi_lfi',
       title: 'LBI/LFI',
-      shouldInclude: (informe: Informe, context: IndexGenerationContext) => context.hasLBI || context.hasLFI
+      shouldInclude: (_informe: Informe, context: IndexGenerationContext) =>
+        context.hasLBI || context.hasLFI,
     },
     {
       id: 'plano_indice',
       title: 'PLANO ÍNDICE',
-      shouldInclude: (informe: Informe, context: IndexGenerationContext) => 
-        context.documentosVisuales.planosIndice.length > 0 || !!(informe.edificabilidad?.link_imagen?.plano_indice)
+      shouldInclude: (informe: Informe, context: IndexGenerationContext) =>
+        context.documentosVisuales.planosIndice.length > 0 ||
+        !!informe.edificabilidad?.link_imagen?.plano_indice,
     },
     {
       id: 'calculo_plusvalia',
       title: 'CÁLCULO DETALLADO DE PLUSVALÍA / DDHUS',
-      shouldInclude: (informe: Informe) => !!(informe.edificabilidad?.plusvalia),
+      shouldInclude: (informe: Informe) => !!informe.edificabilidad?.plusvalia,
       subSections: [
         {
           id: 'calculo_capacidad_constructiva',
           title: 'CÁLCULO DE CAPACIDAD CONSTRUCTIVA',
-          shouldInclude: (informe: Informe) => !!(informe.edificabilidad?.sup_edificable_planta)
+          shouldInclude: (informe: Informe) => !!informe.edificabilidad?.sup_edificable_planta,
         },
         {
           id: 'calculo_a1',
           title: 'CÁLCULO DE A1',
-          shouldInclude: (informe: Informe) => !!(informe.edificabilidad?.plusvalia)
+          shouldInclude: (informe: Informe) => !!informe.edificabilidad?.plusvalia,
         },
         {
           id: 'calculo_a2',
           title: 'CÁLCULO DE A2',
-          shouldInclude: (informe: Informe) => !!(informe.edificabilidad?.plusvalia)
+          shouldInclude: (informe: Informe) => !!informe.edificabilidad?.plusvalia,
         },
         {
           id: 'calculo_plusvalia_final',
           title: 'CÁLCULO DE PLUSVALÍA',
-          shouldInclude: (informe: Informe) => !!(informe.edificabilidad?.plusvalia)
-        }
-      ]
-    }
-  ]
+          shouldInclude: (informe: Informe) => !!informe.edificabilidad?.plusvalia,
+        },
+      ],
+    },
+  ],
 } as const;
 
 export interface SubscriptionPlan {
@@ -1240,6 +1318,7 @@ export interface SubscriptionPlan {
   // Nuevos campos de créditos y opciones
   creditosMes?: number;
   creditosDia?: number;
+  creditosTotales?: number;
   permiteCompuestas?: boolean;
   watermarkOrg?: boolean;
   watermarkPrefas?: boolean;
@@ -1252,6 +1331,9 @@ export interface SubscriptionPlan {
     bgClass: string;
     icon?: string;
   };
+  discountPct?: number;
+  discountUntil?: string;
+  purchaseEnabled?: boolean;
 }
 
 export interface PaymentData {
@@ -1273,8 +1355,8 @@ export const SUBSCRIPTION_PLANS = [
       'Hasta 5 prefactibilidades mensuales',
       'Personalización completa',
       'Informes en PDF',
-      'Soporte por email'
-    ]
+      'Soporte por email',
+    ],
   },
   {
     id: 'unlimited',
@@ -1289,10 +1371,10 @@ export const SUBSCRIPTION_PLANS = [
       'Personalización completa',
       'Informes en PDF',
       'Soporte prioritario',
-      'API access'
-    ]
-  }
-] as const satisfies readonly SubscriptionPlan[]; 
+      'API access',
+    ],
+  },
+] as const satisfies readonly SubscriptionPlan[];
 
 // LbiLfiViewerUSIG interfaces
 export interface LbiLfiData {
@@ -1341,7 +1423,7 @@ export interface LbiLfiViewerUSIGProps {
   className?: string;
   mapType?: 'OpenStreetMap' | 'satelital' | 'hibrido';
   onElementSelect?: (elementName: string | null) => void;
-} 
+}
 
 // Tipo de prefactibilidad seleccionada
-export type PrefaType = 'prefa1' | 'prefa2'; 
+export type PrefaType = 'prefa1' | 'prefa2';

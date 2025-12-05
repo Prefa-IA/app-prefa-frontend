@@ -1,0 +1,72 @@
+export const TOTAL_TUTORIAL_STEPS = 7;
+export const TERMS_STEP_INDEX = -1;
+
+export interface TutorialStepContent {
+  title: string;
+  description: string;
+  image?: string;
+  highlightElement?: string;
+}
+
+export const TUTORIAL_STEPS: TutorialStepContent[] = [
+  {
+    title: '¡Bienvenido!',
+    description:
+      'Te damos la bienvenida a nuestra plataforma. Este tutorial te ayudará a conocer las principales funcionalidades.',
+  },
+  {
+    title: 'Análisis de Prefactibilidad',
+    description:
+      'En esta sección puedes generar reportes completos de prefactibilidad. Busca una dirección, completa los datos y descarga tu informe personalizado.',
+    highlightElement: '[data-tutorial="analisis-prefactibilidad"]',
+  },
+  {
+    title: 'Chatbot de Ayuda',
+    description:
+      '¿Tienes alguna pregunta? Nuestro chatbot Prefa está disponible 24/7 para ayudarte. Haz clic en el botón flotante en la esquina inferior derecha para iniciar una conversación.',
+    highlightElement: '[data-tutorial="chatbot"]',
+  },
+  {
+    title: 'Buscar Dirección',
+    description:
+      'Utiliza esta herramienta para buscar direcciones y generar consultas de prefactibilidad. Cada consulta consume créditos según su tipo.',
+    highlightElement: '[data-tutorial="buscar-direccion"]',
+  },
+  {
+    title: 'Registros',
+    description:
+      'Accede a tus registros y direcciones guardadas. Aquí puedes ver y gestionar todos tus informes de prefactibilidad generados.',
+    highlightElement: '[data-tutorial="registros"]',
+  },
+  {
+    title: 'Mi Perfil',
+    description:
+      'Personaliza tu experiencia: ajusta colores, tipografías, carga tu logo y gestiona toda tu información personal y de facturación.',
+    highlightElement: '[data-tutorial="mi-perfil"]',
+  },
+  {
+    title: 'Planes y Precios',
+    description:
+      'Explora nuestros planes disponibles y elige el que mejor se adapte a tus necesidades. Puedes actualizar tu plan en cualquier momento.',
+    highlightElement: '[data-tutorial="planes"]',
+  },
+];
+
+export const STEP_ROUTES: Record<number, string | null> = {
+  0: null,
+  1: '/consultar',
+  2: null,
+  3: '/buscar',
+  4: '/informes',
+  5: '/perfil',
+  6: '/suscripciones',
+};
+
+export const STEP_SELECTORS: Record<number, string> = {
+  1: '[data-tutorial="analisis-prefactibilidad"]',
+  2: '[data-tutorial="chatbot"]',
+  3: '[data-tutorial="buscar-direccion"]',
+  4: '[data-tutorial="registros"]',
+  5: '[data-tutorial="mi-perfil"]',
+  6: '[data-tutorial="planes"]',
+};

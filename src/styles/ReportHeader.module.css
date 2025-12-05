@@ -1,5 +1,5 @@
 .container {
-  background-color: var(--color-primary, #3B82F6);
+  background-color: var(--color-primary, #3b82f6);
   padding: 2.5rem;
   color: white;
   min-height: 25rem;
@@ -54,7 +54,6 @@
 }
 
 .footerBorder {
-  border-top: 2px solid var(--color-accent, #10B981);
   padding-top: 1.5rem;
   margin-top: 1.5rem;
 }
@@ -63,4 +62,4 @@
   font-size: 1.5rem;
   font-weight: 500;
   color: white;
-} 
+}

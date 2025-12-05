@@ -1,12 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { CreditCardIcon, DocumentSearchIcon, DocumentTextIcon } from '@heroicons/react/outline';
+
 import { useAuth } from '../contexts/AuthContext';
-import {
-  DocumentSearchIcon,
-  DocumentTextIcon,
-  CreditCardIcon,
-} from '@heroicons/react/outline';
-import { HomeProps, FeatureItem, HOME_CONFIG } from '../types/enums';
+import { FeatureItem, HOME_CONFIG, HomeProps, Usuario } from '../types/enums';
 
 const features: FeatureItem[] = [
   {
@@ -40,8 +37,8 @@ const Home: React.FC<HomeProps> = ({ className }) => {
   );
 };
 
-const HeroSection: React.FC<{ usuario: any }> = ({ usuario }) => (
-  <div className="relative">
+const HeroSection: React.FC<{ usuario: Usuario | null }> = ({ usuario }) => (
+  <div className="relative bg-white dark:bg-gray-900">
     <main className="lg:relative">
       <div className="mx-auto max-w-7xl w-full pt-16 pb-20 text-center lg:py-48 lg:text-left">
         <HeroContent usuario={usuario} />
@@ -51,7 +48,7 @@ const HeroSection: React.FC<{ usuario: any }> = ({ usuario }) => (
   </div>
 );
 
-const HeroContent: React.FC<{ usuario: any }> = ({ usuario }) => (
+const HeroContent: React.FC<{ usuario: Usuario | null }> = ({ usuario }) => (
   <div className="px-4 lg:w-1/2 sm:px-8 xl:pr-16">
     <HeroTitle />
     <HeroDescription />
@@ -60,31 +57,29 @@ const HeroContent: React.FC<{ usuario: any }> = ({ usuario }) => (
 );
 
 const HeroTitle: React.FC = () => (
-  <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl">
+  <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-gray-100 sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl">
     <span className="block xl:inline">{HOME_CONFIG.HERO.TITLE}</span>{' '}
-    <span className="block text-primary-600 xl:inline">
-      {HOME_CONFIG.HERO.SUBTITLE}
-    </span>
+    <span className="block text-primary-600 xl:inline">{HOME_CONFIG.HERO.SUBTITLE}</span>
   </h1>
 );
 
 const HeroDescription: React.FC = () => (
-  <p className="mt-3 max-w-md mx-auto text-lg text-gray-500 sm:text-xl md:mt-5 md:max-w-3xl">
+  <p className="mt-3 max-w-md mx-auto text-lg text-gray-500 dark:text-gray-400 sm:text-xl md:mt-5 md:max-w-3xl">
     {HOME_CONFIG.HERO.DESCRIPTION}
   </p>
 );
 
-const HeroActions: React.FC<{ usuario: any }> = ({ usuario }) => (
-  <div className="mt-10 sm:flex sm:justify-center lg:justify-start">
+const HeroActions: React.FC<{ usuario: Usuario | null }> = ({ usuario }) => (
+  <div className="mt-10 mb-8 sm:flex sm:justify-center lg:justify-start lg:mb-0">
     <MainAction usuario={usuario} />
   </div>
 );
 
-const MainAction: React.FC<{ usuario: any }> = ({ usuario }) => (
+const MainAction: React.FC<{ usuario: Usuario | null }> = ({ usuario }) => (
   <div className="rounded-md shadow-xl">
     <Link
-      to={usuario ? "/consultar" : "/login"}
-      className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-300 md:py-4 md:text-lg md:px-10 shadow-lg hover:shadow-2xl"
+      to={usuario ? '/consultar' : '/login'}
+      className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 dark:from-primary-700 dark:to-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-300 md:py-4 md:text-lg md:px-10 shadow-lg hover:shadow-2xl"
     >
       Empezar ahora
     </Link>
@@ -92,9 +87,9 @@ const MainAction: React.FC<{ usuario: any }> = ({ usuario }) => (
 );
 
 const HeroImage: React.FC = () => (
-  <div className="relative w-full h-64 sm:h-72 md:h-96 lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 lg:h-full">
+  <div className="relative overflow-hidden w-full h-64 sm:h-72 md:h-96 lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 lg:h-full">
     <img
-      className="absolute inset-0 w-full h-full object-cover"
+      className="absolute inset-0 w-full h-full object-cover slow-zoom"
       src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2600&q=80"
       alt="Buenos Aires"
     />
@@ -102,7 +97,7 @@ const HeroImage: React.FC = () => (
 );
 
 const FeatureSection: React.FC<{ features: FeatureItem[] }> = ({ features }) => (
-  <div className="py-12 bg-white">
+  <div className="py-12 bg-white dark:bg-gray-900">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <FeatureSectionHeader />
       <FeatureGrid features={features} />
@@ -112,12 +107,15 @@ const FeatureSection: React.FC<{ features: FeatureItem[] }> = ({ features }) => 
 
 const FeatureSectionHeader: React.FC = () => (
   <div className="lg:text-center">
-    <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+    <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl">
       {HOME_CONFIG.FEATURES.SUBTITLE}
     </p>
-    <p className="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+    <p className="mt-4 max-w-2xl text-xl text-gray-500 dark:text-gray-400 lg:mx-auto">
       {HOME_CONFIG.FEATURES.DESCRIPTION}
     </p>
+    <div className="mt-8 flex justify-center">
+      <span className="block w-1/2 h-px bg-gray-300 dark:bg-gray-700" />
+    </div>
   </div>
 );
 
@@ -138,9 +136,11 @@ const FeatureCard: React.FC<{ feature: FeatureItem }> = ({ feature }) => (
   </div>
 );
 
-const FeatureIcon: React.FC<{ icon: React.ComponentType<any> }> = ({ icon: Icon }) => (
+const FeatureIcon: React.FC<{ icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }> = ({
+  icon: Icon,
+}) => (
   <dt>
-    <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-primary-500 text-white">
+    <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-primary-600 text-white">
       <Icon className="h-6 w-6" aria-hidden="true" />
     </div>
   </dt>
@@ -149,13 +149,9 @@ const FeatureIcon: React.FC<{ icon: React.ComponentType<any> }> = ({ icon: Icon 
 const FeatureContent: React.FC<{ name: string; description: string }> = ({ name, description }) => (
   <>
     <dt>
-      <p className="ml-16 text-lg leading-6 font-medium text-gray-900">
-        {name}
-      </p>
+      <p className="ml-16 text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">{name}</p>
     </dt>
-    <dd className="mt-2 ml-16 text-base text-gray-500">
-      {description}
-    </dd>
+    <dd className="mt-2 ml-16 text-base text-gray-500 dark:text-gray-400">{description}</dd>
   </>
 );
 

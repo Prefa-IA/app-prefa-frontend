@@ -1,23 +1,33 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+
+import OveragesAdmin from './components/admin/OveragesAdmin';
+import BuscarDireccionPage from './components/BuscarDireccionPage';
+import ConsultaDireccion from './components/ConsultaDireccion';
+import ForgotPasswordPage from './components/ForgotPasswordPage';
+import Chatbot from './components/generales/Chatbot';
+import Footer from './components/generales/Footer';
+import GlobalConfirmModal from './components/generales/GlobalConfirmModal';
 import Navbar from './components/generales/Navbar';
 import Home from './components/Home';
-import LoginForm from './components/usuario/LoginForm';
-import RegistroForm from './components/usuario/RegistroForm';
-import ConsultaDireccion from './components/ConsultaDireccion';
 import ListaInformes from './components/ListaInformes';
-import PerfilUsuario from './components/usuario/PerfilUsuario';
-import { useAuth } from './contexts/AuthContext';
+import NotFound from './components/NotFound';
 import PrintInforme from './components/PrintInforme';
-import SubscriptionPage from './components/SubscriptionPage';
-import FAQPage from './components/FAQPage';
-import VerifyEmailPage from './components/VerifyEmailPage';
-import ForgotPasswordPage from './components/ForgotPasswordPage';
 import ResendVerificationPage from './components/ResendVerificationPage';
 import ResetPasswordPage from './components/ResetPasswordPage';
+import SubscriptionPage from './components/SubscriptionPage';
+import SubscriptionManager from './components/suscripcion/SubscriptionManager';
+import { TutorialOnboarding } from './components/tutorial/TutorialOnboarding';
+import LoginForm from './components/usuario/LoginForm';
+import PerfilUsuario from './components/usuario/PerfilUsuario';
+import RegistroForm from './components/usuario/RegistroForm';
+import VerifyEmailPage from './components/VerifyEmailPage';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ModalLoadingProvider } from './contexts/ModalLoadingContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+
+import 'react-toastify/dist/ReactToastify.css';
 
 const ProtectedRoute: React.FC<{
   children: React.ReactNode;
@@ -39,71 +49,119 @@ const ProtectedRoute: React.FC<{
   return <>{children}</>;
 };
 
+const AppRoutes: React.FC = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/login" element={<LoginForm />} />
+      <Route path="/registro" element={<RegistroForm />} />
+      <Route
+        path="/consultar"
+        element={
+          <ProtectedRoute>
+            <ConsultaDireccion />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/buscar"
+        element={
+          <ProtectedRoute>
+            <BuscarDireccionPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/informes"
+        element={
+          <ProtectedRoute>
+            <ListaInformes />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/perfil"
+        element={
+          <ProtectedRoute>
+            <PerfilUsuario />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/suscripciones"
+        element={
+          <ProtectedRoute>
+            <SubscriptionPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/suscripcion"
+        element={
+          <ProtectedRoute>
+            <SubscriptionManager />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/print/informe/:id" element={<PrintInforme />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/resend-verification" element={<ResendVerificationPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route
+        path="/admin/facturacion/overages"
+        element={
+          <ProtectedRoute>
+            <OveragesAdmin />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-gray-50 overflow-x-hidden">
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<LoginForm />} />
-            <Route path="/registro" element={<RegistroForm />} />
-            <Route
-              path="/consultar"
-              element={
-                <ProtectedRoute>
-                  <ConsultaDireccion />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/informes"
-              element={
-                <ProtectedRoute>
-                  <ListaInformes />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/perfil"
-              element={
-                <ProtectedRoute>
-                  <PerfilUsuario />
-                </ProtectedRoute>
-              }
-            />
+    <ThemeProvider>
+      <AuthProvider>
+        <ModalLoadingProvider>
+          <Router>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden flex flex-col">
+              <Navbar />
+              <main className="flex-grow">
+                <AppRoutes />
+              </main>
+              <Footer />
+              <Chatbot />
+              <ThemedToast />
+              <GlobalConfirmModal />
+              <TutorialOnboarding />
+            </div>
+          </Router>
+        </ModalLoadingProvider>
+      </AuthProvider>
+    </ThemeProvider>
+  );
+};
 
-            <Route
-              path="/suscripciones"
-              element={
-                <ProtectedRoute>
-                  <SubscriptionPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/faq" element={<FAQPage />} />
-            <Route path="/print/informe/:id" element={<PrintInforme />} />
-            <Route path="/verify-email" element={<VerifyEmailPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/resend-verification" element={<ResendVerificationPage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-          </Routes>
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-          />
-        </div>
-      </Router>
-    </AuthProvider>
+// Toast container that reads theme inside ThemeProvider context
+const ThemedToast: React.FC = () => {
+  const { theme } = useTheme();
+  return (
+    <ToastContainer
+      position="top-right"
+      autoClose={4000}
+      hideProgressBar={true}
+      newestOnTop
+      closeOnClick
+      rtl={false}
+      limit={3}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme={theme === 'dark' ? 'dark' : 'light'}
+    />
   );
 };
 

@@ -1,17 +1,9 @@
 import React from 'react';
+
 import logo from '../../assets/images/logo.png';
+import { LogoProps } from '../../types/components';
 
-interface LogoProps {
-  className?: string;
-  width?: number;
-  height?: number;
-}
-
-const Logo: React.FC<LogoProps> = ({ 
-  className = '', 
-  width = 100, 
-  height = 30 
-}) => {
+const Logo: React.FC<LogoProps> = ({ className = '', width = 100, height = 30 }) => {
   return (
     <img
       src={logo}
@@ -24,4 +16,4 @@ const Logo: React.FC<LogoProps> = ({
   );
 };
 
-export default Logo; 
+export default Logo;

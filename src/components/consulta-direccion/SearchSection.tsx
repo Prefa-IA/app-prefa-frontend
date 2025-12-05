@@ -1,6 +1,7 @@
 import React from 'react';
-import SearchBar from '../generales/SearchBar';
+
 import { SearchSectionProps } from '../../types/enums';
+import SearchBar from '../generales/SearchBar';
 
 const SearchSection: React.FC<SearchSectionProps> = ({
   direccion,
@@ -15,11 +16,12 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   onToggleConsultarPorSMP,
   hasResult,
   onClear,
-  disabled
+  disabled,
+  singleModeIcon,
 }) => {
   return (
     <div className="space-y-2">
-      <SearchBar 
+      <SearchBar
         value={direccion}
         onChange={onDireccionChange}
         onSearch={onSearch}
@@ -28,20 +30,17 @@ const SearchSection: React.FC<SearchSectionProps> = ({
         sugerencias={sugerencias}
         onInputChange={onInputChange}
         onSeleccionarSugerencia={onSeleccionarSugerencia}
-        placeholder={consultarPorSMP ? 'Ingrese código SMP' : undefined}
-        hasResult={hasResult}
-        onClear={onClear}
-        disabled={disabled}
+        {...(consultarPorSMP ? { placeholder: 'Ingrese código SMP' } : {})}
+        {...(hasResult !== undefined ? { hasResult } : {})}
+        {...(onClear ? { onClear } : {})}
+        {...(disabled !== undefined ? { disabled } : {})}
+        {...(singleModeIcon !== undefined ? { singleModeIcon } : {})}
       />
 
       {/* Mostrar checkbox sólo si se provee handler */}
       {onToggleConsultarPorSMP && (
         <label className="flex items-center space-x-2 text-sm select-none">
-          <input 
-            type="checkbox" 
-            checked={consultarPorSMP}
-            onChange={onToggleConsultarPorSMP}
-          />
+          <input type="checkbox" checked={consultarPorSMP} onChange={onToggleConsultarPorSMP} />
           <span>Consultar SMP directamente</span>
         </label>
       )}
@@ -49,4 +48,4 @@ const SearchSection: React.FC<SearchSectionProps> = ({
   );
 };
 
-export default SearchSection; 
+export default SearchSection;

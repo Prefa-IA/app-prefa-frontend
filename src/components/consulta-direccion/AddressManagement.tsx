@@ -1,6 +1,7 @@
 import React from 'react';
-import AddressList from '../generales/AddressList';
+
 import { AddressManagementProps } from '../../types/enums';
+import AddressList from '../generales/AddressList';
 
 const AddressManagement: React.FC<AddressManagementProps> = ({
   modoCompuesto,
@@ -8,15 +9,17 @@ const AddressManagement: React.FC<AddressManagementProps> = ({
   onEliminarDireccion,
   onConsultarDirecciones,
   loading,
-  hasResult
+  hasResult,
 }) => {
   if (!modoCompuesto) return null;
 
   return (
-    <AddressList 
+    <AddressList
       addresses={direcciones}
       onRemove={onEliminarDireccion}
-      onSearch={onConsultarDirecciones}
+      onSearch={() => {
+        void onConsultarDirecciones();
+      }}
       isLoading={loading}
       minCount={2}
       hasResult={!!hasResult}
@@ -24,4 +27,4 @@ const AddressManagement: React.FC<AddressManagementProps> = ({
   );
 };
 
-export default AddressManagement; 
+export default AddressManagement;
