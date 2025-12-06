@@ -43,7 +43,7 @@ const RegistroForm: React.FC = () => {
 
   return (
     <div
-      className={`${styles['container']} min-h-screen pt-[90px] flex justify-center items-center w-full`}
+      className={`${styles['container']} min-h-screen flex justify-center items-center w-full`}
     >
       <div
         className={`${styles['formContainer']} bg-white dark:bg-gray-800 p-4 sm:p-8 rounded shadow`}
@@ -146,7 +146,7 @@ const RecaptchaSection: React.FC<{
   }
 
   return (
-    <div className="flex justify-center my-4">
+    <div className="flex justify-center my-2 sm:my-4">
       <Recaptcha
         key={resetKey}
         siteKey={recaptchaSiteKey}
@@ -212,7 +212,9 @@ const RegistrationForm: React.FC<RegistrationFormExtendedProps> = ({
         onCaptchaError={onCaptchaError}
         recaptchaWidgetIdRef={recaptchaWidgetIdRef}
       />
-      <SubmitButton disabled={!aceptoTyC || !captchaToken || isSubmitting} />
+      <div className="mt-2 sm:mt-4">
+        <SubmitButton disabled={!aceptoTyC || !captchaToken || isSubmitting} />
+      </div>
       <SocialLoginSection resetCaptcha={resetCaptcha} />
       <p className="text-center text-gray-900 dark:text-gray-100 mt-4">
         ¿Ya tenés cuenta?{' '}

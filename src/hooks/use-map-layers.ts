@@ -126,4 +126,3 @@ export const useMapLayers = ({
   return { drawLayers };
 };
 /* prettier-ignore */
-/* eslint-disable prettier/prettier */
