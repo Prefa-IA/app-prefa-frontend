@@ -48,6 +48,9 @@ const NavbarContent: React.FC<NavbarContentProps> = ({
                 />
                 <ThemeButton />
               </div>
+              <div className="flex sm:hidden items-center justify-center flex-1">
+                {usuario && <CreditsPill saldo={creditBalance} />}
+              </div>
               <div className="flex sm:hidden items-center space-x-2 ml-2">
                 <ThemeButton />
                 <MobileMenuButton open={open} />
@@ -55,30 +58,15 @@ const NavbarContent: React.FC<NavbarContentProps> = ({
             </div>
           </div>
           {open && (
-            <>
-              <button
-                type="button"
-                className="fixed inset-0 bg-black/50 z-50 lg:hidden"
-                onClick={() => {
-                  close();
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    close();
-                  }
-                }}
-                aria-label="Cerrar menú"
-              />
-              <MobileMenu
-                navigation={[...NAVBAR_CONFIG.NAVIGATION]}
-                usuario={usuario}
-                planObj={planObjValue}
-                onLogout={logout}
-                open={open}
-                onClose={close}
-                {...navigationProps}
-              />
-            </>
+            <MobileMenu
+              navigation={[...NAVBAR_CONFIG.NAVIGATION]}
+              usuario={usuario}
+              planObj={planObjValue}
+              onLogout={logout}
+              open={open}
+              onClose={close}
+              {...navigationProps}
+            />
           )}
         </>
       )}

@@ -1,12 +1,9 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { CurrencyDollarIcon, SparklesIcon } from '@heroicons/react/outline';
 
 import { TutorialStep } from '../TutorialStep';
 
 export const Step5Planes: React.FC = () => {
-  const navigate = useNavigate();
-
   return (
     <TutorialStep
       title="Planes y Precios"
@@ -31,12 +28,6 @@ export const Step5Planes: React.FC = () => {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => navigate('/suscripciones')}
-          className="w-full mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-        >
-          Ver planes disponibles
-        </button>
       </div>
     </TutorialStep>
   );

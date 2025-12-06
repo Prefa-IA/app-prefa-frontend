@@ -14,7 +14,7 @@ const MobileNavigation: React.FC<MobileNavigationExtendedProps> = ({
   disabled = false,
   onLinkClick,
 }) => (
-  <div className="pt-2 pb-3 space-y-1">
+  <div className="pt-2 pb-4">
     {navigation.map((item) => (
       <MobileNavigationLink
         key={item.name}

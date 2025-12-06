@@ -15,7 +15,7 @@ const MobileNavigationLink: React.FC<MobileNavigationLinkExtendedProps> = ({
 }) => {
   if (disabled) {
     return (
-      <span className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-50">
+      <span className="block px-6 py-3 text-left text-base font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-50 border-l-4 border-transparent">
         {item.name}
       </span>
     );
@@ -25,7 +25,7 @@ const MobileNavigationLink: React.FC<MobileNavigationLinkExtendedProps> = ({
     <Link
       to={item.href}
       onClick={onLinkClick}
-      className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium text-gray-600 dark:text-white hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500"
+      className="block px-6 py-3 text-left text-base font-medium text-gray-700 dark:text-gray-200 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-l-4 border-transparent hover:border-primary-500 transition-all duration-200 active:bg-gray-100 dark:active:bg-gray-700"
     >
       {item.name}
     </Link>
