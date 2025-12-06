@@ -99,6 +99,3 @@ export const useSingleAddressSearchExecution = ({
 
   return { executeSearch, handleError };
 };
-
-/* eslint-disable prettier/prettier */
-/* Código inyectado por Console Ninja - ignorar formato de Prettier */
