@@ -145,12 +145,32 @@ const App: React.FC = () => {
   );
 };
 
+// Hook para detectar si es mobile
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = React.useState(
+    typeof window !== 'undefined' && window.innerWidth < 768
+  );
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return isMobile;
+};
+
 // Toast container that reads theme inside ThemeProvider context
 const ThemedToast: React.FC = () => {
   const { theme } = useTheme();
+  const isMobile = useIsMobile();
+
   return (
     <ToastContainer
-      position="top-right"
+      position={isMobile ? 'bottom-center' : 'top-right'}
       autoClose={4000}
       hideProgressBar={true}
       newestOnTop
@@ -161,6 +181,7 @@ const ThemedToast: React.FC = () => {
       draggable
       pauseOnHover
       theme={theme === 'dark' ? 'dark' : 'light'}
+      className="mobile-toast-container"
     />
   );
 };

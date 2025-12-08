@@ -325,17 +325,23 @@ const SubscriptionPage: React.FC = () => {
     void handlePlanSelection(plan, setSelected, setLoading);
   };
 
-  const overagesAsPlans: PlanType[] = overages.map((o: Overage) => ({
-    id: o.id,
-    name: o.name,
-    price: o.price,
-    isOverage: true,
-    parentPlan: o.parentPlan,
-    creditosTotales: o.creditosTotales,
-    currency: o.currency,
-    interval: 'month' as const,
-    features: [],
-  }));
+  const overagesAsPlans: PlanType[] = overages.map((o: Overage) => {
+    const plan: PlanType = {
+      id: o.id,
+      name: o.name,
+      price: o.price,
+      isOverage: true,
+      parentPlan: o.parentPlan,
+      creditosTotales: o.creditosTotales,
+      currency: o.currency,
+      interval: 'month' as const,
+      features: [],
+    };
+    if (o.purchaseEnabled !== undefined) {
+      plan.purchaseEnabled = o.purchaseEnabled;
+    }
+    return plan;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-10" data-tutorial="planes">

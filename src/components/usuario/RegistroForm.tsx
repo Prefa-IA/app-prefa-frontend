@@ -25,11 +25,11 @@ const RegistroForm: React.FC = () => {
     setShowPass,
     aceptoTyC,
     mostrarTyC,
-    captchaToken,
     captchaValidated,
     isSubmitting,
     recaptchaWidgetIdRef,
     resetKey,
+    showRecaptcha,
     handleSubmit,
     handleCaptchaVerify,
     handleCaptchaError,
@@ -42,9 +42,7 @@ const RegistroForm: React.FC = () => {
   const handleChange = createFormHandler(setDatos);
 
   return (
-    <div
-      className={`${styles['container']} min-h-screen flex justify-center items-center w-full`}
-    >
+    <div className={`${styles['container']} min-h-screen flex justify-center items-center w-full`}>
       <div
         className={`${styles['formContainer']} bg-white dark:bg-gray-800 p-4 sm:p-8 rounded shadow`}
       >
@@ -67,8 +65,8 @@ const RegistroForm: React.FC = () => {
           onOpenTyC={openModal}
           showPass={showPass}
           setShowPass={setShowPass}
-          captchaToken={captchaToken}
           captchaValidated={captchaValidated}
+          showRecaptcha={showRecaptcha}
           onCaptchaVerify={handleCaptchaVerify}
           onCaptchaError={handleCaptchaError}
           recaptchaWidgetIdRef={recaptchaWidgetIdRef}
@@ -90,8 +88,8 @@ interface RegistrationFormExtendedProps extends RegistrationFormProps {
   onOpenTyC: () => void;
   showPass: boolean;
   setShowPass: React.Dispatch<React.SetStateAction<boolean>>;
-  captchaToken: string | null;
   captchaValidated: boolean;
+  showRecaptcha: boolean;
   onCaptchaVerify: (token: string) => void;
   onCaptchaError: () => void;
   recaptchaWidgetIdRef: React.MutableRefObject<number | null>;
@@ -129,34 +127,49 @@ const TermsCheckbox: React.FC<{
 const RecaptchaSection: React.FC<{
   recaptchaSiteKey: string;
   captchaValidated: boolean;
+  showRecaptcha: boolean;
   resetKey: number;
   onCaptchaVerify: (token: string) => void;
   onCaptchaError: () => void;
   recaptchaWidgetIdRef: React.MutableRefObject<number | null>;
-}> = ({
-  recaptchaSiteKey,
-  captchaValidated,
-  resetKey,
-  onCaptchaVerify,
-  onCaptchaError,
-  recaptchaWidgetIdRef,
-}) => {
-  if (!recaptchaSiteKey || captchaValidated) {
-    return null;
-  }
+}> = React.memo(
+  ({
+    recaptchaSiteKey,
+    captchaValidated,
+    showRecaptcha,
+    resetKey,
+    onCaptchaVerify,
+    onCaptchaError,
+    recaptchaWidgetIdRef,
+  }) => {
+    if (!recaptchaSiteKey || !showRecaptcha || captchaValidated) {
+      return null;
+    }
 
-  return (
-    <div className="flex justify-center my-2 sm:my-4">
-      <Recaptcha
-        key={resetKey}
-        siteKey={recaptchaSiteKey}
-        onVerify={onCaptchaVerify}
-        onError={onCaptchaError}
-        widgetIdRef={recaptchaWidgetIdRef}
-      />
-    </div>
-  );
-};
+    return (
+      <div className="flex justify-center my-2 sm:my-4">
+        <Recaptcha
+          key={resetKey}
+          siteKey={recaptchaSiteKey}
+          onVerify={onCaptchaVerify}
+          onError={onCaptchaError}
+          widgetIdRef={recaptchaWidgetIdRef}
+        />
+      </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.recaptchaSiteKey === nextProps.recaptchaSiteKey &&
+      prevProps.captchaValidated === nextProps.captchaValidated &&
+      prevProps.showRecaptcha === nextProps.showRecaptcha &&
+      prevProps.resetKey === nextProps.resetKey &&
+      prevProps.recaptchaWidgetIdRef === nextProps.recaptchaWidgetIdRef
+    );
+  }
+);
+
+RecaptchaSection.displayName = 'RecaptchaSection';
 
 const SocialLoginSection: React.FC<{ resetCaptcha: () => void }> = ({ resetCaptcha }) => (
   <>
@@ -182,8 +195,8 @@ const RegistrationForm: React.FC<RegistrationFormExtendedProps> = ({
   onOpenTyC,
   showPass,
   setShowPass,
-  captchaToken,
   captchaValidated,
+  showRecaptcha,
   onCaptchaVerify,
   onCaptchaError,
   recaptchaWidgetIdRef,
@@ -204,17 +217,20 @@ const RegistrationForm: React.FC<RegistrationFormExtendedProps> = ({
         />
       </div>
       <TermsCheckbox aceptoTyC={aceptoTyC} onToggleTyC={onToggleTyC} onOpenTyC={onOpenTyC} />
-      <RecaptchaSection
-        recaptchaSiteKey={recaptchaSiteKey}
-        captchaValidated={captchaValidated}
-        resetKey={resetKey}
-        onCaptchaVerify={onCaptchaVerify}
-        onCaptchaError={onCaptchaError}
-        recaptchaWidgetIdRef={recaptchaWidgetIdRef}
-      />
       <div className="mt-2 sm:mt-4">
-        <SubmitButton disabled={!aceptoTyC || !captchaToken || isSubmitting} />
+        <SubmitButton disabled={!aceptoTyC || isSubmitting} />
       </div>
+      {showRecaptcha && (
+        <RecaptchaSection
+          recaptchaSiteKey={recaptchaSiteKey}
+          captchaValidated={captchaValidated}
+          showRecaptcha={showRecaptcha}
+          resetKey={resetKey}
+          onCaptchaVerify={onCaptchaVerify}
+          onCaptchaError={onCaptchaError}
+          recaptchaWidgetIdRef={recaptchaWidgetIdRef}
+        />
+      )}
       <SocialLoginSection resetCaptcha={resetCaptcha} />
       <p className="text-center text-gray-900 dark:text-gray-100 mt-4">
         ¿Ya tenés cuenta?{' '}
