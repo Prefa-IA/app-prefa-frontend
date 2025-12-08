@@ -5,33 +5,70 @@ import App from './App';
 
 import './index.css';
 
+const isNetworkError = (message: string): boolean => {
+  return (
+    message.includes('Timeout') ||
+    message.includes('timeout') ||
+    message.includes('Cross-Origin-Opener-Policy') ||
+    message.includes('ERR_BAD_REQUEST') ||
+    message.includes('403')
+  );
+};
+
+const isGoogleServiceError = (source: string): boolean => {
+  return (
+    source.includes('recaptcha') ||
+    source.includes('gsi') ||
+    source.includes('accounts.google.com') ||
+    source.includes('google.com') ||
+    source.includes('bframe')
+  );
+};
+
+const isWebpackOverlayError = (message: string, source: string): boolean => {
+  return (
+    source.includes('overlay.js') ||
+    source.includes('webpack') ||
+    message.includes('removeChild') ||
+    message.includes('not a child of this node')
+  );
+};
+
 const shouldIgnoreError = (errorMessage: string, errorSource: string): boolean => {
   return (
-    errorMessage.includes('Timeout') ||
-    errorMessage.includes('Cross-Origin-Opener-Policy') ||
-    errorSource.includes('recaptcha') ||
-    errorSource.includes('gsi') ||
-    errorSource.includes('accounts.google.com') ||
-    errorMessage.includes('ERR_BAD_REQUEST') ||
-    errorMessage.includes('403')
+    isNetworkError(errorMessage) ||
+    isGoogleServiceError(errorSource) ||
+    isWebpackOverlayError(errorMessage, errorSource)
+  );
+};
+
+const isAbortError = (reasonString: string, errorName: string): boolean => {
+  return (
+    reasonString.includes('AbortError') ||
+    reasonString.includes('signal is aborted') ||
+    reasonString.includes('aborted without reason') ||
+    errorName === 'AbortError' ||
+    errorName === 'AbortController'
+  );
+};
+
+const isWebpackOverlayRejection = (reasonString: string, errorName: string): boolean => {
+  return (
+    reasonString.includes('removeChild') ||
+    reasonString.includes('not a child of this node') ||
+    reasonString.includes('overlay.js') ||
+    reasonString.includes('fsm.js') ||
+    errorName === 'NotFoundError'
   );
 };
 
 const shouldIgnoreRejection = (reason: unknown, errorName: string): boolean => {
   const reasonString = String(reason);
   return (
-    reasonString.includes('Timeout') ||
-    reasonString.includes('Cross-Origin-Opener-Policy') ||
-    reasonString.includes('recaptcha') ||
-    reasonString.includes('gsi') ||
-    reasonString.includes('accounts.google.com') ||
-    reasonString.includes('AbortError') ||
-    reasonString.includes('signal is aborted') ||
-    reasonString.includes('aborted without reason') ||
-    reasonString.includes('ERR_BAD_REQUEST') ||
-    reasonString.includes('403') ||
-    errorName === 'AbortError' ||
-    errorName === 'AbortController'
+    isNetworkError(reasonString) ||
+    isGoogleServiceError(reasonString) ||
+    isAbortError(reasonString, errorName) ||
+    isWebpackOverlayRejection(reasonString, errorName)
   );
 };
 

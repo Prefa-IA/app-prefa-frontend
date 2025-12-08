@@ -11,7 +11,7 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({
   onLinkClick,
 }) => {
   const isVertical = className.includes('flex-col');
-  
+
   return (
     <div className={className}>
       <Link

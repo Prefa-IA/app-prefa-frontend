@@ -2,6 +2,42 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import { RecaptchaProps } from '../../types/recaptcha';
 
+const isDevelopment = process.env['NODE_ENV'] === 'development';
+
+const checkRecaptchaLoaded = (): boolean => {
+  return (
+    typeof window !== 'undefined' &&
+    window.grecaptcha !== undefined &&
+    typeof window.grecaptcha.render === 'function'
+  );
+};
+
+const handleCleanupError = (error: unknown): void => {
+  if (isDevelopment) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (!errorMessage.includes('removeChild') && !errorMessage.includes('not a child')) {
+      console.warn('Error reseteando reCAPTCHA durante cleanup:', error);
+    }
+  }
+};
+
+const cleanupRecaptcha = (
+  widgetIdRef: React.MutableRefObject<number | null>,
+  containerRef: React.RefObject<HTMLDivElement>
+): void => {
+  if (widgetIdRef.current !== null && typeof window !== 'undefined' && window.grecaptcha) {
+    try {
+      const widgetId = widgetIdRef.current;
+      if (containerRef.current && typeof window.grecaptcha.reset === 'function') {
+        window.grecaptcha.reset(widgetId);
+      }
+    } catch (error) {
+      handleCleanupError(error);
+    }
+  }
+  widgetIdRef.current = null;
+};
+
 export const Recaptcha: React.FC<RecaptchaProps> = ({
   onVerify,
   onError,
@@ -13,32 +49,36 @@ export const Recaptcha: React.FC<RecaptchaProps> = ({
   const widgetIdRef = externalWidgetIdRef || internalWidgetIdRef;
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const verifyCallbackRef = useRef(onVerify);
+  const errorCallbackRef = useRef(onError);
+
   useEffect(() => {
-    const checkRecaptchaLoaded = () => {
-      if (
-        typeof window !== 'undefined' &&
-        window.grecaptcha &&
-        typeof window.grecaptcha.render === 'function'
-      ) {
+    verifyCallbackRef.current = onVerify;
+    errorCallbackRef.current = onError;
+  }, [onVerify, onError]);
+
+  useEffect(() => {
+    const checkAndSetLoaded = (): boolean => {
+      if (checkRecaptchaLoaded()) {
         setIsLoaded(true);
         return true;
       }
       return false;
     };
 
-    if (checkRecaptchaLoaded()) {
+    if (checkAndSetLoaded()) {
       return;
     }
 
     const interval = setInterval(() => {
-      if (checkRecaptchaLoaded()) {
+      if (checkAndSetLoaded()) {
         clearInterval(interval);
       }
     }, 100);
 
     const timeout = setTimeout(() => {
       clearInterval(interval);
-      if (!checkRecaptchaLoaded()) {
+      if (!checkAndSetLoaded()) {
         console.warn('reCAPTCHA no se cargó en el tiempo esperado');
       }
     }, 10000);
@@ -58,29 +98,22 @@ export const Recaptcha: React.FC<RecaptchaProps> = ({
       const widgetId = window.grecaptcha.render(containerRef.current, {
         sitekey: siteKey,
         callback: (token: string) => {
-          onVerify(token);
+          verifyCallbackRef.current(token);
         },
         'error-callback': () => {
-          onError?.();
+          errorCallbackRef.current?.();
         },
       });
       widgetIdRef.current = widgetId;
     } catch (error) {
       console.error('Error renderizando reCAPTCHA:', error);
-      onError?.();
+      errorCallbackRef.current?.();
     }
 
     return () => {
-      if (widgetIdRef.current !== null && typeof window !== 'undefined' && window.grecaptcha) {
-        try {
-          window.grecaptcha.reset(widgetIdRef.current);
-        } catch (error) {
-          console.error('Error reseteando reCAPTCHA:', error);
-        }
-      }
-      widgetIdRef.current = null;
+      cleanupRecaptcha(widgetIdRef, containerRef);
     };
-  }, [isLoaded, siteKey, onVerify, onError, widgetIdRef]);
+  }, [isLoaded, siteKey, widgetIdRef]);
 
   return <div ref={containerRef} />;
 };

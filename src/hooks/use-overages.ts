@@ -8,6 +8,7 @@ export interface Overage {
   currency: string;
   creditosTotales: number;
   parentPlan: string;
+  purchaseEnabled?: boolean;
 }
 
 const cache = {

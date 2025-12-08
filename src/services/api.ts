@@ -119,6 +119,11 @@ export const auth = {
     }
   },
 
+  checkEmail: async (email: string) => {
+    const response = await api.post<{ available: boolean }>('/auth/check-email', { email });
+    return response.data;
+  },
+
   registro: async (datos: RegistroData) => {
     const { repeatPassword: _repeatPassword, ...restDatos } = datos;
     const payload: Omit<RegistroData, 'repeatPassword'> & { password: string } = {

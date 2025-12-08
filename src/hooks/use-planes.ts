@@ -7,6 +7,9 @@ export interface Plan {
   price: number;
   /*@deprecated*/ creditosMes?: number;
   /*@deprecated*/ creditosDia?: number;
+  creditosTotales?: number;
+  currency?: string;
+  interval?: 'month' | 'year';
   permiteCompuestas?: boolean;
   watermarkOrg?: boolean;
   watermarkPrefas?: boolean;
