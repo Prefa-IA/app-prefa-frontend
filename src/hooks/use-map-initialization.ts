@@ -14,20 +14,28 @@ interface UseMapInitializationProps {
 
 const pickStyleUrl = async (): Promise<string> => {
   const demotiles = 'https://demotiles.maplibre.org/style.json';
-  const key = process.env['REACT_APP_MAPTILER_KEY'] || 'BvZtXULr9szx4d76ddiF';
+  const key = process.env['REACT_APP_MAPTILER_KEY'] || '';
   const styleEnv = process.env['REACT_APP_MAP_STYLE_URL'];
-  const primary = styleEnv || `https://api.maptiler.com/maps/dataviz/style.json?key=${key}`;
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    const res = await fetch(primary, { method: 'HEAD', signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (res.ok) return primary;
-  } catch (e) {
-    if (e instanceof Error && e.name !== 'AbortError') {
-      console.warn('No se pudo cargar el estilo de maptiler, usando estilo por defecto');
+
+  if (styleEnv) {
+    return styleEnv;
+  }
+
+  if (key) {
+    const primary = `https://api.maptiler.com/maps/dataviz/style.json?key=${key}`;
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const res = await fetch(primary, { method: 'HEAD', signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (res.ok) return primary;
+    } catch (e) {
+      if (e instanceof Error && e.name !== 'AbortError') {
+        console.warn('No se pudo cargar el estilo de maptiler, usando estilo por defecto');
+      }
     }
   }
+
   return demotiles;
 };
 
