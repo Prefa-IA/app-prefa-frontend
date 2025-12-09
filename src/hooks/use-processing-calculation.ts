@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { toast } from 'react-toastify';
 
 import { prefactibilidad } from '../services/api';
@@ -43,26 +43,52 @@ export const useProcessingCalculation = ({
   setResultado,
   setProcessing,
 }: UseProcessingCalculationProps) => {
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const procesarCalculoPrefactibilidad = useCallback(
     async (informe: Informe, _tipoPrefa: TipoPrefa, _informeCompuesto?: InformeCompuesto) => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
+
       setProcessing(true);
       try {
         const parcelaParaCalcular = { ...informe } as Record<string, unknown>;
         normalizarLfiAfeccionPercent(parcelaParaCalcular);
 
-        const obtenerResumenValido = async (): Promise<ProcessingResponse | null> => {
-          const attempts = Array.from({ length: PROCESSING_CONFIG.MAX_RETRIES }, (_, i) => i);
-          for (const _intento of attempts) {
-            const respuesta = await prefactibilidad.calcular(parcelaParaCalcular);
+        const obtenerResumenValido = async (
+          signal?: AbortSignal
+        ): Promise<ProcessingResponse | null> => {
+          const maxRetries = PROCESSING_CONFIG.MAX_RETRIES;
+          const attempts = Array.from({ length: maxRetries }, (_, i) => i);
+          for (const intento of attempts) {
+            if (signal?.aborted) {
+              return null;
+            }
 
+            try {
+            const respuesta = await prefactibilidad.calcular(parcelaParaCalcular);
             if (respuesta && isValidProcessingResponse(respuesta)) {
               return respuesta;
+              }
+            } catch (error) {
+              if (error instanceof Error && error.name === 'AbortError') {
+                return null;
+              }
+            }
+
+            if (intento < maxRetries - 1) {
+              const delay = Math.min(1000 * Math.pow(2, intento), 10000);
+              const jitter = Math.random() * 1000;
+              await new Promise((resolve) => setTimeout(resolve, delay + jitter));
             }
           }
           return null;
         };
 
-        const resumenValido = await obtenerResumenValido();
+        const resumenValido = await obtenerResumenValido(signal);
 
         if (resumenValido) {
           const calculoFromResponse = resumenValido['calculo'] as
@@ -92,6 +118,7 @@ export const useProcessingCalculation = ({
         // Si la consulta se resuelve antes de 60 segundos, mostrar inmediatamente
         // El contador visual ya maneja el tiempo restante
         setProcessing(false);
+        abortControllerRef.current = null;
       }
     },
     [setResultado, setProcessing]

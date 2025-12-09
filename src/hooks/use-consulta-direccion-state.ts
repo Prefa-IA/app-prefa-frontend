@@ -16,6 +16,7 @@ export const useConsultaDireccionState = (_className?: string) => {
     setError: setup.setError,
     setResultado: setup.setResultado,
     setResultados: setup.setResultados,
+    processing: setup.processing,
     setProcessing: setup.setProcessing,
     setIsValidating: setup.setIsValidating,
     setDirecciones: setup.setDirecciones,

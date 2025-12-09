@@ -9,14 +9,32 @@ import { useReportSave } from './use-report-save';
 interface UseAutoSaveReportProps {
   resultado: Informe | null;
   tipoPrefa: TipoPrefa;
+  processing: boolean;
   setError: (error: string | null) => void;
   setSavedId: (id: string | null) => void;
   onSaveComplete?: (savedId: string) => void;
 }
 
+const generarResultadoKey = (informe: Informe, tipoPrefa: TipoPrefa): string => {
+  return JSON.stringify({
+    smp: informe.datosCatastrales?.smp,
+    direccion: informe.direccionesNormalizadas?.[0]?.direccion,
+    tipoPrefa,
+  });
+};
+
+const tieneCalculoCompleto = (informe: Informe): boolean => {
+  return Boolean(
+    informe.calculo &&
+      typeof informe.calculo === 'object' &&
+      Object.keys(informe.calculo).length > 0
+  );
+};
+
 export const useAutoSaveReport = ({
   resultado,
   tipoPrefa,
+  processing,
   setError,
   setSavedId,
   onSaveComplete,
@@ -47,32 +65,22 @@ export const useAutoSaveReport = ({
       return;
     }
 
-    if (isSaving) {
+    if (isSaving || processing) {
       return;
     }
 
     const datosCompletos = validarDatosCompletos(resultado);
     const datosIncompletos = Boolean(resultado.datosIncompletos) || !datosCompletos;
 
-    if (datosIncompletos) {
+    if (datosIncompletos || !tieneCalculoCompleto(resultado)) {
       return;
     }
 
     const resultadoId = resultado._id as string | undefined;
     const resultadoIdString = resultadoId || null;
-
-    const resultadoKey = JSON.stringify({
-      smp: resultado.datosCatastrales?.smp,
-      direccion: resultado.direccionesNormalizadas?.[0]?.direccion,
-      tipoPrefa,
-    });
-
+    const resultadoKey = generarResultadoKey(resultado, tipoPrefa);
     const resultadoRefKey = resultadoRef.current
-      ? JSON.stringify({
-          smp: resultadoRef.current.datosCatastrales?.smp,
-          direccion: resultadoRef.current.direccionesNormalizadas?.[0]?.direccion,
-          tipoPrefa,
-        })
+      ? generarResultadoKey(resultadoRef.current, tipoPrefa)
       : null;
 
     if (resultadoKey === resultadoRefKey) {
@@ -88,7 +96,7 @@ export const useAutoSaveReport = ({
     resultadoIdRef.current = resultadoIdString;
     resultadoRef.current = resultado;
     void guardarInforme(resultado);
-  }, [resultado, isSaving, lastSavedResultadoId, guardarInforme, tipoPrefa]);
+  }, [resultado, isSaving, lastSavedResultadoId, guardarInforme, tipoPrefa, processing]);
 
   return {
     isSaving,

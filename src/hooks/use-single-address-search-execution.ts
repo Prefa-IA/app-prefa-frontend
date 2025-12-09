@@ -89,6 +89,8 @@ export const useSingleAddressSearchExecution = ({
         `[SLOW] Frontend - executeSearch tardó más de 2 minutos: ${Date.now() - searchStartTime}ms`
       );
     }
+    setProcessing(false);
+    setLoading(false);
   };
 
   const handleError = (err: unknown) => {

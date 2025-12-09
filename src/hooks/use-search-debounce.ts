@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 interface UseSearchDebounceOptions {
   delay?: number;
@@ -19,13 +19,11 @@ export const useSearchDebounce = <T extends unknown[]>(
       // Incrementar el ID de búsqueda para rastrear la más reciente
       const currentSearchId = ++searchIdRef.current;
 
-      // Cancelar búsqueda anterior si existe
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
 
-      // Cancelar request anterior si existe
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
         abortControllerRef.current = null;
@@ -37,10 +35,11 @@ export const useSearchDebounce = <T extends unknown[]>(
         return;
       }
 
-      // Configurar nuevo timeout
       timeoutRef.current = setTimeout(() => {
-        // Verificar que esta sigue siendo la búsqueda más reciente
-        if (currentSearchId === searchIdRef.current) {
+        if (currentSearchId !== searchIdRef.current) {
+          return;
+        }
+
           void (async () => {
             try {
               abortControllerRef.current = new AbortController();
@@ -50,15 +49,16 @@ export const useSearchDebounce = <T extends unknown[]>(
                 console.error('Search error:', error);
               }
             } finally {
-              if (abortControllerRef.current && !abortControllerRef.current.signal.aborted) {
+            if (currentSearchId === searchIdRef.current) {
+              if (abortControllerRef.current) {
                 abortControllerRef.current = null;
               }
-              if (timeoutRef.current && currentSearchId === searchIdRef.current) {
+              if (timeoutRef.current) {
                 timeoutRef.current = null;
+              }
               }
             }
           })();
-        }
       }, delay);
     },
     [searchFn, delay, minLength]
@@ -74,6 +74,19 @@ export const useSearchDebounce = <T extends unknown[]>(
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    };
   }, []);
 
   return { debouncedSearch, cancel };

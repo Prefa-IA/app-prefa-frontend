@@ -86,10 +86,29 @@ const applyDiagonalWatermark = (): void => {
 };
 
 const getGatewayUrl = (): string => {
+  const envApiUrl = process.env['REACT_APP_API_URL'];
+  if (envApiUrl) {
+    return envApiUrl.endsWith('/api') ? envApiUrl : `${envApiUrl}/api`;
+  }
+
   const currentHost = window.location.hostname;
-  return currentHost.includes('docker.internal')
-    ? `http://${currentHost}:4000/api`
-    : `http://localhost:4000/api`;
+  const isPrintMode = window.location.pathname.startsWith('/print/');
+  if (isPrintMode) {
+    if (currentHost === 'host.docker.internal' || currentHost.includes('docker.internal')) {
+      return 'http://prefa-gateway:4000/api';
+    }
+    if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+      return 'http://localhost:4000/api';
+    }
+  }
+
+  if (currentHost === 'host.docker.internal') {
+    return 'http://prefa-gateway:4000/api';
+  }
+  if (currentHost.includes('docker.internal')) {
+    return `http://${currentHost}:4000/api`;
+  }
+  return 'http://localhost:4000/api';
 };
 
 const loadInformeInPrintMode = async (id: string, token: string): Promise<Informe> => {

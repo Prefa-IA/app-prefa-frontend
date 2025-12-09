@@ -82,6 +82,21 @@ const puedeGuardarInformeHelper = (
   return validarTipoPrefa();
 };
 
+const TOAST_ID_GENERAR_PDF = 'generar-pdf';
+
+const generarPdfDespuesDeGuardar = async (informeId: string): Promise<void> => {
+  toast.loading('Generando PDF...', { toastId: TOAST_ID_GENERAR_PDF });
+  try {
+    await prefactibilidad.generarPdf(informeId);
+    toast.dismiss(TOAST_ID_GENERAR_PDF);
+    toast.success('PDF generado exitosamente');
+  } catch (pdfError) {
+    toast.dismiss(TOAST_ID_GENERAR_PDF);
+    toast.warn('El informe se guardó pero hubo un error al generar el PDF');
+    console.error('Error al generar PDF:', pdfError);
+  }
+};
+
 export const useReportSave = ({
   tipoPrefa,
   setError,
@@ -143,7 +158,13 @@ export const useReportSave = ({
         };
 
         const response = await prefactibilidad.aceptarInforme(informeParaGuardar);
-        return procesarRespuestaGuardado(response, resultadoId);
+        const guardadoExitoso = procesarRespuestaGuardado(response, resultadoId);
+
+        if (guardadoExitoso && response.informe?._id) {
+          await generarPdfDespuesDeGuardar(response.informe._id);
+        }
+
+        return guardadoExitoso;
       } catch (err) {
         manejarErrorGuardado(err, setError);
         return false;

@@ -443,6 +443,13 @@ export const prefactibilidad = {
     return response.data;
   },
 
+  generarPdf: async (id: string) => {
+    const response = await api.post<{ success: boolean; message: string; informe: Informe }>(
+      `/prefactibilidad/generar-pdf/${id}`
+    );
+    return response.data;
+  },
+
   descargarPDF: async (id: string) => {
     const response = await api.get(`/prefactibilidad/descargar/${id}`, { responseType: 'blob' });
     return response.data;
@@ -470,8 +477,8 @@ export const prefactibilidad = {
 
   obtenerSugerenciasDirecciones,
 
-  calcular: async (parcela: unknown) => {
-    const { data } = await api.post('/prefactibilidad/calcular', { parcela });
+  calcular: async (parcela: unknown, options?: { signal?: AbortSignal }) => {
+    const { data } = await api.post('/prefactibilidad/calcular', { parcela }, options);
     return data;
   },
 

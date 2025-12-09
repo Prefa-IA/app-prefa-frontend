@@ -18,6 +18,7 @@ interface UseConsultaDireccionStateHooksPart2Props {
   setError: React.Dispatch<React.SetStateAction<string | null>>;
   setResultado: React.Dispatch<React.SetStateAction<Informe | null>>;
   setCenter: (center: { lat: number; lng: number }) => void;
+  processing: boolean;
   setProcessing: (processing: boolean) => void;
   setIsValidating: (isValidating: boolean) => void;
   refreshProfile: () => Promise<void>;
@@ -85,6 +86,7 @@ export const useConsultaDireccionStateHooksPart2 = (
   useAutoSaveReport({
     resultado: props.resultado,
     tipoPrefa: props.tipoPrefa,
+    processing: props.processing,
     setError: props.setError,
     setSavedId: props.setSavedId,
   });
