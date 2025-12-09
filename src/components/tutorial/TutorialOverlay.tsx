@@ -118,7 +118,10 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
       return;
     }
 
+    const isMountedRef = { current: true };
+
     const checkElement = () => {
+      if (!isMountedRef.current) return;
       const element = document.querySelector(targetSelector || '') as HTMLElement;
       if (element) {
         forceUpdate();
@@ -129,6 +132,7 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({
     const interval = setInterval(checkElement, 200);
 
     return () => {
+      isMountedRef.current = false;
       clearInterval(interval);
     };
   }, [isVisible, targetSelector]);

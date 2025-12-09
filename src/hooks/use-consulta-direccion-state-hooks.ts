@@ -19,6 +19,7 @@ interface UseConsultaDireccionStateHooksProps {
   setError: React.Dispatch<React.SetStateAction<string | null>>;
   setResultado: React.Dispatch<React.SetStateAction<Informe | null>>;
   setResultados: React.Dispatch<React.SetStateAction<Informe[]>>;
+  processing: boolean;
   setProcessing: (processing: boolean) => void;
   setIsValidating: (isValidating: boolean) => void;
   setDirecciones: React.Dispatch<React.SetStateAction<string[]>>;
@@ -66,6 +67,7 @@ export const useConsultaDireccionStateHooks = (props: UseConsultaDireccionStateH
     setError: props.setError,
     setResultado: props.setResultado,
     setCenter: props.setCenter,
+    processing: props.processing,
     setProcessing: props.setProcessing,
     setIsValidating: props.setIsValidating,
     refreshProfile: props.refreshProfile,

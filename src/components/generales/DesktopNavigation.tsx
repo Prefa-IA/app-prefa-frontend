@@ -9,7 +9,7 @@ interface DesktopNavigationProps {
 }
 
 const DesktopNavigation: React.FC<DesktopNavigationProps> = ({ needsTermsAcceptance = false }) => (
-  <div className="hidden lg:ml-6 lg:flex lg:space-x-8">
+  <div className="hidden md:ml-6 md:flex md:space-x-8">
     {NAVBAR_CONFIG.NAVIGATION.map((item) => (
       <NavigationLink key={item.name} item={item} disabled={needsTermsAcceptance} />
     ))}

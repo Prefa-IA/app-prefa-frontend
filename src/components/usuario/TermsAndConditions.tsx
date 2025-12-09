@@ -79,7 +79,7 @@ const TermsAndConditions: React.FC<TermsAndConditionsProps> = ({ onClose }) => {
   }, []);
 
   return (
-    <ModalBase title="Términos y Condiciones" onClose={onClose} hideConfirm>
+    <ModalBase title="Términos y Condiciones" onClose={onClose}>
       <div className="prose max-w-none">
         <TermsAndConditionsStyles />
         {loading ? (

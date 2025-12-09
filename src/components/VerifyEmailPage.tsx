@@ -38,12 +38,17 @@ const VerifyEmailPage: React.FC = () => {
 
   useEffect(() => {
     if (status !== 'success') return;
-    const id = setInterval(() => setSeconds((s) => s - 1), 1000);
-    if (seconds === 0) {
+    const id = setInterval(() => {
+      setSeconds((s) => {
+        if (s <= 1) {
       window.location.href = '/login';
+          return 0;
     }
+        return s - 1;
+      });
+    }, 1000);
     return () => clearInterval(id);
-  }, [status, seconds]);
+  }, [status]);
 
   return (
     <div className={`${stylesCont['container']} bg-gray-50 dark:bg-gray-900`}>

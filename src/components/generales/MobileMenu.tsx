@@ -38,11 +38,11 @@ const MobileMenu: React.FC<MobileMenuExtendedProps> = ({
     <>
       <button
         type="button"
-        className="fixed inset-y-0 left-0 w-1/2 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+        className="fixed inset-y-0 left-0 w-1/2 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300"
         onClick={handleLinkClick}
         aria-label="Cerrar menú"
       />
-      <div className="fixed inset-y-0 right-0 w-1/2 bg-white dark:bg-gray-800 shadow-2xl z-50 lg:hidden overflow-y-auto transform transition-transform duration-300 ease-out">
+      <div className="fixed inset-y-0 right-0 w-1/2 bg-white dark:bg-gray-800 shadow-2xl z-50 md:hidden overflow-y-auto transform transition-transform duration-300 ease-out">
         <div className="pt-6 pb-8 flex flex-col h-full">
           {usuario && (
             <div className="block sm:hidden px-6 mb-4">
