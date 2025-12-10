@@ -279,8 +279,33 @@ export const subscriptions = {
       const response = await api.post('/suscripciones/validar-uso', opts);
       return response.data;
     } catch (error: unknown) {
-      const err = error as { response?: { status?: number; data?: { error?: string } } };
-      if (err.response && err.response.status === 403) {
+      const err = error as {
+        response?: { status?: number; data?: { error?: string } };
+        message?: string;
+        code?: string;
+      };
+
+      // Manejar errores de red/CORS/502
+      if (!err.response) {
+        const networkError = err.message || 'Error de conexión con el servidor';
+        console.error('[validateUsage] Error de red:', networkError, err);
+        throw new Error(`Error de conexión: No se pudo validar el uso. ${networkError}`);
+      }
+
+      // Manejar errores 502/503/504 (servicio no disponible)
+      if (
+        err.response.status === 502 ||
+        err.response.status === 503 ||
+        err.response.status === 504
+      ) {
+        console.error('[validateUsage] Servicio no disponible:', err.response.status);
+        throw new Error(
+          'El servicio de validación no está disponible. Por favor, intenta nuevamente en unos momentos.'
+        );
+      }
+
+      // Manejar errores 403 (sin créditos)
+      if (err.response.status === 403) {
         const errorCode = err.response.data?.error || '';
         if (errorCode === 'limite_diario_superado') {
           throw new Error('Límite diario de créditos superado');
@@ -290,6 +315,9 @@ export const subscriptions = {
         }
         throw new Error('Sin créditos disponibles');
       }
+
+      // Otros errores
+      console.error('[validateUsage] Error inesperado:', err.response.status, err.response.data);
       throw error;
     }
   },
@@ -356,6 +384,181 @@ const obtenerSugerenciasDirecciones = async (
   }
 };
 
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+
+const hasCompleteData = (informe: Informe): boolean => {
+  return (
+    informe.datosIncompletos === false &&
+    Array.isArray(informe.datosFaltantes) &&
+    informe.datosFaltantes.length === 0
+  );
+};
+
+const hasRequiredFields = (informe: Informe): boolean => {
+  if (!informe.googleMaps) {
+    return false;
+  }
+  const hasDireccion =
+    informe.direccion ||
+    (informe.direccionesNormalizadas && informe.direccionesNormalizadas.length > 0);
+  return Boolean(hasDireccion);
+};
+
+const hasDataContent = (informe: Informe): boolean => {
+  const hasDatosCatastrales =
+    informe.datosCatastrales && Object.keys(informe.datosCatastrales).length > 0;
+  const hasDatosUtiles = informe.datosUtiles && Object.keys(informe.datosUtiles).length > 0;
+  const hasGeometria =
+    informe.geometria && informe.geometria.features && informe.geometria.features.length > 0;
+  return hasDatosCatastrales || hasDatosUtiles || hasGeometria;
+};
+
+const isValidInformeResponse = (data: Informe | (Informe & { inProgress: boolean })): boolean => {
+  if ('inProgress' in data && data.inProgress) {
+    return true;
+  }
+
+  const informe = data as Informe;
+
+  if (hasCompleteData(informe)) {
+    return true;
+  }
+
+  if (!hasRequiredFields(informe)) {
+    return false;
+  }
+
+  return hasDataContent(informe);
+};
+
+const shouldRetryError = (err: unknown): boolean => {
+  const error = err as { response?: { status?: number }; code?: string; message?: string };
+
+  if (error.response?.status === 401 || error.response?.status === 403) {
+    return false;
+  }
+
+  if (error.code === 'PREFA_IN_PROGRESS') {
+    return false;
+  }
+
+  if (
+    error.response?.status === 500 ||
+    error.response?.status === 502 ||
+    error.response?.status === 503 ||
+    error.response?.status === 504 ||
+    error.message?.includes('timeout') ||
+    error.message?.includes('Network Error') ||
+    error.message?.includes('ECONNREFUSED')
+  ) {
+    return true;
+  }
+
+  if (!error.response) {
+    return true;
+  }
+
+  return false;
+};
+
+const executeConsultaRequest = async (
+  direccion: string,
+  coordenadas: { lat: number; lon: number },
+  opts: {
+    prefaCompleta: boolean;
+    compuesta: boolean;
+    basicSearch?: boolean;
+    skipCredits?: boolean;
+  }
+): Promise<Informe> => {
+  const response = await api.post<Informe>(
+    '/prefactibilidad/consultar',
+    {
+      direccion,
+      coordenadas,
+      ...opts,
+    },
+    { timeout: 40000 }
+  );
+  return response.data;
+};
+
+const handleConsultaError = (err: unknown): (Informe & { inProgress: boolean }) | null => {
+  const error = err as { code?: string };
+  if (error.code === 'PREFA_IN_PROGRESS') {
+    return { inProgress: true } as Informe & { inProgress: boolean };
+  }
+  return null;
+};
+
+const processConsultaResponse = (
+  data: Informe,
+  attempt: number,
+  maxRetries: number
+): { shouldReturn: boolean; shouldRetry: boolean; data: Informe } => {
+  if (isValidInformeResponse(data)) {
+    return { shouldReturn: true, shouldRetry: false, data };
+  }
+
+  if (attempt < maxRetries) {
+    return { shouldReturn: false, shouldRetry: true, data };
+  }
+
+  return { shouldReturn: true, shouldRetry: false, data };
+};
+
+const retryConsulta = async (
+  direccion: string,
+  coordenadas: { lat: number; lon: number },
+  opts: {
+    prefaCompleta: boolean;
+    compuesta: boolean;
+    basicSearch?: boolean;
+    skipCredits?: boolean;
+  },
+  maxRetries: number
+): Promise<Informe | (Informe & { inProgress: boolean })> => {
+  const lastErrorRef: { value: unknown } = { value: undefined };
+
+  for (const attempt of Array.from({ length: maxRetries }, (_, i) => i + 1)) {
+    try {
+      const requestOpts = {
+        ...opts,
+        skipCredits: attempt > 1 || Boolean(opts.skipCredits),
+      };
+      const data = await executeConsultaRequest(direccion, coordenadas, requestOpts);
+      const result = processConsultaResponse(data, attempt, maxRetries);
+
+      if (result.shouldReturn) {
+        return result.data;
+      }
+
+      if (result.shouldRetry) {
+        console.warn(
+          `[Retry ${attempt}/${maxRetries}] Respuesta sin datos válidos, reintentando...`
+        );
+        await sleep(1000 * attempt);
+        continue;
+      }
+    } catch (err: unknown) {
+      lastErrorRef.value = err;
+      const inProgressResult = handleConsultaError(err);
+      if (inProgressResult) {
+        return inProgressResult;
+      }
+
+      if (!shouldRetryError(err) || attempt >= maxRetries) {
+        throw err;
+      }
+
+      console.warn(`[Retry ${attempt}/${maxRetries}] Error en consulta, reintentando...`, err);
+      await sleep(1000 * attempt);
+    }
+  }
+
+  throw lastErrorRef.value;
+};
+
 export const prefactibilidad = {
   consultarDireccion: async (
     direccion: string,
@@ -366,36 +569,19 @@ export const prefactibilidad = {
       skipCredits?: boolean;
     }
   ): Promise<Informe | (Informe & { inProgress: boolean })> => {
-    try {
-      if (!opts.skipCredits) {
-        const usageOpts: { prefaCompleta: boolean; compuesta: boolean; basicSearch?: boolean } = {
-          prefaCompleta: opts.prefaCompleta,
-          compuesta: opts.compuesta,
-        };
-        if (opts.basicSearch !== undefined) {
-          usageOpts.basicSearch = opts.basicSearch;
-        }
-        await subscriptions.validateUsage(usageOpts);
+    if (!opts.skipCredits) {
+      const usageOpts: { prefaCompleta: boolean; compuesta: boolean; basicSearch?: boolean } = {
+        prefaCompleta: opts.prefaCompleta,
+        compuesta: opts.compuesta,
+      };
+      if (opts.basicSearch !== undefined) {
+        usageOpts.basicSearch = opts.basicSearch;
       }
-      const coordenadas = await obtenerCoordenadas(direccion);
-
-      const response = await api.post<Informe>(
-        '/prefactibilidad/consultar',
-        {
-          direccion,
-          coordenadas,
-          ...opts,
-        },
-        { timeout: 40000 }
-      );
-      return response.data;
-    } catch (err: unknown) {
-      const error = err as { code?: string };
-      if (error.code === 'PREFA_IN_PROGRESS') {
-        return { inProgress: true } as Informe & { inProgress: boolean };
-      }
-      throw err;
+      await subscriptions.validateUsage(usageOpts);
     }
+
+    const coordenadas = await obtenerCoordenadas(direccion);
+    return retryConsulta(direccion, coordenadas, opts, 3);
   },
 
   consultarDireccionesCompuestas: async (

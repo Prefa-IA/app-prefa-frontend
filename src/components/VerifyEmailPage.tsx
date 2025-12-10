@@ -41,9 +41,9 @@ const VerifyEmailPage: React.FC = () => {
     const id = setInterval(() => {
       setSeconds((s) => {
         if (s <= 1) {
-      window.location.href = '/login';
+          window.location.href = '/login';
           return 0;
-    }
+        }
         return s - 1;
       });
     }, 1000);
