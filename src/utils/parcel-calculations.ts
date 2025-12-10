@@ -908,18 +908,22 @@ const calcularValoresPlusvalia = (
 
   const a2Recalculado = calculateA2(totalCapConstructivaFinal, valoresA.a1Final);
   const aRecalculado = calculateA(valoresA.a1Final, a2Recalculado);
-  const axbRecalculado = calculateAxB(aRecalculado, b);
+
+  const axbRecalculado =
+    tieneCalculoMotor && valoresCalculo.montoFinalPlusvalia > 0 && alicuotaValor > 0
+      ? valoresCalculo.montoFinalPlusvalia / alicuotaValor
+      : calculateAxB(aRecalculado, b);
+
+  const plusvaliaFinalFinal =
+    tieneCalculoMotor && valoresCalculo.montoFinalPlusvalia > 0
+      ? valoresCalculo.montoFinalPlusvalia
+      : calculatePlusvaliaFinal(axbRecalculado, alicuotaValor);
 
   const lfiAfeccionPercentFinal = calcularLfiAfeccionPercent(
     valoresCalculo.lfiAplicada,
     capacidadConstructiva.totalCapConstructivaOriginal,
     capacidadConstructiva.lfiAfeccionPercent
   );
-
-  const plusvaliaFinalFinal =
-    tieneCalculoMotor && valoresCalculo.montoFinalPlusvalia > 0
-      ? valoresCalculo.montoFinalPlusvalia
-      : calculatePlusvaliaFinal(axbRecalculado, alicuotaValor);
 
   return {
     b,

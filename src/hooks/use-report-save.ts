@@ -160,6 +160,10 @@ export const useReportSave = ({
         const response = await prefactibilidad.aceptarInforme(informeParaGuardar);
         const guardadoExitoso = procesarRespuestaGuardado(response, resultadoId);
 
+        if (guardadoExitoso) {
+          toast.dismiss(loadingId);
+        }
+
         if (guardadoExitoso && response.informe?._id) {
           await generarPdfDespuesDeGuardar(response.informe._id);
         }
@@ -169,6 +173,7 @@ export const useReportSave = ({
         manejarErrorGuardado(err, setError);
         return false;
       } finally {
+        // Solo descartar si no se descartó antes (en caso de error)
         toast.dismiss(loadingId);
         saveStateRef.current.isSaving = false;
       }

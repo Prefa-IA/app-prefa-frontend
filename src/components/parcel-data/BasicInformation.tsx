@@ -54,7 +54,7 @@ const calculateBreakdowns = (
 
   return {
     capacityBreakdown: caps.length > 0 ? ` (${caps.join(' + ')})` : '',
-    plusvaliaBreakdown: plusVals.length > 0 ? ` ($${plusVals.join(' + $')})` : '',
+    plusvaliaBreakdown: plusVals.length > 0 ? ` (${plusVals.join(' + ')} UVAs)` : '',
   };
 };
 
@@ -128,7 +128,7 @@ const getBasicInfoValues = (
       : null;
   const plusvalia =
     plusvaliaNum !== null
-      ? `$${Number(plusvaliaNum).toLocaleString('es-AR')}${plusvaliaBreakdown}`
+      ? `${Number(plusvaliaNum).toLocaleString('es-AR')} UVAs${plusvaliaBreakdown}`
       : 'N/A';
 
   return [

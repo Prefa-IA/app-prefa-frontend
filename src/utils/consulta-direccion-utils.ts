@@ -104,61 +104,108 @@ export const validarConsulta = (
   return true;
 };
 
+interface ErrorResponse {
+  response?: { status?: number; data?: { error?: string; tienePlan?: boolean } };
+  message?: string;
+}
+
+function normalizeErrorMessage(message: string | undefined): string {
+  if (!message || typeof message !== 'string') {
+    return '';
+  }
+  return message
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+function isConnectionError(status: number | undefined, msgNormalized: string): boolean {
+  return (
+    status === 502 ||
+    status === 503 ||
+    status === 504 ||
+    msgNormalized.includes('error de conexión') ||
+    msgNormalized.includes('network error') ||
+    msgNormalized.includes('servicio no está disponible')
+  );
+}
+
+function handleConnectionError(setError: (error: string | null) => void): void {
+  toast.error(
+    'El servicio no está disponible temporalmente. Por favor, intenta nuevamente en unos momentos.'
+  );
+  setError('Error de conexión con el servidor. Por favor, intenta nuevamente.');
+}
+
+function handleCreditsWithPlanError(): void {
+  toast.error(
+    'No tienes créditos suficientes. Serás redirigido para comprar créditos adicionales.'
+  );
+  setTimeout(() => {
+    const safePath = sanitizePath('/suscripciones#overages');
+    window.location.href = safePath;
+  }, 2000);
+}
+
+function handleDailyLimitError(): void {
+  toast.error('Has alcanzado el límite diario de créditos. Intenta mañana.');
+}
+
+function handleMonthlyLimitError(): void {
+  toast.error(
+    'Has alcanzado el límite mensual de créditos. El límite se reiniciará el próximo mes.'
+  );
+}
+
+function handleGeneralCreditsError(): void {
+  toast.error(
+    'No tienes créditos suficientes para realizar esta acción. Serás redirigido para mejorar tu plan.'
+  );
+  setTimeout(() => {
+    const safePath = sanitizePath('/suscripciones');
+    window.location.href = safePath;
+  }, 3000);
+}
+
 export const manejarErrorConsulta = (
   error: unknown,
   setError: (error: string | null) => void
 ): void => {
   console.error('Error en consulta:', error);
-  const errorObj = error as {
-    response?: { status?: number; data?: { error?: string; tienePlan?: boolean } };
-    message?: string;
-  };
-  const status403 = errorObj?.response?.status === 403;
+  const errorObj = error as ErrorResponse;
+  const status = errorObj?.response?.status;
   const errorData = errorObj?.response?.data || {};
   const errorCode = errorData.error || '';
   const tienePlan = errorData.tienePlan === true;
+  const msgNormalized = normalizeErrorMessage(errorObj?.message);
 
-  if (status403 && errorCode === 'sin_creditos_con_plan' && tienePlan) {
-    toast.error(
-      'No tienes créditos suficientes. Serás redirigido para comprar créditos adicionales.'
-    );
-    setTimeout(() => {
-      const safePath = sanitizePath('/suscripciones#overages');
-      window.location.href = safePath;
-    }, 2000);
+  if (isConnectionError(status, msgNormalized)) {
+    handleConnectionError(setError);
     return;
   }
 
-  const msgRaw = typeof errorObj?.message === 'string' ? errorObj.message : '';
-  const msgNormalized = msgRaw
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase();
+  if (status === 403 && errorCode === 'sin_creditos_con_plan' && tienePlan) {
+    handleCreditsWithPlanError();
+    return;
+  }
 
   if (msgNormalized.includes('limite diario')) {
-    toast.error('Has alcanzado el límite diario de créditos. Intenta mañana.');
+    handleDailyLimitError();
     return;
   }
 
   if (msgNormalized.includes('limite mensual')) {
-    toast.error(
-      'Has alcanzado el límite mensual de créditos. El límite se reiniciará el próximo mes.'
-    );
+    handleMonthlyLimitError();
     return;
   }
 
   const sinCreditosMsg = msgNormalized.includes('creditos') || msgNormalized.includes('consultas');
-  const sinCreditos = status403 || sinCreditosMsg;
+  const sinCreditos = status === 403 || sinCreditosMsg;
   if (sinCreditos) {
-    toast.error(
-      'No tienes créditos suficientes para realizar esta acción. Serás redirigido para mejorar tu plan.'
-    );
-    setTimeout(() => {
-      const safePath = sanitizePath('/suscripciones');
-      window.location.href = safePath;
-    }, 3000);
+    handleGeneralCreditsError();
     return;
   }
+
   setError(CONSULTA_DIRECCION_CONFIG.MESSAGES.ERROR_GENERAL);
 };
 

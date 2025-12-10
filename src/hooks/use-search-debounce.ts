@@ -40,15 +40,15 @@ export const useSearchDebounce = <T extends unknown[]>(
           return;
         }
 
-          void (async () => {
-            try {
-              abortControllerRef.current = new AbortController();
-              await searchFn(...args);
-            } catch (error: unknown) {
-              if (error instanceof Error && error.name !== 'AbortError') {
-                console.error('Search error:', error);
-              }
-            } finally {
+        void (async () => {
+          try {
+            abortControllerRef.current = new AbortController();
+            await searchFn(...args);
+          } catch (error: unknown) {
+            if (error instanceof Error && error.name !== 'AbortError') {
+              console.error('Search error:', error);
+            }
+          } finally {
             if (currentSearchId === searchIdRef.current) {
               if (abortControllerRef.current) {
                 abortControllerRef.current = null;
@@ -56,9 +56,9 @@ export const useSearchDebounce = <T extends unknown[]>(
               if (timeoutRef.current) {
                 timeoutRef.current = null;
               }
-              }
             }
-          })();
+          }
+        })();
       }, delay);
     },
     [searchFn, delay, minLength]

@@ -172,7 +172,7 @@ const PlusvaliaFinalTable: React.FC<PlusvaliaFinalTableProps> = ({ calculatedVal
           <div>
             <TableRow
               label="B (Valor Incidencia Suelo)"
-              value={`$${((calculatedValues['b'] as number) || 0).toLocaleString('es-AR')}`}
+              value={`${((calculatedValues['b'] as number) || 0).toLocaleString('es-AR')} UVAs/m²`}
             />
           </div>
         </div>
@@ -181,7 +181,7 @@ const PlusvaliaFinalTable: React.FC<PlusvaliaFinalTableProps> = ({ calculatedVal
           <div className="grid grid-cols-2 gap-4">
             <TableRow
               label="A × B"
-              value={`$${((calculatedValues['axb'] as number) || 0).toLocaleString('es-AR')}`}
+              value={`${((calculatedValues['axb'] as number) || 0).toLocaleString('es-AR')} UVAs`}
             />
             <TableRow
               label="Alícuota"
@@ -194,7 +194,7 @@ const PlusvaliaFinalTable: React.FC<PlusvaliaFinalTableProps> = ({ calculatedVal
           <div className="text-center">
             <div className="text-lg font-bold dark:text-gray-200">PLUSVALÍA TOTAL ESTIMADA</div>
             <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2">
-              ${((calculatedValues['plusvaliaFinal'] as number) || 0).toLocaleString('es-AR')}
+              {((calculatedValues['plusvaliaFinal'] as number) || 0).toLocaleString('es-AR')} UVAs
             </div>
           </div>
         </div>
