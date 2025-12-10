@@ -10,8 +10,8 @@ interface SEOProps {
   noindex?: boolean;
 }
 
-const defaultTitle = 'PREFA-IA: Sistema Generador de Prefactibilidades Urbanísticas CABA | Analizador de Terrenos y Código Urbanístico';
-const defaultDescription = 'Sistema generador de prefactibilidades urbanísticas para CABA. Analizador de terrenos con interpretación automática del código urbanístico. Genera reportes inmobiliarios profesionales al instante.';
+const defaultTitle = 'PREFA-IA: Prefactibilidades Urbanísticas CABA';
+const defaultDescription = 'Sistema generador de prefactibilidades urbanísticas para CABA. Analizador de terrenos con interpretación automática del código urbanístico.';
 const defaultImage = '/logo.png';
 const defaultUrl = 'https://prefaia.com';
 const siteName = 'PREFA-IA';
