@@ -34,8 +34,8 @@ const Home: React.FC<HomeProps> = ({ className }) => {
   return (
     <>
       <SEO
-        title="PREFA-IA: Sistema Generador de Prefactibilidades Urbanísticas CABA | Analizador de Terrenos y Código Urbanístico"
-        description="Sistema generador de prefactibilidades urbanísticas para CABA. Analizador de terrenos con interpretación automática del código urbanístico. Genera reportes inmobiliarios profesionales al instante. Prefactibilidad CABA, análisis de terrenos y código urbanístico en un solo lugar."
+        title="PREFA-IA: Prefactibilidades Urbanísticas CABA"
+        description="Sistema generador de prefactibilidades urbanísticas para CABA. Analizador de terrenos con interpretación automática del código urbanístico."
         url="/"
       />
       <div className={`${className || ''}`}>

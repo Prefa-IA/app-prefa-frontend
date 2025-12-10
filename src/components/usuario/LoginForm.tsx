@@ -44,7 +44,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   return (
     <>
       <SEO
-        title="Iniciar Sesión | PREFA-IA - Prefactibilidades Urbanísticas CABA"
+        title="Iniciar Sesión | PREFA-IA"
         description="Accede a tu cuenta de PREFA-IA para generar prefactibilidades urbanísticas en CABA. Sistema de análisis de terrenos y código urbanístico."
         url="/login"
         noindex={true}
