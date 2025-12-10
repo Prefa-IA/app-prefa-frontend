@@ -1,24 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="../logo.png" />
+    <!-- Favicon - Logo de PREFA-IA -->
+    <link rel="icon" type="image/png" href="%PUBLIC_URL%/logo.png" />
+    <link rel="shortcut icon" type="image/png" href="%PUBLIC_URL%/logo.png" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta http-equiv="Cross-Origin-Opener-Policy" content="unsafe-none" />
+    
+    <!-- SEO Meta Tags -->
     <meta
       name="description"
-      content="Web site created using create-react-app"
+      content="Plataforma de prefactibilidades urbanísticas para inmobiliarias. Consulta código urbanístico, normativas y regulaciones de desarrollo urbano. Herramienta profesional para análisis de factibilidad de proyectos inmobiliarios."
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <meta
+      name="keywords"
+      content="prefactibilidades urbanísticas, código urbanístico, desarrollo urbano, inmobiliarias, normativas urbanas, regulaciones urbanísticas, factibilidad inmobiliaria, análisis urbanístico, planificación urbana, código de edificación, zonificación urbana, estudios de prefactibilidad, consultoría inmobiliaria, proyectos inmobiliarios, normativa de construcción, ordenamiento territorial"
+    />
+    <meta name="author" content="Desarrollo Urbano" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="Spanish" />
+    <meta name="revisit-after" content="7 days" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="%PUBLIC_URL%/" />
+    <meta property="og:title" content="Desarrollo Urbano - Prefactibilidades Urbanísticas" />
+    <meta property="og:description" content="Plataforma de prefactibilidades urbanísticas para inmobiliarias. Consulta código urbanístico, normativas y regulaciones de desarrollo urbano." />
+    <meta property="og:image" content="%PUBLIC_URL%/logo.png" />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:site_name" content="Desarrollo Urbano" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="%PUBLIC_URL%/" />
+    <meta name="twitter:title" content="Desarrollo Urbano - Prefactibilidades Urbanísticas" />
+    <meta name="twitter:description" content="Plataforma de prefactibilidades urbanísticas para inmobiliarias. Consulta código urbanístico, normativas y regulaciones de desarrollo urbano." />
+    <meta name="twitter:image" content="%PUBLIC_URL%/logo.png" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="%PUBLIC_URL%/" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     
-    <!-- jQuery para USIG -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Preconnect para recursos externos (mejora el tiempo de conexión) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://code.jquery.com" />
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="preconnect" href="https://accounts.google.com" />
+    <link rel="preconnect" href="https://www.google.com" />
+    
+    <!-- Google Fonts - Carga optimizada con preconnect ya establecido -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap"
+      />
+    </noscript>
+    
+    <!-- jQuery para USIG - Cargado de forma diferida para no bloquear renderización -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
     
     <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -35,10 +88,10 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>Desarrollo Urbano</title>
+    <title>Desarrollo Urbano - Prefactibilidades Urbanísticas | Código Urbanístico para Inmobiliarias</title>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>Necesitas habilitar JavaScript para ejecutar esta aplicación.</noscript>
     <div id="root"></div>
     <!--
       This HTML file is a template.

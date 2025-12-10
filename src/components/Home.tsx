@@ -92,6 +92,9 @@ const HeroImage: React.FC = () => (
       className="absolute inset-0 w-full h-full object-cover slow-zoom"
       src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2600&q=80"
       alt="Buenos Aires"
+      fetchPriority="high"
+      loading="eager"
+      decoding="async"
     />
   </div>
 );
