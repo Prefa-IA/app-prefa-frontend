@@ -1,4 +1,5 @@
 import React from 'react';
+import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 
@@ -123,25 +124,27 @@ const AppRoutes: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <ModalLoadingProvider>
-          <Router>
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden flex flex-col">
-              <Navbar />
-              <main className="flex-grow">
-                <AppRoutes />
-              </main>
-              <Footer />
-              <Chatbot />
-              <ThemedToast />
-              <GlobalConfirmModal />
-              <TutorialOnboarding />
-            </div>
-          </Router>
-        </ModalLoadingProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <HelmetProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <ModalLoadingProvider>
+            <Router>
+              <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden flex flex-col">
+                <Navbar />
+                <main className="flex-grow">
+                  <AppRoutes />
+                </main>
+                <Footer />
+                <Chatbot />
+                <ThemedToast />
+                <GlobalConfirmModal />
+                <TutorialOnboarding />
+              </div>
+            </Router>
+          </ModalLoadingProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 };
 

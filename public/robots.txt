@@ -1,3 +1,26 @@
-# https://www.robotstxt.org/robotstxt.html
+# https://www.robotstxt.org/robotstxt.org/robotstxt.html
+# Robots.txt optimizado para SEO - PREFA-IA
+
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /print/
+
+# Sitemap
+Sitemap: https://prefaia.com/sitemap.xml
+
+# Permitir acceso a recursos estáticos importantes
+Allow: /logo.png
+Allow: /favicon.ico
+Allow: /manifest.json
+Allow: /sitemap.xml
+Allow: /robots.txt
+
+# Googlebot - Sin restricciones para indexación rápida
+User-agent: Googlebot
+Allow: /
+
+# Bingbot - Sin restricciones
+User-agent: Bingbot
+Allow: /

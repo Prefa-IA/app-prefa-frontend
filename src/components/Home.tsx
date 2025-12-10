@@ -5,6 +5,8 @@ import { CreditCardIcon, DocumentSearchIcon, DocumentTextIcon } from '@heroicons
 import { useAuth } from '../contexts/AuthContext';
 import { FeatureItem, HOME_CONFIG, HomeProps, Usuario } from '../types/enums';
 
+import SEO from './SEO';
+
 const features: FeatureItem[] = [
   {
     name: 'Datos catastrales al día.',
@@ -30,10 +32,17 @@ const Home: React.FC<HomeProps> = ({ className }) => {
   const { usuario } = useAuth();
 
   return (
-    <div className={`${className || ''}`}>
-      <HeroSection usuario={usuario} />
-      <FeatureSection features={features} />
-    </div>
+    <>
+      <SEO
+        title="PREFA-IA: Sistema Generador de Prefactibilidades Urbanísticas CABA | Analizador de Terrenos y Código Urbanístico"
+        description="Sistema generador de prefactibilidades urbanísticas para CABA. Analizador de terrenos con interpretación automática del código urbanístico. Genera reportes inmobiliarios profesionales al instante. Prefactibilidad CABA, análisis de terrenos y código urbanístico en un solo lugar."
+        url="/"
+      />
+      <div className={`${className || ''}`}>
+        <HeroSection usuario={usuario} />
+        <FeatureSection features={features} />
+      </div>
+    </>
   );
 };
 
@@ -91,7 +100,7 @@ const HeroImage: React.FC = () => (
     <img
       className="absolute inset-0 w-full h-full object-cover slow-zoom"
       src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2600&q=80"
-      alt="Buenos Aires"
+      alt="Vista aérea de edificios en Buenos Aires, Ciudad Autónoma de Buenos Aires"
       fetchPriority="high"
       loading="eager"
       decoding="async"

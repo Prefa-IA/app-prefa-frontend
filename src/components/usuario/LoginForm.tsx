@@ -10,6 +10,7 @@ import {
 } from '../../types/components';
 import { LOGIN_CONFIG, LoginCredentials, LoginFormProps } from '../../types/enums';
 import { createFormHandler } from '../../utils/form-utils';
+import SEO from '../SEO';
 
 import GoogleLoginButton from './GoogleLoginButton';
 
@@ -41,21 +42,29 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   const handleChange = createFormHandler(setCredentials);
 
   return (
-    <div className={`${styles['container']} min-h-screen flex justify-center items-center w-full`}>
-      <div
-        className={`${styles['formContainer']} bg-white dark:bg-gray-800 p-4 sm:p-8 rounded shadow`}
-      >
-        <LoginFormComponent
-          credentials={credentials}
-          onSubmit={(e) => {
-            void handleSubmit(e);
-          }}
-          onChange={handleChange}
-          showPass={showPass}
-          setShowPass={setShowPass}
-        />
+    <>
+      <SEO
+        title="Iniciar Sesión | PREFA-IA - Prefactibilidades Urbanísticas CABA"
+        description="Accede a tu cuenta de PREFA-IA para generar prefactibilidades urbanísticas en CABA. Sistema de análisis de terrenos y código urbanístico."
+        url="/login"
+        noindex={true}
+      />
+      <div className={`${styles['container']} min-h-screen flex justify-center items-center w-full`}>
+        <div
+          className={`${styles['formContainer']} bg-white dark:bg-gray-800 p-4 sm:p-8 rounded shadow`}
+        >
+          <LoginFormComponent
+            credentials={credentials}
+            onSubmit={(e) => {
+              void handleSubmit(e);
+            }}
+            onChange={handleChange}
+            showPass={showPass}
+            setShowPass={setShowPass}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
