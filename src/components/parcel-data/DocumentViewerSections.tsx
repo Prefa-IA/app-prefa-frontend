@@ -166,23 +166,23 @@ const CroquisSection: React.FC<{
   pageCounter: number;
 }> = ({ croquis, pageCounter }) => {
   const { parentTableStyle } = useTablePersonalization();
+  const [hasError, setHasError] = React.useState(false);
+
+  if (!croquis || hasError) {
+    return null;
+  }
 
   return (
     <div className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
       <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-2`} style={parentTableStyle}>
         CROQUIS DE LA PARCELA
       </div>
-      {croquis ? (
-        <DocumentItem
-          url={croquis}
-          title="Croquis de la parcela"
-          defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.CROQUIS}
-        />
-      ) : (
-        <div className="p-8 text-center text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded">
-          No hay croquis disponible para esta parcela
-        </div>
-      )}
+      <DocumentItem
+        url={croquis}
+        title="Croquis de la parcela"
+        defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.CROQUIS}
+        onError={() => setHasError(true)}
+      />
       <PageNumber pageNumber={pageCounter} />
     </div>
   );
@@ -193,23 +193,23 @@ const PerimetroSection: React.FC<{
   pageCounter: number;
 }> = ({ perimetro, pageCounter }) => {
   const { parentTableStyle } = useTablePersonalization();
+  const [hasError, setHasError] = React.useState(false);
+
+  if (!perimetro || hasError) {
+    return null;
+  }
 
   return (
     <div className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
       <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-2`} style={parentTableStyle}>
         PERÍMETRO DE LA MANZANA
       </div>
-      {perimetro ? (
-        <DocumentItem
-          url={perimetro}
-          title="Perímetro de la manzana"
-          defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PERIMETRO}
-        />
-      ) : (
-        <div className="p-8 text-center text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded">
-          No hay perímetro disponible para esta manzana
-        </div>
-      )}
+      <DocumentItem
+        url={perimetro}
+        title="Perímetro de la manzana"
+        defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PERIMETRO}
+        onError={() => setHasError(true)}
+      />
       <PageNumber pageNumber={pageCounter} />
     </div>
   );
@@ -220,23 +220,23 @@ const PlanoIndiceSection: React.FC<{
   pageCounter: number;
 }> = ({ planoIndice, pageCounter }) => {
   const { parentTableStyle } = useTablePersonalization();
+  const [hasError, setHasError] = React.useState(false);
+
+  if (!planoIndice || hasError) {
+    return null;
+  }
 
   return (
     <div className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
       <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-2`} style={parentTableStyle}>
         PLANO ÍNDICE
       </div>
-      {planoIndice ? (
-        <DocumentItem
-          url={planoIndice}
-          title="Plano índice"
-          defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PLANO_INDICE}
-        />
-      ) : (
-        <div className="p-8 text-center text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded">
-          No hay plano índice disponible para esta parcela
-        </div>
-      )}
+      <DocumentItem
+        url={planoIndice}
+        title="Plano índice"
+        defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PLANO_INDICE}
+        onError={() => setHasError(true)}
+      />
       <PageNumber pageNumber={pageCounter} />
     </div>
   );
@@ -247,8 +247,11 @@ const CompoundCroquisSection: React.FC<{ croquis: string[]; pageCounter: number 
   pageCounter,
 }) => {
   const { parentTableStyle } = useTablePersonalization();
+  const [errorUrls, setErrorUrls] = React.useState<Set<string>>(new Set());
 
-  if (croquis.length === 0) return null;
+  const validCroquis = croquis.filter((url) => !errorUrls.has(url));
+
+  if (validCroquis.length === 0) return null;
 
   return (
     <div className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
@@ -256,13 +259,14 @@ const CompoundCroquisSection: React.FC<{ croquis: string[]; pageCounter: number 
         CROQUIS DE LAS PARCELAS
       </div>
 
-      {croquis.map((url, index) => (
+      {validCroquis.map((url, index) => (
         <DataTable key={index} title={`CROQUIS DE PARCELA ${index + 1}`} className="mb-6">
           <div className="p-4 text-center">
             <DocumentItem
               url={url}
               title={`Croquis de parcela ${index + 1}`}
               defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.CROQUIS}
+              onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
             />
           </div>
         </DataTable>
@@ -277,8 +281,11 @@ const CompoundPerimetrosSection: React.FC<{ perimetros: string[]; pageCounter: n
   pageCounter,
 }) => {
   const { parentTableStyle } = useTablePersonalization();
+  const [errorUrls, setErrorUrls] = React.useState<Set<string>>(new Set());
 
-  if (perimetros.length === 0) return null;
+  const validPerimetros = perimetros.filter((url) => !errorUrls.has(url));
+
+  if (validPerimetros.length === 0) return null;
 
   return (
     <div className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
@@ -286,13 +293,14 @@ const CompoundPerimetrosSection: React.FC<{ perimetros: string[]; pageCounter: n
         PERÍMETROS DE LAS MANZANAS
       </div>
 
-      {perimetros.map((url, index) => (
+      {validPerimetros.map((url, index) => (
         <DataTable key={index} title={`PERÍMETRO DE MANZANA ${index + 1}`} className="mb-6">
           <div className="p-4 text-center">
             <DocumentItem
               url={url}
               title={`Perímetro de manzana ${index + 1}`}
               defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PERIMETRO}
+              onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
             />
           </div>
         </DataTable>
@@ -307,8 +315,11 @@ const CompoundPlanosIndiceSection: React.FC<{ planosIndice: string[]; pageCounte
   pageCounter,
 }) => {
   const { parentTableStyle } = useTablePersonalization();
+  const [errorUrls, setErrorUrls] = React.useState<Set<string>>(new Set());
 
-  if (planosIndice.length === 0) return null;
+  const validPlanosIndice = planosIndice.filter((url) => !errorUrls.has(url));
+
+  if (validPlanosIndice.length === 0) return null;
 
   return (
     <div className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
@@ -316,13 +327,14 @@ const CompoundPlanosIndiceSection: React.FC<{ planosIndice: string[]; pageCounte
         PLANOS ÍNDICE
       </div>
 
-      {planosIndice.map((url, index) => (
+      {validPlanosIndice.map((url, index) => (
         <DataTable key={index} title={`PLANO ÍNDICE ${index + 1}`} className="mb-6">
           <div className="p-4 text-center">
             <DocumentItem
               url={url}
               title={`Plano índice ${index + 1}`}
               defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PLANO_INDICE}
+              onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
             />
           </div>
         </DataTable>
@@ -336,25 +348,28 @@ const DocumentItem: React.FC<{
   url: string;
   title: string;
   defaultImageUrl: string;
-}> = ({ url, title, defaultImageUrl }) => (
+  onError?: (() => void) | undefined;
+}> = ({ url, title, defaultImageUrl, onError }) => (
   <div className="border border-gray-300 dark:border-gray-700 p-4 text-center">
     {!isPDF(url) ? (
-      <ImageViewer url={url} title={title} defaultImageUrl={defaultImageUrl} />
+      <ImageViewer url={url} title={title} defaultImageUrl={defaultImageUrl} onError={onError} />
     ) : (
       <PdfViewer url={url} title={title} />
     )}
   </div>
 );
 
-const ImageViewer: React.FC<{ url: string; title: string; defaultImageUrl: string }> = ({
-  url,
-  title,
-  defaultImageUrl,
-}) => {
+const ImageViewer: React.FC<{
+  url: string;
+  title: string;
+  defaultImageUrl: string;
+  onError?: (() => void) | undefined;
+}> = ({ url, title, defaultImageUrl, onError }) => {
   const [hasError, setHasError] = React.useState(false);
   const isUsingDefaultRef = React.useRef(false);
   const hasHandledErrorRef = React.useRef(false);
   const imgRef = React.useRef<HTMLImageElement | null>(null);
+  const originalUrlRef = React.useRef<string>(url);
 
   const handleError = React.useCallback(
     (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -367,6 +382,7 @@ const ImageViewer: React.FC<{ url: string; title: string; defaultImageUrl: strin
 
       const currentSrc = img.src;
       const isDefaultImage = currentSrc === defaultImageUrl || currentSrc.endsWith(defaultImageUrl);
+      const isOriginalUrl = currentSrc === originalUrlRef.current || currentSrc === url;
 
       if (isUsingDefaultRef.current || isDefaultImage) {
         hasHandledErrorRef.current = true;
@@ -375,7 +391,28 @@ const ImageViewer: React.FC<{ url: string; title: string; defaultImageUrl: strin
         if (imgRef.current) {
           imgRef.current.onerror = null;
         }
+        console.warn(
+          `[ImageViewer] No se pudo cargar la imagen. URL original: ${originalUrlRef.current}, URL actual: ${currentSrc}`
+        );
+        onError?.();
         return;
+      }
+
+      if (isOriginalUrl) {
+        const isExternalUrl = url.startsWith('http://') || url.startsWith('https://');
+        if (isExternalUrl && !url.startsWith(window.location.origin)) {
+          console.warn(
+            `[ImageViewer] Error al cargar imagen externa: ${url}. Puede ser un problema de CORS o la imagen no está disponible.`
+          );
+          hasHandledErrorRef.current = true;
+          setHasError(true);
+          img.onerror = null;
+          if (imgRef.current) {
+            imgRef.current.onerror = null;
+          }
+          onError?.();
+          return;
+        }
       }
 
       isUsingDefaultRef.current = true;
@@ -383,21 +420,18 @@ const ImageViewer: React.FC<{ url: string; title: string; defaultImageUrl: strin
       img.onerror = null;
       img.src = defaultImageUrl;
     },
-    [defaultImageUrl]
+    [defaultImageUrl, url, onError]
   );
 
   React.useEffect(() => {
     isUsingDefaultRef.current = false;
     hasHandledErrorRef.current = false;
     setHasError(false);
+    originalUrlRef.current = url;
   }, [url]);
 
   if (hasError) {
-    return (
-      <div className="p-8 text-center text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded">
-        No se pudo cargar la imagen
-      </div>
-    );
+    return null;
   }
 
   return (
