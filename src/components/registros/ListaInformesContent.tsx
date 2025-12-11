@@ -10,7 +10,9 @@ interface ListaInformesContentProps {
   error: string | null;
   informes: Informe[];
   onDescargar: (informe: Informe) => void;
+  onCompartir: (informe: Informe) => void;
   downloadingIds: string[];
+  sharingIds: string[];
 }
 
 const ListaInformesContent: React.FC<ListaInformesContentProps> = ({
@@ -18,7 +20,9 @@ const ListaInformesContent: React.FC<ListaInformesContentProps> = ({
   error,
   informes,
   onDescargar,
+  onCompartir,
   downloadingIds,
+  sharingIds,
 }) => {
   if (loading) {
     return <LoadingState />;
@@ -33,7 +37,13 @@ const ListaInformesContent: React.FC<ListaInformesContentProps> = ({
   }
 
   return (
-    <InformesList informes={informes} onDescargar={onDescargar} downloadingIds={downloadingIds} />
+    <InformesList
+      informes={informes}
+      onDescargar={onDescargar}
+      onCompartir={onCompartir}
+      downloadingIds={downloadingIds}
+      sharingIds={sharingIds}
+    />
   );
 };
 

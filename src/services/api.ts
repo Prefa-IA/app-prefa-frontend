@@ -707,6 +707,18 @@ export const prefactibilidad = {
     const response = await api.get<Informe>(`/prefactibilidad/${id}`);
     return response.data;
   },
+
+  generarTokenCompartir: async (id: string) => {
+    const response = await api.post<{ shareToken: string }>(
+      `/prefactibilidad/generar-token-compartir/${id}`
+    );
+    return response.data;
+  },
+
+  obtenerInformeCompartido: async (token: string) => {
+    const response = await api.get<Informe>(`/prefactibilidad/compartir/${token}`);
+    return response.data;
+  },
 };
 
 export const support = {

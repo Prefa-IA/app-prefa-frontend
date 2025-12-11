@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify';
 
 import OveragesAdmin from './components/admin/OveragesAdmin';
 import BuscarDireccionPage from './components/BuscarDireccionPage';
+import CompartirInforme from './components/CompartirInforme';
 import ConsultaDireccion from './components/ConsultaDireccion';
 import ForgotPasswordPage from './components/ForgotPasswordPage';
 import Chatbot from './components/generales/Chatbot';
@@ -105,6 +106,7 @@ const AppRoutes: React.FC = () => {
         }
       />
       <Route path="/print/informe/:id" element={<PrintInforme />} />
+      <Route path="/compartir/:token" element={<CompartirInforme />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/resend-verification" element={<ResendVerificationPage />} />

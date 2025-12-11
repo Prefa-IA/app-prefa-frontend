@@ -215,6 +215,7 @@ export interface Informe {
   tipoPrefa?: PrefaType;
   pdfUrl?: string;
   esUltimoInforme?: boolean;
+  shareToken?: string;
   calculo?: Record<string, unknown>;
   datosIncompletos?: boolean;
   datosFaltantes?: string[];
@@ -291,7 +292,7 @@ export interface ReportPreviewProps {
     lat: number;
     lng: number;
   };
-  onGenerateReport: () => void;
+  onGenerateReport?: () => void;
   savedId?: string | null;
   tipoPrefa: PrefaType;
 }

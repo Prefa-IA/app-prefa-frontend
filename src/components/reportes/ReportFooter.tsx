@@ -62,19 +62,21 @@ const FooterActions: React.FC<FooterActionsProps> = ({ onGenerateReport }) => {
     <>
       <LegalNotice />
 
-      <div
-        className={`${styles['container']} print-hidden flex justify-end bg-white dark:bg-gray-800`}
-      >
-        <ActionButton
-          onClick={() => {
-            void handleDownload();
-          }}
-          variant={ButtonVariant.PRIMARY}
-          icon={<DownloadIcon />}
-          text="Descargar Informe PDF"
-          disabled={downloading}
-        />
-      </div>
+      {onGenerateReport && (
+        <div
+          className={`${styles['container']} print-hidden flex justify-end bg-white dark:bg-gray-800`}
+        >
+          <ActionButton
+            onClick={() => {
+              void handleDownload();
+            }}
+            variant={ButtonVariant.PRIMARY}
+            icon={<DownloadIcon />}
+            text="Descargar Informe PDF"
+            disabled={downloading}
+          />
+        </div>
+      )}
     </>
   );
 };

@@ -5,6 +5,7 @@ import {
   DownloadIcon,
   LocationMarkerIcon,
   OfficeBuildingIcon,
+  ShareIcon,
   TagIcon,
 } from '@heroicons/react/outline';
 import { CurrencyDollarIcon } from '@heroicons/react/solid';
@@ -16,8 +17,10 @@ import { formatearFecha } from '../../utils/date-utils';
 export const InformesList: React.FC<{
   informes: Informe[];
   onDescargar: (informe: Informe) => void;
+  onCompartir: (informe: Informe) => void;
   downloadingIds: string[];
-}> = ({ informes, onDescargar, downloadingIds }) => (
+  sharingIds: string[];
+}> = ({ informes, onDescargar, onCompartir, downloadingIds, sharingIds }) => (
   <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg mb-8">
     <ul className="divide-y divide-gray-200">
       {informes.map((informe, index) => (
@@ -26,7 +29,9 @@ export const InformesList: React.FC<{
           informe={informe}
           index={index}
           onDescargar={onDescargar}
+          onCompartir={onCompartir}
           downloading={downloadingIds.includes(informe._id as string)}
+          sharing={sharingIds.includes(informe._id as string)}
         />
       ))}
     </ul>
@@ -37,13 +42,27 @@ export const InformeItem: React.FC<{
   informe: Informe;
   index: number;
   onDescargar: (informe: Informe) => void;
+  onCompartir: (informe: Informe) => void;
   downloading: boolean;
-}> = ({ informe, index: _index, onDescargar, downloading }) => (
+  sharing: boolean;
+}> = ({ informe, index: _index, onDescargar, onCompartir, downloading, sharing }) => (
   <li className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
     <div className="px-4 py-5 sm:px-6">
-      <InformeHeader informe={informe} onDescargar={onDescargar} downloading={downloading} />
+      <InformeHeader
+        informe={informe}
+        onDescargar={onDescargar}
+        onCompartir={onCompartir}
+        downloading={downloading}
+        sharing={sharing}
+      />
       <InformeDetails informe={informe} />
-      <DownloadButtonMobile informe={informe} onDescargar={onDescargar} downloading={downloading} />
+      <DownloadButtonMobile
+        informe={informe}
+        onDescargar={onDescargar}
+        onCompartir={onCompartir}
+        downloading={downloading}
+        sharing={sharing}
+      />
     </div>
   </li>
 );
@@ -51,11 +70,16 @@ export const InformeItem: React.FC<{
 export const InformeHeader: React.FC<{
   informe: Informe;
   onDescargar: (informe: Informe) => void;
+  onCompartir: (informe: Informe) => void;
   downloading: boolean;
-}> = ({ informe, onDescargar, downloading }) => (
+  sharing: boolean;
+}> = ({ informe, onDescargar, onCompartir, downloading, sharing }) => (
   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
     <InformeTitleSection informe={informe} />
-    <DownloadButton informe={informe} onDescargar={onDescargar} downloading={downloading} />
+    <div className="hidden sm:flex mt-2 sm:mt-0 sm:ml-2 flex-shrink-0 gap-2">
+      <ShareButton informe={informe} onCompartir={onCompartir} sharing={sharing} />
+      <DownloadButton informe={informe} onDescargar={onDescargar} downloading={downloading} />
+    </div>
   </div>
 );
 
@@ -67,6 +91,33 @@ export const InformeTitleSection: React.FC<{ informe: Informe }> = ({ informe })
     </h3>
   </div>
 );
+
+export const ShareButton: React.FC<{
+  informe: Informe;
+  onCompartir: (informe: Informe) => void;
+  sharing: boolean;
+}> = ({ informe, onCompartir, sharing }) => {
+  if (!informe.esUltimoInforme && informe.esUltimoInforme !== undefined) {
+    return null;
+  }
+
+  const isDisabled = sharing;
+
+  return (
+    <button
+      onClick={() => onCompartir(informe)}
+      disabled={isDisabled}
+      className={`inline-flex justify-center items-center px-2 py-1 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 text-xs sm:text-sm leading-4 font-medium rounded-md shadow-sm ${
+        isDisabled
+          ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+          : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+      } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200`}
+    >
+      <ShareIcon className="h-4 w-4 mr-1" />
+      Compartir
+    </button>
+  );
+};
 
 export const DownloadButton: React.FC<{
   informe: Informe;
@@ -80,20 +131,18 @@ export const DownloadButton: React.FC<{
   const isDisabled = downloading;
 
   return (
-    <div className="hidden sm:flex mt-2 sm:mt-0 sm:ml-2 flex-shrink-0 w-full sm:w-auto">
-      <button
-        onClick={() => onDescargar(informe)}
-        disabled={isDisabled}
-        className={`inline-flex justify-center items-center w-full sm:w-auto px-2 py-1 sm:px-3 sm:py-2 border border-transparent text-xs sm:text-sm leading-4 font-medium rounded-md shadow-sm text-white ${
-          isDisabled
-            ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
-            : 'bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600'
-        } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200`}
-      >
-        <DownloadIcon className="h-4 w-4 mr-1" />
-        {LISTA_INFORMES_CONFIG.BUTTON_TEXT}
-      </button>
-    </div>
+    <button
+      onClick={() => onDescargar(informe)}
+      disabled={isDisabled}
+      className={`inline-flex justify-center items-center px-2 py-1 sm:px-3 sm:py-2 border border-transparent text-xs sm:text-sm leading-4 font-medium rounded-md shadow-sm text-white ${
+        isDisabled
+          ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+          : 'bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600'
+      } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200`}
+    >
+      <DownloadIcon className="h-4 w-4 mr-1" />
+      {LISTA_INFORMES_CONFIG.BUTTON_TEXT}
+    </button>
   );
 };
 
@@ -157,20 +206,34 @@ export const DateInfo: React.FC<{ informe: Informe }> = ({ informe }) => (
 export const DownloadButtonMobile: React.FC<{
   informe: Informe;
   onDescargar: (inf: Informe) => void;
+  onCompartir: (inf: Informe) => void;
   downloading: boolean;
-}> = ({ informe, onDescargar, downloading }) => {
+  sharing: boolean;
+}> = ({ informe, onDescargar, onCompartir, downloading, sharing }) => {
   if (!informe.esUltimoInforme && informe.esUltimoInforme !== undefined) {
     return null;
   }
 
-  const isDisabled = downloading;
+  const isDisabled = downloading || sharing;
 
   return (
-    <div className="sm:hidden mt-4">
+    <div className="sm:hidden mt-4 flex gap-2">
+      <button
+        onClick={() => onCompartir(informe)}
+        disabled={isDisabled}
+        className={`flex-1 inline-flex justify-center items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-xs leading-4 font-medium rounded-md shadow-sm ${
+          isDisabled
+            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+            : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+        } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200`}
+      >
+        <ShareIcon className="h-4 w-4 mr-1" />
+        Compartir
+      </button>
       <button
         onClick={() => onDescargar(informe)}
         disabled={isDisabled}
-        className={`w-full inline-flex justify-center items-center px-3 py-2 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white ${
+        className={`flex-1 inline-flex justify-center items-center px-3 py-2 border border-transparent text-xs leading-4 font-medium rounded-md shadow-sm text-white ${
           isDisabled
             ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
             : 'bg-primary-600 hover:bg-primary-700 dark:bg-primary-700 dark:hover:bg-primary-600'
