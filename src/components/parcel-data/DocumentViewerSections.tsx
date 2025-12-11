@@ -352,24 +352,45 @@ const ImageViewer: React.FC<{ url: string; title: string; defaultImageUrl: strin
   defaultImageUrl,
 }) => {
   const [hasError, setHasError] = React.useState(false);
-  const [isUsingDefault, setIsUsingDefault] = React.useState(false);
+  const isUsingDefaultRef = React.useRef(false);
+  const hasHandledErrorRef = React.useRef(false);
+  const imgRef = React.useRef<HTMLImageElement | null>(null);
 
   const handleError = React.useCallback(
     (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
       const img = e.currentTarget;
-      
-      if (isUsingDefault || img.src === defaultImageUrl) {
-        setHasError(true);
+
+      if (hasHandledErrorRef.current) {
         img.onerror = null;
         return;
       }
 
-      setIsUsingDefault(true);
+      const currentSrc = img.src;
+      const isDefaultImage = currentSrc === defaultImageUrl || currentSrc.endsWith(defaultImageUrl);
+
+      if (isUsingDefaultRef.current || isDefaultImage) {
+        hasHandledErrorRef.current = true;
+        setHasError(true);
+        img.onerror = null;
+        if (imgRef.current) {
+          imgRef.current.onerror = null;
+        }
+        return;
+      }
+
+      isUsingDefaultRef.current = true;
+      hasHandledErrorRef.current = true;
       img.onerror = null;
       img.src = defaultImageUrl;
     },
-    [defaultImageUrl, isUsingDefault]
+    [defaultImageUrl]
   );
+
+  React.useEffect(() => {
+    isUsingDefaultRef.current = false;
+    hasHandledErrorRef.current = false;
+    setHasError(false);
+  }, [url]);
 
   if (hasError) {
     return (
@@ -381,6 +402,7 @@ const ImageViewer: React.FC<{ url: string; title: string; defaultImageUrl: strin
 
   return (
     <img
+      ref={imgRef}
       src={url}
       alt={title}
       className="max-w-full object-contain mx-auto"
