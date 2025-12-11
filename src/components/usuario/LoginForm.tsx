@@ -49,7 +49,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
         url="/login"
         noindex={true}
       />
-      <div className={`${styles['container']} min-h-screen flex justify-center items-center w-full`}>
+      <div
+        className={`${styles['container']} min-h-screen flex justify-center items-center w-full`}
+      >
         <div
           className={`${styles['formContainer']} bg-white dark:bg-gray-800 p-4 sm:p-8 rounded shadow`}
         >

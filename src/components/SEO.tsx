@@ -11,7 +11,8 @@ interface SEOProps {
 }
 
 const defaultTitle = 'PREFA-IA: Prefactibilidades Urbanísticas CABA';
-const defaultDescription = 'Sistema generador de prefactibilidades urbanísticas para CABA. Analizador de terrenos con interpretación automática del código urbanístico.';
+const defaultDescription =
+  'Sistema generador de prefactibilidades urbanísticas para CABA. Analizador de terrenos con interpretación automática del código urbanístico.';
 const defaultImage = '/logo.png';
 const defaultUrl = 'https://prefaia.com';
 const siteName = 'PREFA-IA';
@@ -32,17 +33,20 @@ const SEO: React.FC<SEOProps> = ({
       {/* Título y descripción básicos */}
       <title>{title}</title>
       <meta name="description" content={description} />
-      
+
       {/* Robots */}
       {noindex ? (
         <meta name="robots" content="noindex, nofollow" />
       ) : (
-        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+        <meta
+          name="robots"
+          content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
+        />
       )}
-      
+
       {/* Canonical URL */}
       <link rel="canonical" href={fullUrl} />
-      
+
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={type} />
       <meta property="og:url" content={fullUrl} />
@@ -54,7 +58,7 @@ const SEO: React.FC<SEOProps> = ({
       <meta property="og:image:alt" content={title} />
       <meta property="og:locale" content="es_AR" />
       <meta property="og:site_name" content={siteName} />
-      
+
       {/* Twitter Card */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:url" content={fullUrl} />
@@ -62,7 +66,7 @@ const SEO: React.FC<SEOProps> = ({
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={fullImageUrl} />
       <meta name="twitter:image:alt" content={title} />
-      
+
       {/* Geo tags (solo en homepage) */}
       {url === defaultUrl && (
         <>
@@ -80,4 +84,3 @@ const SEO: React.FC<SEOProps> = ({
 };
 
 export default SEO;
-
