@@ -5,6 +5,7 @@ import { Informe } from '../types/enums';
 
 import { useInformesDownload } from './use-informes-download';
 import { useInformesSearch } from './use-informes-search';
+import { useInformesShare } from './use-informes-share';
 
 const ITEMS_PER_PAGE_STORAGE_KEY = 'listaInformes_itemsPerPage';
 
@@ -77,12 +78,22 @@ export const useInformesList = () => {
     setError: setDownloadError,
   } = useInformesDownload();
 
+  const {
+    handleCompartir,
+    sharingIds,
+    error: shareError,
+    setError: setShareError,
+  } = useInformesShare();
+
   const { informes, loading, error, totalPages, cargarInformes } = useInformesData(
     page,
     search,
     itemsPerPage,
-    downloadError,
-    setDownloadError
+    downloadError || shareError,
+    (error) => {
+      setDownloadError(error);
+      setShareError(error);
+    }
   );
 
   const handlePrevPage = useCallback(() => {
@@ -122,10 +133,12 @@ export const useInformesList = () => {
     totalPages,
     search,
     downloadingIds,
+    sharingIds,
     searchCooldown,
     itemsPerPage,
     cargarInformes,
     handleDescargar,
+    handleCompartir,
     handleSearchSubmit: handleSearchSubmitWithReset,
     handleSearchChange,
     handlePrevPage,

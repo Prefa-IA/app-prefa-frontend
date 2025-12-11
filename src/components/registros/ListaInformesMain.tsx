@@ -20,12 +20,14 @@ interface ListaInformesMainProps {
   totalPages: number;
   search: string;
   downloadingIds: string[];
+  sharingIds: string[];
   searchCooldown: boolean;
   itemsPerPage?: number;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSearchSubmit: (e: React.FormEvent) => void;
   onRefresh: () => void;
   onDescargar: (informe: Informe) => void;
+  onCompartir: (informe: Informe) => void;
   onPrevPage: () => void;
   onNextPage: () => void;
   onItemsPerPageChange?: (limit: number) => void;
@@ -41,12 +43,14 @@ const ListaInformesMain: React.FC<ListaInformesMainProps> = ({
   totalPages,
   search,
   downloadingIds,
+  sharingIds,
   searchCooldown,
   itemsPerPage,
   onSearchChange,
   onSearchSubmit,
   onRefresh,
   onDescargar,
+  onCompartir,
   onPrevPage,
   onNextPage,
   onItemsPerPageChange,
@@ -72,7 +76,9 @@ const ListaInformesMain: React.FC<ListaInformesMainProps> = ({
             error={error}
             informes={informes}
             onDescargar={onDescargar}
+            onCompartir={onCompartir}
             downloadingIds={downloadingIds}
+            sharingIds={sharingIds}
           />
           <PaginationControls
             page={page}

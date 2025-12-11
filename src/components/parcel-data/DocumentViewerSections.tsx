@@ -411,7 +411,7 @@ const ImageViewer: React.FC<{
           }
           return;
         }
-        
+
         isUsingDefaultRef.current = true;
         hasHandledErrorRef.current = true;
         img.onerror = null;
@@ -433,7 +433,7 @@ const ImageViewer: React.FC<{
     setHasError(false);
     originalUrlRef.current = url;
   }, [url]);
-  
+
   React.useEffect(() => {
     if (hasError) {
       onErrorRef.current?.();
