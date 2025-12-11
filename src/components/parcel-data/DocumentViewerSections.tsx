@@ -394,7 +394,6 @@ const ImageViewer: React.FC<{
         console.warn(
           `[ImageViewer] No se pudo cargar la imagen. URL original: ${originalUrlRef.current}, URL actual: ${currentSrc}`
         );
-        onError?.();
         return;
       }
 
@@ -410,18 +409,23 @@ const ImageViewer: React.FC<{
           if (imgRef.current) {
             imgRef.current.onerror = null;
           }
-          onError?.();
           return;
         }
+        
+        isUsingDefaultRef.current = true;
+        hasHandledErrorRef.current = true;
+        img.onerror = null;
+        img.src = defaultImageUrl;
+        return;
       }
-
-      isUsingDefaultRef.current = true;
-      hasHandledErrorRef.current = true;
-      img.onerror = null;
-      img.src = defaultImageUrl;
     },
-    [defaultImageUrl, url, onError]
+    [defaultImageUrl, url]
   );
+
+  const onErrorRef = React.useRef(onError);
+  React.useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
 
   React.useEffect(() => {
     isUsingDefaultRef.current = false;
@@ -429,6 +433,12 @@ const ImageViewer: React.FC<{
     setHasError(false);
     originalUrlRef.current = url;
   }, [url]);
+  
+  React.useEffect(() => {
+    if (hasError) {
+      onErrorRef.current?.();
+    }
+  }, [hasError]);
 
   if (hasError) {
     return null;
