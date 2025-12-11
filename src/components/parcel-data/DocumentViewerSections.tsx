@@ -350,17 +350,44 @@ const ImageViewer: React.FC<{ url: string; title: string; defaultImageUrl: strin
   url,
   title,
   defaultImageUrl,
-}) => (
-  <img
-    src={url}
-    alt={title}
-    className="max-w-full object-contain mx-auto"
-    onError={(e) => {
-      e.currentTarget.onerror = null;
-      e.currentTarget.src = defaultImageUrl;
-    }}
-  />
-);
+}) => {
+  const [hasError, setHasError] = React.useState(false);
+  const [isUsingDefault, setIsUsingDefault] = React.useState(false);
+
+  const handleError = React.useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+      const img = e.currentTarget;
+      
+      if (isUsingDefault || img.src === defaultImageUrl) {
+        setHasError(true);
+        img.onerror = null;
+        return;
+      }
+
+      setIsUsingDefault(true);
+      img.onerror = null;
+      img.src = defaultImageUrl;
+    },
+    [defaultImageUrl, isUsingDefault]
+  );
+
+  if (hasError) {
+    return (
+      <div className="p-8 text-center text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-700 rounded">
+        No se pudo cargar la imagen
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={url}
+      alt={title}
+      className="max-w-full object-contain mx-auto"
+      onError={handleError}
+    />
+  );
+};
 
 const PdfViewer: React.FC<{ url: string; title: string; className?: string }> = ({
   url,

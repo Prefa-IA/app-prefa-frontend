@@ -102,10 +102,15 @@ const ZoningDataTable: React.FC<{
   calculatedValues: CalculatedValues;
 }> = ({ informe, calculatedValues: _calculatedValues }) => {
   const distritoCPU = informe.edificabilidad?.plusvalia?.distrito_cpu;
+  const catalogacionData = informe.edificabilidad?.catalogacion;
+  
   const catalogacion =
-    informe.edificabilidad?.catalogacion?.catalogacion ||
-    informe.edificabilidad?.catalogacion?.denominacion ||
+    catalogacionData?.catalogacion ||
+    catalogacionData?.denominacion ||
+    catalogacionData?.estado ||
+    catalogacionData?.proteccion ||
     null;
+  
   const troneras = informe.edificabilidad?.troneras;
 
   return (
