@@ -48,8 +48,35 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
+const normalizePerimetroManzanaUrl = (data: unknown): void => {
+  if (data && typeof data === 'object') {
+    const obj = data as Record<string, unknown>;
+    const edificabilidad = obj['edificabilidad'] as Record<string, unknown> | undefined;
+    if (edificabilidad) {
+      const linkImagen = edificabilidad['link_imagen'] as Record<string, unknown> | undefined;
+      if (linkImagen) {
+        const perimetroManzana = linkImagen['perimetro_manzana'];
+        if (
+          typeof perimetroManzana === 'string' &&
+          perimetroManzana.startsWith('https://www.ssplan.buenosaires.gov.ar')
+        ) {
+          linkImagen['perimetro_manzana'] = perimetroManzana.replace(
+            'https://www.ssplan.buenosaires.gov.ar',
+            'http://www.ssplan.buenosaires.gov.ar'
+          );
+        }
+      }
+    }
+  }
+};
+
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response.data) {
+      normalizePerimetroManzanaUrl(response.data);
+    }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 409 && error.response?.data?.status === 'in_progress') {
       error.code = 'PREFA_IN_PROGRESS';
@@ -428,13 +455,34 @@ const isValidInformeResponse = (data: Informe | (Informe & { inProgress: boolean
     return false;
   }
 
+  if (informe.datosIncompletos === true) {
+    const datosFaltantes = informe.datosFaltantes || [];
+    if (datosFaltantes.length > 0) {
+      return false;
+    }
+  }
+
   return hasDataContent(informe);
 };
 
-const shouldRetryError = (err: unknown): boolean => {
-  const error = err as { response?: { status?: number }; code?: string; message?: string };
+const isServerError = (status?: number): boolean => {
+  return status === 500 || status === 502 || status === 503 || status === 504;
+};
 
-  if (error.response?.status === 401 || error.response?.status === 403) {
+const isNetworkError = (message?: string): boolean => {
+  if (!message) return false;
+  return (
+    message.includes('timeout') ||
+    message.includes('Network Error') ||
+    message.includes('ECONNREFUSED')
+  );
+};
+
+const shouldRetryError = (err: unknown, attempt: number = 1): boolean => {
+  const error = err as { response?: { status?: number }; code?: string; message?: string };
+  const status = error.response?.status;
+
+  if (status === 401 || status === 403) {
     return false;
   }
 
@@ -442,15 +490,15 @@ const shouldRetryError = (err: unknown): boolean => {
     return false;
   }
 
-  if (
-    error.response?.status === 500 ||
-    error.response?.status === 502 ||
-    error.response?.status === 503 ||
-    error.response?.status === 504 ||
-    error.message?.includes('timeout') ||
-    error.message?.includes('Network Error') ||
-    error.message?.includes('ECONNREFUSED')
-  ) {
+  if (status === 429 && attempt > 1) {
+    return true;
+  }
+
+  if (isServerError(status)) {
+    return true;
+  }
+
+  if (isNetworkError(error.message)) {
     return true;
   }
 
@@ -478,7 +526,7 @@ const executeConsultaRequest = async (
       coordenadas,
       ...opts,
     },
-    { timeout: 40000 }
+    { timeout: 60000 }
   );
   return response.data;
 };
@@ -505,6 +553,27 @@ const processConsultaResponse = (
   }
 
   return { shouldReturn: true, shouldRetry: false, data };
+};
+
+const handleRetryError = async (
+  err: unknown,
+  attempt: number,
+  maxRetries: number
+): Promise<(Informe & { inProgress: boolean }) | null> => {
+  const inProgressResult = handleConsultaError(err);
+  if (inProgressResult) {
+    return inProgressResult;
+  }
+
+  if (!shouldRetryError(err, attempt) || attempt >= maxRetries) {
+    throw err;
+  }
+
+  console.warn(`[Retry ${attempt}/${maxRetries}] Error en consulta, reintentando...`, err);
+  const error = err as { response?: { status?: number } };
+  const waitTime = error.response?.status === 429 ? 2000 * attempt : 1000 * attempt;
+  await sleep(waitTime);
+  return null;
 };
 
 const retryConsulta = async (
@@ -537,22 +606,15 @@ const retryConsulta = async (
         console.warn(
           `[Retry ${attempt}/${maxRetries}] Respuesta sin datos válidos, reintentando...`
         );
-        await sleep(1000 * attempt);
+        await sleep(2000 * attempt);
         continue;
       }
     } catch (err: unknown) {
       lastErrorRef.value = err;
-      const inProgressResult = handleConsultaError(err);
+      const inProgressResult = await handleRetryError(err, attempt, maxRetries);
       if (inProgressResult) {
         return inProgressResult;
       }
-
-      if (!shouldRetryError(err) || attempt >= maxRetries) {
-        throw err;
-      }
-
-      console.warn(`[Retry ${attempt}/${maxRetries}] Error en consulta, reintentando...`, err);
-      await sleep(1000 * attempt);
     }
   }
 
