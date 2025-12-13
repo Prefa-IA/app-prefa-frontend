@@ -48,28 +48,49 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
+const normalizeSsplanUrl = (url: string): string => {
+  if (url.includes('ssplan.buenosaires.gov.ar')) {
+    return url.replace(/^https:\/\/(www\.)?ssplan\.buenosaires\.gov\.ar/, 'http://www.ssplan.buenosaires.gov.ar');
+  }
+  return url;
+};
+
+const normalizeLinkImagenUrls = (
+  linkImagen: {
+    perimetro_manzana?: string;
+    croquis_parcela?: string;
+    plano_indice?: string;
+  }
+): void => {
+  if (linkImagen.perimetro_manzana) {
+    linkImagen.perimetro_manzana = normalizeSsplanUrl(linkImagen.perimetro_manzana);
+  }
+  if (linkImagen.croquis_parcela) {
+    linkImagen.croquis_parcela = normalizeSsplanUrl(linkImagen.croquis_parcela);
+  }
+  if (linkImagen.plano_indice) {
+    linkImagen.plano_indice = normalizeSsplanUrl(linkImagen.plano_indice);
+  }
+};
+
 const normalizeSsplanUrls = (data: unknown): void => {
   if (!data || typeof data !== 'object') return;
 
-  const obj = data as Record<string, unknown>;
-
-  if (Array.isArray(obj)) {
-    obj.forEach((item) => normalizeSsplanUrls(item));
+  if (Array.isArray(data)) {
+    data.forEach((item) => normalizeSsplanUrls(item));
     return;
   }
 
+  const obj = data as Record<string, unknown>;
   const edificabilidad = obj['edificabilidad'] as Record<string, unknown> | undefined;
-  if (edificabilidad) {
-    const linkImagen = edificabilidad['link_imagen'] as Record<string, unknown> | undefined;
-    if (linkImagen) {
-      const urlFields = ['perimetro_manzana', 'croquis_parcela', 'plano_indice'];
-      urlFields.forEach((field) => {
-        const url = linkImagen[field];
-        if (typeof url === 'string' && url.includes('ssplan.buenosaires.gov.ar')) {
-          linkImagen[field] = url.replace(/^https:\/\/(www\.)?ssplan\.buenosaires\.gov\.ar/, 'http://www.ssplan.buenosaires.gov.ar');
-        }
-      });
-    }
+  const linkImagen = edificabilidad?.['link_imagen'];
+
+  if (linkImagen && typeof linkImagen === 'object') {
+    normalizeLinkImagenUrls(linkImagen as {
+      perimetro_manzana?: string;
+      croquis_parcela?: string;
+      plano_indice?: string;
+    });
   }
 
   Object.values(obj).forEach((value) => {
