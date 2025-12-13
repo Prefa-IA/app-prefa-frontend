@@ -111,6 +111,28 @@ const getGatewayUrl = (): string => {
   return 'http://localhost:4000/api';
 };
 
+const normalizeSsplanUrl = (url: string): string => {
+  if (url.includes('ssplan.buenosaires.gov.ar')) {
+    return url.replace(/^https:\/\/(www\.)?ssplan\.buenosaires\.gov\.ar/, 'http://www.ssplan.buenosaires.gov.ar');
+  }
+  return url;
+};
+
+const normalizeLinkImagenUrls = (informe: Informe): void => {
+  if (informe.edificabilidad?.link_imagen) {
+    const linkImagen = informe.edificabilidad.link_imagen;
+    if (linkImagen.perimetro_manzana) {
+      linkImagen.perimetro_manzana = normalizeSsplanUrl(linkImagen.perimetro_manzana);
+    }
+    if (linkImagen.croquis_parcela) {
+      linkImagen.croquis_parcela = normalizeSsplanUrl(linkImagen.croquis_parcela);
+    }
+    if (linkImagen.plano_indice) {
+      linkImagen.plano_indice = normalizeSsplanUrl(linkImagen.plano_indice);
+    }
+  }
+};
+
 const loadInformeInPrintMode = async (id: string, token: string): Promise<Informe> => {
   const gatewayUrl = getGatewayUrl();
   console.log(`[PrintInforme] Modo print - cargando desde ${gatewayUrl}`);
@@ -129,7 +151,9 @@ const loadInformeInPrintMode = async (id: string, token: string): Promise<Inform
     throw new Error(`Error ${response.status}: ${response.statusText}`);
   }
 
-  return response.json();
+  const informe = await response.json();
+  normalizeLinkImagenUrls(informe);
+  return informe;
 };
 
 const formatErrorMessage = (err: unknown, id: string): string => {
