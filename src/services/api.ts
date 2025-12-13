@@ -48,32 +48,41 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
-const normalizePerimetroManzanaUrl = (data: unknown): void => {
-  if (data && typeof data === 'object') {
-    const obj = data as Record<string, unknown>;
-    const edificabilidad = obj['edificabilidad'] as Record<string, unknown> | undefined;
-    if (edificabilidad) {
-      const linkImagen = edificabilidad['link_imagen'] as Record<string, unknown> | undefined;
-      if (linkImagen) {
-        const perimetroManzana = linkImagen['perimetro_manzana'];
-        if (
-          typeof perimetroManzana === 'string' &&
-          perimetroManzana.startsWith('https://www.ssplan.buenosaires.gov.ar')
-        ) {
-          linkImagen['perimetro_manzana'] = perimetroManzana.replace(
-            'https://www.ssplan.buenosaires.gov.ar',
-            'http://www.ssplan.buenosaires.gov.ar'
-          );
+const normalizeSsplanUrls = (data: unknown): void => {
+  if (!data || typeof data !== 'object') return;
+
+  const obj = data as Record<string, unknown>;
+
+  if (Array.isArray(obj)) {
+    obj.forEach((item) => normalizeSsplanUrls(item));
+    return;
+  }
+
+  const edificabilidad = obj['edificabilidad'] as Record<string, unknown> | undefined;
+  if (edificabilidad) {
+    const linkImagen = edificabilidad['link_imagen'] as Record<string, unknown> | undefined;
+    if (linkImagen) {
+      const urlFields = ['perimetro_manzana', 'croquis_parcela', 'plano_indice'];
+      urlFields.forEach((field) => {
+        const url = linkImagen[field];
+        if (typeof url === 'string' && url.includes('ssplan.buenosaires.gov.ar')) {
+          linkImagen[field] = url.replace(/^https:\/\/(www\.)?ssplan\.buenosaires\.gov\.ar/, 'http://www.ssplan.buenosaires.gov.ar');
         }
-      }
+      });
     }
   }
+
+  Object.values(obj).forEach((value) => {
+    if (value && typeof value === 'object') {
+      normalizeSsplanUrls(value);
+    }
+  });
 };
 
 api.interceptors.response.use(
   (response) => {
     if (response.data) {
-      normalizePerimetroManzanaUrl(response.data);
+      normalizeSsplanUrls(response.data);
     }
     return response;
   },
