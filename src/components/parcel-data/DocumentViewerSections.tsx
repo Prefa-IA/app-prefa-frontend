@@ -172,13 +172,15 @@ const CroquisSection: React.FC<{
     return null;
   }
 
+  const normalizedUrl = normalizeSsplanUrl(croquis);
+
   return (
     <div className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
       <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-2`} style={parentTableStyle}>
         CROQUIS DE LA PARCELA
       </div>
       <DocumentItem
-        url={croquis}
+        url={normalizedUrl}
         title="Croquis de la parcela"
         defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.CROQUIS}
         onError={() => setHasError(true)}
@@ -186,6 +188,13 @@ const CroquisSection: React.FC<{
       <PageNumber pageNumber={pageCounter} />
     </div>
   );
+};
+
+const normalizeSsplanUrl = (url: string): string => {
+  if (url.includes('ssplan.buenosaires.gov.ar')) {
+    return url.replace(/^https:\/\/(www\.)?ssplan\.buenosaires\.gov\.ar/, 'http://www.ssplan.buenosaires.gov.ar');
+  }
+  return url;
 };
 
 const PerimetroSection: React.FC<{
@@ -199,13 +208,15 @@ const PerimetroSection: React.FC<{
     return null;
   }
 
+  const normalizedUrl = normalizeSsplanUrl(perimetro);
+
   return (
     <div className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
       <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-2`} style={parentTableStyle}>
         PERÍMETRO DE LA MANZANA
       </div>
       <DocumentItem
-        url={perimetro}
+        url={normalizedUrl}
         title="Perímetro de la manzana"
         defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PERIMETRO}
         onError={() => setHasError(true)}
@@ -226,13 +237,15 @@ const PlanoIndiceSection: React.FC<{
     return null;
   }
 
+  const normalizedUrl = normalizeSsplanUrl(planoIndice);
+
   return (
     <div className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
       <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-2`} style={parentTableStyle}>
         PLANO ÍNDICE
       </div>
       <DocumentItem
-        url={planoIndice}
+        url={normalizedUrl}
         title="Plano índice"
         defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PLANO_INDICE}
         onError={() => setHasError(true)}
@@ -259,18 +272,21 @@ const CompoundCroquisSection: React.FC<{ croquis: string[]; pageCounter: number 
         CROQUIS DE LAS PARCELAS
       </div>
 
-      {validCroquis.map((url, index) => (
-        <DataTable key={index} title={`CROQUIS DE PARCELA ${index + 1}`} className="mb-6">
-          <div className="p-4 text-center">
-            <DocumentItem
-              url={url}
-              title={`Croquis de parcela ${index + 1}`}
-              defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.CROQUIS}
-              onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
-            />
-          </div>
-        </DataTable>
-      ))}
+      {validCroquis.map((url, index) => {
+        const normalizedUrl = normalizeSsplanUrl(url);
+        return (
+          <DataTable key={index} title={`CROQUIS DE PARCELA ${index + 1}`} className="mb-6">
+            <div className="p-4 text-center">
+              <DocumentItem
+                url={normalizedUrl}
+                title={`Croquis de parcela ${index + 1}`}
+                defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.CROQUIS}
+                onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
+              />
+            </div>
+          </DataTable>
+        );
+      })}
       <PageNumber pageNumber={pageCounter} />
     </div>
   );
@@ -293,18 +309,21 @@ const CompoundPerimetrosSection: React.FC<{ perimetros: string[]; pageCounter: n
         PERÍMETROS DE LAS MANZANAS
       </div>
 
-      {validPerimetros.map((url, index) => (
-        <DataTable key={index} title={`PERÍMETRO DE MANZANA ${index + 1}`} className="mb-6">
-          <div className="p-4 text-center">
-            <DocumentItem
-              url={url}
-              title={`Perímetro de manzana ${index + 1}`}
-              defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PERIMETRO}
-              onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
-            />
-          </div>
-        </DataTable>
-      ))}
+      {validPerimetros.map((url, index) => {
+        const normalizedUrl = normalizeSsplanUrl(url);
+        return (
+          <DataTable key={index} title={`PERÍMETRO DE MANZANA ${index + 1}`} className="mb-6">
+            <div className="p-4 text-center">
+              <DocumentItem
+                url={normalizedUrl}
+                title={`Perímetro de manzana ${index + 1}`}
+                defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PERIMETRO}
+                onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
+              />
+            </div>
+          </DataTable>
+        );
+      })}
       <PageNumber pageNumber={pageCounter} />
     </div>
   );
@@ -327,18 +346,21 @@ const CompoundPlanosIndiceSection: React.FC<{ planosIndice: string[]; pageCounte
         PLANOS ÍNDICE
       </div>
 
-      {validPlanosIndice.map((url, index) => (
-        <DataTable key={index} title={`PLANO ÍNDICE ${index + 1}`} className="mb-6">
-          <div className="p-4 text-center">
-            <DocumentItem
-              url={url}
-              title={`Plano índice ${index + 1}`}
-              defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PLANO_INDICE}
-              onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
-            />
-          </div>
-        </DataTable>
-      ))}
+      {validPlanosIndice.map((url, index) => {
+        const normalizedUrl = normalizeSsplanUrl(url);
+        return (
+          <DataTable key={index} title={`PLANO ÍNDICE ${index + 1}`} className="mb-6">
+            <div className="p-4 text-center">
+              <DocumentItem
+                url={normalizedUrl}
+                title={`Plano índice ${index + 1}`}
+                defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PLANO_INDICE}
+                onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
+              />
+            </div>
+          </DataTable>
+        );
+      })}
       <PageNumber pageNumber={pageCounter} />
     </div>
   );
