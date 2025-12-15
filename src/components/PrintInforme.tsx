@@ -113,7 +113,10 @@ const getGatewayUrl = (): string => {
 
 const normalizeSsplanUrl = (url: string): string => {
   if (url.includes('ssplan.buenosaires.gov.ar')) {
-    return url.replace(/^https:\/\/(www\.)?ssplan\.buenosaires\.gov\.ar/, 'http://www.ssplan.buenosaires.gov.ar');
+    return url.replace(
+      /^https:\/\/(www\.)?ssplan\.buenosaires\.gov\.ar/,
+      'http://www.ssplan.buenosaires.gov.ar'
+    );
   }
   return url;
 };

@@ -33,16 +33,11 @@ interface DocumentViewerSectionsProps {
 
 const calculatePageNumbers = (
   pageCounter: number,
-  pageNumbers:
-    | { croquis?: number; lbiLfi?: number; planoIndice?: number }
-    | undefined,
+  pageNumbers: { croquis?: number; lbiLfi?: number; planoIndice?: number } | undefined,
   hasCroquis: boolean,
   hasLbiLfi: boolean
 ) => {
-  const getPage = (
-    key: 'croquis' | 'lbiLfi' | 'planoIndice',
-    current: number
-  ): number => {
+  const getPage = (key: 'croquis' | 'lbiLfi' | 'planoIndice', current: number): number => {
     return (pageNumbers && Reflect.get(pageNumbers, key)) ?? current;
   };
 
@@ -172,7 +167,10 @@ const CroquisSection: React.FC<{
 
 const normalizeSsplanUrl = (url: string): string => {
   if (url.includes('ssplan.buenosaires.gov.ar')) {
-    return url.replace(/^https:\/\/(www\.)?ssplan\.buenosaires\.gov\.ar/, 'http://www.ssplan.buenosaires.gov.ar');
+    return url.replace(
+      /^https:\/\/(www\.)?ssplan\.buenosaires\.gov\.ar/,
+      'http://www.ssplan.buenosaires.gov.ar'
+    );
   }
   return url;
 };
@@ -226,16 +224,16 @@ const CompoundCroquisSection: React.FC<{ croquis: string[]; pageCounter: number 
       {validCroquis.map((url, index) => {
         const normalizedUrl = normalizeSsplanUrl(url);
         return (
-        <DataTable key={index} title={`CROQUIS DE PARCELA ${index + 1}`} className="mb-6">
-          <div className="p-4 text-center">
-            <DocumentItem
+          <DataTable key={index} title={`CROQUIS DE PARCELA ${index + 1}`} className="mb-6">
+            <div className="p-4 text-center">
+              <DocumentItem
                 url={normalizedUrl}
-              title={`Croquis de parcela ${index + 1}`}
-              defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.CROQUIS}
-              onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
-            />
-          </div>
-        </DataTable>
+                title={`Croquis de parcela ${index + 1}`}
+                defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.CROQUIS}
+                onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
+              />
+            </div>
+          </DataTable>
         );
       })}
       <PageNumber pageNumber={pageCounter} />
@@ -263,16 +261,16 @@ const CompoundPlanosIndiceSection: React.FC<{ planosIndice: string[]; pageCounte
       {validPlanosIndice.map((url, index) => {
         const normalizedUrl = normalizeSsplanUrl(url);
         return (
-        <DataTable key={index} title={`PLANO ÍNDICE ${index + 1}`} className="mb-6">
-          <div className="p-4 text-center">
-            <DocumentItem
+          <DataTable key={index} title={`PLANO ÍNDICE ${index + 1}`} className="mb-6">
+            <div className="p-4 text-center">
+              <DocumentItem
                 url={normalizedUrl}
-              title={`Plano índice ${index + 1}`}
-              defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PLANO_INDICE}
-              onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
-            />
-          </div>
-        </DataTable>
+                title={`Plano índice ${index + 1}`}
+                defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PLANO_INDICE}
+                onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
+              />
+            </div>
+          </DataTable>
         );
       })}
       <PageNumber pageNumber={pageCounter} />

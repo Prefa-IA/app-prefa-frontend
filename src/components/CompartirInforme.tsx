@@ -71,8 +71,16 @@ const necesitaRecalcular = (informe: Informe): boolean => {
   const areaSegundoRetiro = calculo['areaSegundoRetiro'] as number | undefined;
 
   const tieneRetiros = calculo['tieneRetiros'] as boolean | undefined;
-  if (tieneRetiros && (m2Ret1 === undefined || m2Ret1 === null || m2Ret2 === undefined || m2Ret2 === null)) {
-    if (areaPrimerRetiro === undefined || areaPrimerRetiro === null || areaSegundoRetiro === undefined || areaSegundoRetiro === null) {
+  if (
+    tieneRetiros &&
+    (m2Ret1 === undefined || m2Ret1 === null || m2Ret2 === undefined || m2Ret2 === null)
+  ) {
+    if (
+      areaPrimerRetiro === undefined ||
+      areaPrimerRetiro === null ||
+      areaSegundoRetiro === undefined ||
+      areaSegundoRetiro === null
+    ) {
       return true;
     }
   }
@@ -103,9 +111,11 @@ const useInformeCompartido = (token: string | undefined) => {
               try {
                 const parcelaParaCalcular = { ...dataInicial } as Record<string, unknown>;
                 const respuestaCalculo = await prefactibilidad.calcular(parcelaParaCalcular);
-                
+
                 if (respuestaCalculo && isValidProcessingResponse(respuestaCalculo)) {
-                  const calculoFromResponse = respuestaCalculo['calculo'] as Record<string, unknown> | undefined;
+                  const calculoFromResponse = respuestaCalculo['calculo'] as
+                    | Record<string, unknown>
+                    | undefined;
                   return {
                     ...dataInicial,
                     ...respuestaCalculo,
@@ -114,7 +124,10 @@ const useInformeCompartido = (token: string | undefined) => {
                 }
                 return dataInicial;
               } catch (calcError) {
-                console.warn('[CompartirInforme] Error al recalcular, usando datos guardados', calcError);
+                console.warn(
+                  '[CompartirInforme] Error al recalcular, usando datos guardados',
+                  calcError
+                );
                 return dataInicial;
               }
             })()
