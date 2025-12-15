@@ -121,9 +121,6 @@ const normalizeSsplanUrl = (url: string): string => {
 const normalizeLinkImagenUrls = (informe: Informe): void => {
   if (informe.edificabilidad?.link_imagen) {
     const linkImagen = informe.edificabilidad.link_imagen;
-    if (linkImagen.perimetro_manzana) {
-      linkImagen.perimetro_manzana = normalizeSsplanUrl(linkImagen.perimetro_manzana);
-    }
     if (linkImagen.croquis_parcela) {
       linkImagen.croquis_parcela = normalizeSsplanUrl(linkImagen.croquis_parcela);
     }

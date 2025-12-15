@@ -34,34 +34,29 @@ interface DocumentViewerSectionsProps {
 const calculatePageNumbers = (
   pageCounter: number,
   pageNumbers:
-    | { croquis?: number; perimetro?: number; lbiLfi?: number; planoIndice?: number }
+    | { croquis?: number; lbiLfi?: number; planoIndice?: number }
     | undefined,
   hasCroquis: boolean,
-  hasPerimetro: boolean,
   hasLbiLfi: boolean
 ) => {
   const getPage = (
-    key: 'croquis' | 'perimetro' | 'lbiLfi' | 'planoIndice',
+    key: 'croquis' | 'lbiLfi' | 'planoIndice',
     current: number
   ): number => {
     return (pageNumbers && Reflect.get(pageNumbers, key)) ?? current;
   };
 
   const croquisPage = getPage('croquis', pageCounter);
-  const perimetroPage = getPage(
-    'perimetro',
-    hasCroquis && !pageNumbers?.croquis ? croquisPage + 1 : croquisPage
-  );
   const lbiLfiPage = getPage(
     'lbiLfi',
-    hasPerimetro && !pageNumbers?.perimetro ? perimetroPage + 1 : perimetroPage
+    hasCroquis && !pageNumbers?.croquis ? croquisPage + 1 : croquisPage
   );
   const planoIndicePage = getPage(
     'planoIndice',
     hasLbiLfi && !pageNumbers?.lbiLfi ? lbiLfiPage + 1 : lbiLfiPage
   );
 
-  return { croquisPage, perimetroPage, lbiLfiPage, planoIndicePage };
+  return { croquisPage, lbiLfiPage, planoIndicePage };
 };
 
 const shouldShowSection = (hasData: boolean): boolean => {
@@ -76,23 +71,20 @@ export const SingleInformeSections: React.FC<DocumentViewerSectionsProps> = ({
 }) => {
   const linkImagen = informeAMostrar.edificabilidad?.link_imagen;
   const hasCroquis = !!linkImagen?.croquis_parcela;
-  const hasPerimetro = !!linkImagen?.perimetro_manzana;
   // Sección LFI Y LIB oculta temporalmente
   // const hasLbiLfi = !!(informeAMostrar.googleMaps && informeAMostrar.datosCatastrales?.smp);
   const hasPlanoIndice = !!linkImagen?.plano_indice;
 
   const showCroquis = shouldShowSection(hasCroquis);
-  const showPerimetro = shouldShowSection(hasPerimetro);
   // Sección LFI Y LIB oculta temporalmente
   const showLbiLfi = false;
   const showPlanoIndice = shouldShowSection(hasPlanoIndice);
 
   const {
     croquisPage,
-    perimetroPage,
     lbiLfiPage: _lbiLfiPage,
     planoIndicePage,
-  } = calculatePageNumbers(pageCounter, pageNumbers, showCroquis, showPerimetro, showLbiLfi);
+  } = calculatePageNumbers(pageCounter, pageNumbers, showCroquis, showLbiLfi);
 
   return (
     <>
@@ -100,13 +92,6 @@ export const SingleInformeSections: React.FC<DocumentViewerSectionsProps> = ({
         <CroquisSection
           {...(linkImagen?.croquis_parcela ? { croquis: linkImagen.croquis_parcela } : {})}
           pageCounter={croquisPage}
-        />
-      )}
-
-      {showPerimetro && (
-        <PerimetroSection
-          {...(linkImagen?.perimetro_manzana ? { perimetro: linkImagen.perimetro_manzana } : {})}
-          pageCounter={perimetroPage}
         />
       )}
 
@@ -136,14 +121,9 @@ export const CompoundInformeSections: React.FC<DocumentViewerSectionsProps> = ({
     <>
       <CompoundCroquisSection croquis={documentosVisuales.croquis} pageCounter={pageCounter} />
 
-      <CompoundPerimetrosSection
-        perimetros={documentosVisuales.perimetros}
-        pageCounter={pageCounter + 1}
-      />
-
       <CompoundPlanosIndiceSection
         planosIndice={documentosVisuales.planosIndice}
-        pageCounter={pageCounter + 2}
+        pageCounter={pageCounter + 1}
       />
 
       {/* Sección LFI Y LIB oculta temporalmente
@@ -197,35 +177,6 @@ const normalizeSsplanUrl = (url: string): string => {
   return url;
 };
 
-const PerimetroSection: React.FC<{
-  perimetro?: string;
-  pageCounter: number;
-}> = ({ perimetro, pageCounter }) => {
-  const { parentTableStyle } = useTablePersonalization();
-  const [hasError, setHasError] = React.useState(false);
-
-  if (!perimetro || hasError) {
-    return null;
-  }
-
-  const normalizedUrl = normalizeSsplanUrl(perimetro);
-
-  return (
-    <div className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
-      <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-2`} style={parentTableStyle}>
-        PERÍMETRO DE LA MANZANA
-      </div>
-      <DocumentItem
-        url={normalizedUrl}
-        title="Perímetro de la manzana"
-        defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PERIMETRO}
-        onError={() => setHasError(true)}
-      />
-      <PageNumber pageNumber={pageCounter} />
-    </div>
-  );
-};
-
 const PlanoIndiceSection: React.FC<{
   planoIndice?: string;
   pageCounter: number;
@@ -275,53 +226,16 @@ const CompoundCroquisSection: React.FC<{ croquis: string[]; pageCounter: number 
       {validCroquis.map((url, index) => {
         const normalizedUrl = normalizeSsplanUrl(url);
         return (
-          <DataTable key={index} title={`CROQUIS DE PARCELA ${index + 1}`} className="mb-6">
-            <div className="p-4 text-center">
-              <DocumentItem
+        <DataTable key={index} title={`CROQUIS DE PARCELA ${index + 1}`} className="mb-6">
+          <div className="p-4 text-center">
+            <DocumentItem
                 url={normalizedUrl}
-                title={`Croquis de parcela ${index + 1}`}
-                defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.CROQUIS}
-                onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
-              />
-            </div>
-          </DataTable>
-        );
-      })}
-      <PageNumber pageNumber={pageCounter} />
-    </div>
-  );
-};
-
-const CompoundPerimetrosSection: React.FC<{ perimetros: string[]; pageCounter: number }> = ({
-  perimetros,
-  pageCounter,
-}) => {
-  const { parentTableStyle } = useTablePersonalization();
-  const [errorUrls, setErrorUrls] = React.useState<Set<string>>(new Set());
-
-  const validPerimetros = perimetros.filter((url) => !errorUrls.has(url));
-
-  if (validPerimetros.length === 0) return null;
-
-  return (
-    <div className={PARCEL_DATA_CONFIG.PAGE_BREAK_CLASS}>
-      <div className={`${PARCEL_DATA_CONFIG.TABLE_HEADER_CLASS} mb-2`} style={parentTableStyle}>
-        PERÍMETROS DE LAS MANZANAS
-      </div>
-
-      {validPerimetros.map((url, index) => {
-        const normalizedUrl = normalizeSsplanUrl(url);
-        return (
-          <DataTable key={index} title={`PERÍMETRO DE MANZANA ${index + 1}`} className="mb-6">
-            <div className="p-4 text-center">
-              <DocumentItem
-                url={normalizedUrl}
-                title={`Perímetro de manzana ${index + 1}`}
-                defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PERIMETRO}
-                onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
-              />
-            </div>
-          </DataTable>
+              title={`Croquis de parcela ${index + 1}`}
+              defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.CROQUIS}
+              onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
+            />
+          </div>
+        </DataTable>
         );
       })}
       <PageNumber pageNumber={pageCounter} />
@@ -349,16 +263,16 @@ const CompoundPlanosIndiceSection: React.FC<{ planosIndice: string[]; pageCounte
       {validPlanosIndice.map((url, index) => {
         const normalizedUrl = normalizeSsplanUrl(url);
         return (
-          <DataTable key={index} title={`PLANO ÍNDICE ${index + 1}`} className="mb-6">
-            <div className="p-4 text-center">
-              <DocumentItem
+        <DataTable key={index} title={`PLANO ÍNDICE ${index + 1}`} className="mb-6">
+          <div className="p-4 text-center">
+            <DocumentItem
                 url={normalizedUrl}
-                title={`Plano índice ${index + 1}`}
-                defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PLANO_INDICE}
-                onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
-              />
-            </div>
-          </DataTable>
+              title={`Plano índice ${index + 1}`}
+              defaultImageUrl={PARCEL_DATA_CONFIG.DEFAULT_IMAGES.PLANO_INDICE}
+              onError={() => setErrorUrls((prev) => new Set(prev).add(url))}
+            />
+          </div>
+        </DataTable>
         );
       })}
       <PageNumber pageNumber={pageCounter} />

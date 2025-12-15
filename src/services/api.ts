@@ -57,14 +57,10 @@ const normalizeSsplanUrl = (url: string): string => {
 
 const normalizeLinkImagenUrls = (
   linkImagen: {
-    perimetro_manzana?: string;
     croquis_parcela?: string;
     plano_indice?: string;
   }
 ): void => {
-  if (linkImagen.perimetro_manzana) {
-    linkImagen.perimetro_manzana = normalizeSsplanUrl(linkImagen.perimetro_manzana);
-  }
   if (linkImagen.croquis_parcela) {
     linkImagen.croquis_parcela = normalizeSsplanUrl(linkImagen.croquis_parcela);
   }
@@ -82,12 +78,11 @@ const normalizeSsplanUrls = (data: unknown): void => {
   }
 
   const obj = data as Record<string, unknown>;
-  const edificabilidad = obj['edificabilidad'] as Record<string, unknown> | undefined;
+    const edificabilidad = obj['edificabilidad'] as Record<string, unknown> | undefined;
   const linkImagen = edificabilidad?.['link_imagen'];
 
   if (linkImagen && typeof linkImagen === 'object') {
     normalizeLinkImagenUrls(linkImagen as {
-      perimetro_manzana?: string;
       croquis_parcela?: string;
       plano_indice?: string;
     });
@@ -96,7 +91,7 @@ const normalizeSsplanUrls = (data: unknown): void => {
   Object.values(obj).forEach((value) => {
     if (value && typeof value === 'object') {
       normalizeSsplanUrls(value);
-    }
+        }
   });
 };
 
