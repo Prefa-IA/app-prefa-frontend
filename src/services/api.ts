@@ -50,21 +50,18 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
 const normalizeSsplanUrl = (url: string): string => {
   if (url.includes('ssplan.buenosaires.gov.ar')) {
-    return url.replace(/^https:\/\/(www\.)?ssplan\.buenosaires\.gov\.ar/, 'http://www.ssplan.buenosaires.gov.ar');
+    return url.replace(
+      /^https:\/\/(www\.)?ssplan\.buenosaires\.gov\.ar/,
+      'http://www.ssplan.buenosaires.gov.ar'
+    );
   }
   return url;
 };
 
-const normalizeLinkImagenUrls = (
-  linkImagen: {
-    perimetro_manzana?: string;
-    croquis_parcela?: string;
-    plano_indice?: string;
-  }
-): void => {
-  if (linkImagen.perimetro_manzana) {
-    linkImagen.perimetro_manzana = normalizeSsplanUrl(linkImagen.perimetro_manzana);
-  }
+const normalizeLinkImagenUrls = (linkImagen: {
+  croquis_parcela?: string;
+  plano_indice?: string;
+}): void => {
   if (linkImagen.croquis_parcela) {
     linkImagen.croquis_parcela = normalizeSsplanUrl(linkImagen.croquis_parcela);
   }
@@ -86,11 +83,12 @@ const normalizeSsplanUrls = (data: unknown): void => {
   const linkImagen = edificabilidad?.['link_imagen'];
 
   if (linkImagen && typeof linkImagen === 'object') {
-    normalizeLinkImagenUrls(linkImagen as {
-      perimetro_manzana?: string;
-      croquis_parcela?: string;
-      plano_indice?: string;
-    });
+    normalizeLinkImagenUrls(
+      linkImagen as {
+        croquis_parcela?: string;
+        plano_indice?: string;
+      }
+    );
   }
 
   Object.values(obj).forEach((value) => {

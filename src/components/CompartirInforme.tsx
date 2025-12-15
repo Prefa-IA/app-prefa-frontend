@@ -5,6 +5,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { prefactibilidad } from '../services/api';
 import { TIPO_PREFA } from '../types/consulta-direccion';
 import { Informe, PrefaType } from '../types/enums';
+import { isValidProcessingResponse } from '../utils/consulta-direccion-utils';
 
 import ReportPreview from './reportes/ReportPreview';
 
@@ -60,6 +61,33 @@ const usePrefaWatermark = () => {
   }, [theme]);
 };
 
+const necesitaRecalcular = (informe: Informe): boolean => {
+  const calculo = informe.calculo as Record<string, unknown> | undefined;
+  if (!calculo) return true;
+
+  const m2Ret1 = calculo['m2Ret1'] as number | undefined;
+  const m2Ret2 = calculo['m2Ret2'] as number | undefined;
+  const areaPrimerRetiro = calculo['areaPrimerRetiro'] as number | undefined;
+  const areaSegundoRetiro = calculo['areaSegundoRetiro'] as number | undefined;
+
+  const tieneRetiros = calculo['tieneRetiros'] as boolean | undefined;
+  if (
+    tieneRetiros &&
+    (m2Ret1 === undefined || m2Ret1 === null || m2Ret2 === undefined || m2Ret2 === null)
+  ) {
+    if (
+      areaPrimerRetiro === undefined ||
+      areaPrimerRetiro === null ||
+      areaSegundoRetiro === undefined ||
+      areaSegundoRetiro === null
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 const useInformeCompartido = (token: string | undefined) => {
   const [informe, setInforme] = useState<Informe | null>(null);
   const [loading, setLoading] = useState(true);
@@ -76,8 +104,36 @@ const useInformeCompartido = (token: string | undefined) => {
       try {
         setLoading(true);
         setError(null);
-        const data = await prefactibilidad.obtenerInformeCompartido(token);
-        setInforme(data);
+        const dataInicial = await prefactibilidad.obtenerInformeCompartido(token);
+
+        const dataFinal = necesitaRecalcular(dataInicial)
+          ? await (async () => {
+              try {
+                const parcelaParaCalcular = { ...dataInicial } as Record<string, unknown>;
+                const respuestaCalculo = await prefactibilidad.calcular(parcelaParaCalcular);
+
+                if (respuestaCalculo && isValidProcessingResponse(respuestaCalculo)) {
+                  const calculoFromResponse = respuestaCalculo['calculo'] as
+                    | Record<string, unknown>
+                    | undefined;
+                  return {
+                    ...dataInicial,
+                    ...respuestaCalculo,
+                    calculo: calculoFromResponse || dataInicial.calculo,
+                  } as Informe;
+                }
+                return dataInicial;
+              } catch (calcError) {
+                console.warn(
+                  '[CompartirInforme] Error al recalcular, usando datos guardados',
+                  calcError
+                );
+                return dataInicial;
+              }
+            })()
+          : dataInicial;
+
+        setInforme(dataFinal);
       } catch (err: unknown) {
         console.error('[CompartirInforme] Error cargando informe', err);
         const errorMessage =
