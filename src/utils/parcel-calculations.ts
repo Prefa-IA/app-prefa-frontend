@@ -644,9 +644,8 @@ const calculatePlusvaliaB = (informe: Informe): number => {
 
   const { incidencia_uva } = informe.edificabilidad.plusvalia;
   const alicuotaValor = calculateAlicuota(informe);
-  
   const incidenciaUvaValor = Number(incidencia_uva) || 0;
-  
+
   return alicuotaValor * incidenciaUvaValor;
 };
 
@@ -906,15 +905,9 @@ const calcularValoresPlusvalia = (
   const a2Recalculado = calculateA2(superficieParcela, fotMedanera);
   const aRecalculado = calculateA(valoresA.a1Final, a2Recalculado);
 
-  const axbRecalculado =
-    tieneCalculoMotor && valoresCalculo.montoFinalPlusvalia > 0 && alicuotaValor > 0
-      ? valoresCalculo.montoFinalPlusvalia / alicuotaValor
-      : calculateAxB(aRecalculado, b);
+  const axbRecalculado = calculateAxB(aRecalculado, b);
 
-  const plusvaliaFinalFinal =
-    tieneCalculoMotor && valoresCalculo.montoFinalPlusvalia > 0
-      ? valoresCalculo.montoFinalPlusvalia
-      : calculatePlusvaliaFinal(axbRecalculado, alicuotaValor);
+  const plusvaliaFinalFinal = calculatePlusvaliaFinal(axbRecalculado, alicuotaValor);
 
   const lfiAfeccionPercentFinal = calcularLfiAfeccionPercent(
     valoresCalculo.lfiAplicada,
