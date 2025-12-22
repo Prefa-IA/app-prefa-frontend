@@ -69,7 +69,7 @@ const BuscarDireccionForm: React.FC<BuscarDireccionFormProps> = ({
   onSearch,
 }) => (
   <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-6 mt-4">
-    <h1 className="text-2xl font-bold text-[#0369A1] mb-4">Buscar dirección</h1>
+    <h1 className="text-2xl font-bold text-[#0369A1] mb-4">Buscar Datos básicos</h1>
     <SearchSection
       direccion={direccion}
       onDireccionChange={setDireccion}

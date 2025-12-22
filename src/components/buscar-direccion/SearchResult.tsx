@@ -3,6 +3,8 @@ import React from 'react';
 import { BasicInformationProps } from '../../types/enums';
 import BasicInformation from '../parcel-data/BasicInformation';
 
+import BasicSearchAdditionalSections from './BasicSearchAdditionalSections';
+
 interface SearchResultProps {
   resultado: BasicInformationProps['informe'];
   calculatedValues: BasicInformationProps['calculatedValues'];
@@ -17,6 +19,7 @@ const SearchResult: React.FC<SearchResultProps> = ({ resultado, calculatedValues
       pageCounter={0}
       isBasicSearch={true}
     />
+    <BasicSearchAdditionalSections informe={resultado} calculatedValues={calculatedValues} />
   </div>
 );
 
