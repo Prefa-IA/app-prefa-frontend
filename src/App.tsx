@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify';
 
 import OveragesAdmin from './components/admin/OveragesAdmin';
 import BuscarDireccionPage from './components/BuscarDireccionPage';
+import CareersPage from './components/CareersPage';
 import CompartirInforme from './components/CompartirInforme';
 import ConsultaDireccion from './components/ConsultaDireccion';
 import ForgotPasswordPage from './components/ForgotPasswordPage';
@@ -111,6 +112,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/resend-verification" element={<ResendVerificationPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/career" element={<CareersPage />} />
       <Route
         path="/admin/facturacion/overages"
         element={

@@ -58,7 +58,7 @@ authenticatedTest.describe('Consulta Básica', () => {
     expect(mapVisible || await authenticatedPage.locator('[id*="map"]').count() > 0).toBeTruthy();
   });
 
-  authenticatedTest('debe buscar dirección', async ({ authenticatedPage }) => {
+  authenticatedTest('debe buscar Datos básicos', async ({ authenticatedPage }) => {
     const address = testData.addresses.valid.street;
     await consultaPage.fillAddress(address);
     

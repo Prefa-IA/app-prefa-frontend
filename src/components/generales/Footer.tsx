@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { redesSociales, RedSocial } from '../../services/api';
 import { FooterModalProps } from '../../types/components';
@@ -117,11 +118,8 @@ const SocialIcon: React.FC<{ logo: RedSocial['logo'] }> = ({ logo }) => {
   }
 };
 
-const Footer: React.FC = () => {
-  const [showTyC, setShowTyC] = useState(false);
-  const [showPrivacy, setShowPrivacy] = useState(false);
+const useRedesSociales = () => {
   const [redes, setRedes] = useState<RedSocial[]>([]);
-  const year = new Date().getFullYear();
 
   useEffect(() => {
     const fetchRedes = async () => {
@@ -135,42 +133,71 @@ const Footer: React.FC = () => {
     void fetchRedes();
   }, []);
 
+  return redes;
+};
+
+const SocialLinks: React.FC<{ redes: RedSocial[] }> = ({ redes }) => {
+  if (redes.length === 0) return null;
+
+  return (
+    <div className="flex items-center gap-3">
+      {redes.map((red) => (
+        <a
+          key={red._id}
+          href={red.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-110 transition-transform"
+          title={red.nombre}
+          aria-label={red.nombre}
+        >
+          <SocialIcon logo={red.logo} />
+        </a>
+      ))}
+    </div>
+  );
+};
+
+const LegalLinks: React.FC<{
+  onShowTyC: () => void;
+  onShowPrivacy: () => void;
+}> = ({ onShowTyC, onShowPrivacy }) => (
+  <div className="flex items-center flex-wrap gap-3">
+    <Link
+      to="/career"
+      className="text-primary-600 dark:text-primary-400 hover:underline"
+    >
+      Trabajá con Nosotros
+    </Link>
+    <span className="text-gray-400 dark:text-gray-500">|</span>
+    <button
+      onClick={onShowTyC}
+      className="text-primary-600 dark:text-primary-400 hover:underline"
+    >
+      Términos y Condiciones
+    </button>
+    <span className="text-gray-400 dark:text-gray-500">|</span>
+    <button
+      onClick={onShowPrivacy}
+      className="text-primary-600 dark:text-primary-400 hover:underline"
+    >
+      Políticas de Privacidad
+    </button>
+  </div>
+);
+
+const Footer: React.FC = () => {
+  const [showTyC, setShowTyC] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const redes = useRedesSociales();
+  const year = new Date().getFullYear();
+
   return (
     <footer className="bg-gray-100 dark:bg-gray-800 py-4 mt-8 border-t border-gray-200 dark:border-gray-700">
       <div className="w-[95%] lg:w-[63%] max-w-8xl mx-auto flex flex-col sm:flex-row justify-between items-center text-sm text-gray-600 dark:text-gray-300 gap-4">
         <div className="mb-2 sm:mb-0">Todos los derechos reservados © {year} Prefa-IA</div>
-        {redes.length > 0 && (
-          <div className="flex items-center gap-3">
-            {redes.map((red) => (
-              <a
-                key={red._id}
-                href={red.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-110 transition-transform"
-                title={red.nombre}
-                aria-label={red.nombre}
-              >
-                <SocialIcon logo={red.logo} />
-              </a>
-            ))}
-          </div>
-        )}
-        <div className="flex items-center">
-          <button
-            onClick={() => setShowTyC(true)}
-            className="text-primary-600 dark:text-primary-400 hover:underline"
-          >
-            Términos y Condiciones
-          </button>
-          <span className="mx-3 text-gray-400 dark:text-gray-500">|</span>
-          <button
-            onClick={() => setShowPrivacy(true)}
-            className="text-primary-600 dark:text-primary-400 hover:underline"
-          >
-            Políticas de Privacidad
-          </button>
-        </div>
+        <SocialLinks redes={redes} />
+        <LegalLinks onShowTyC={() => setShowTyC(true)} onShowPrivacy={() => setShowPrivacy(true)} />
       </div>
 
       {showTyC && (

@@ -116,18 +116,13 @@ const CalculoA1Table: React.FC<CalculoA1TableProps> = ({ informe: _informe, calc
     <div className="p-2">
       <div className="space-y-2">
         <TableRow
-          label="Superficie de la Parcela"
-          value={`${(calculatedValues['superficieParcela'] as number) || 0} m²`}
-        />
-
-        <TableRow
-          label="FOT"
-          value={(calculatedValues['fotMedanera'] as number | undefined)?.toString() || 'N/A'}
+          label="Capacidad Constructiva Total"
+          value={`${((calculatedValues['totalCapConstructiva'] as number) || 0).toFixed(2)} m²`}
         />
 
         <div className="border-t pt-2 mt-2">
           <TableRow
-            label="A1 = Superficie × FOT"
+            label="A1 = Capacidad Constructiva × 0.8"
             value={`${((calculatedValues['a1'] as number) || 0).toFixed(2)} m²`}
           />
         </div>
@@ -141,15 +136,18 @@ const CalculoA2Table: React.FC<CalculoA2TableProps> = ({ informe: _informe, calc
     <div className="p-2">
       <div className="space-y-2">
         <TableRow
-          label="Capacidad Constructiva Total"
-          value={`${((calculatedValues['totalCapConstructiva'] as number) || 0).toFixed(2)} m²`}
+          label="Superficie de la Parcela"
+          value={`${(calculatedValues['superficieParcela'] as number) || 0} m²`}
         />
 
-        <TableRow label="A1" value={`${((calculatedValues['a1'] as number) || 0).toFixed(2)} m²`} />
+        <TableRow
+          label="FOT"
+          value={(calculatedValues['fotMedanera'] as number | undefined)?.toString() || 'N/A'}
+        />
 
         <div className="border-t pt-2 mt-2">
           <TableRow
-            label="A2 = Cap. Constructiva - A1"
+            label="A2 = FOT × Sup Parcela"
             value={`${((calculatedValues['a2'] as number) || 0).toFixed(2)} m²`}
           />
         </div>
@@ -165,13 +163,13 @@ const PlusvaliaFinalTable: React.FC<PlusvaliaFinalTableProps> = ({ calculatedVal
         <div className="grid grid-cols-2 gap-4">
           <div>
             <TableRow
-              label="A = A1 + A2"
+              label="A = A1 - A2"
               value={`${((calculatedValues['a'] as number) || 0).toFixed(2)} m²`}
             />
           </div>
           <div>
             <TableRow
-              label="B (Valor Incidencia Suelo)"
+              label="B = Alícuota × Incidencia UVA"
               value={`${((calculatedValues['b'] as number) || 0).toLocaleString('es-AR')} UVAs/m²`}
             />
           </div>

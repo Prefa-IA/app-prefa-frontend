@@ -846,4 +846,19 @@ export const redesSociales = {
   },
 };
 
+export interface Career {
+  _id: string;
+  titulo: string;
+  descripcion?: string;
+  url: string;
+  tipo: 'developer' | 'marketing' | 'design' | 'sales' | 'support' | 'other';
+}
+
+export const careers = {
+  obtenerCareersActivas: async (): Promise<Career[]> => {
+    const response = await api.get<Career[]>('/careers/public');
+    return response.data;
+  },
+};
+
 export default api;

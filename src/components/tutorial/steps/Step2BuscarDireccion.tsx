@@ -12,7 +12,7 @@ export const Step2BuscarDireccion: React.FC = () => {
 
   return (
     <TutorialStep
-      title="Buscar Dirección"
+      title="Buscar Datos básicos"
       description="Utiliza esta herramienta para buscar direcciones y generar consultas de prefactibilidad. Cada consulta consume créditos según su tipo."
     >
       <div className="mt-6 space-y-4">
@@ -20,7 +20,7 @@ export const Step2BuscarDireccion: React.FC = () => {
           <CurrencyDollarIcon className="h-6 w-6 text-green-600 dark:text-green-400 flex-shrink-0" />
           <div className="text-left">
             <p className="font-semibold text-gray-900 dark:text-gray-100">
-              {creditBalance} créditos disponibles
+              {creditBalance} créditos disponibles que se renuevan cada mes
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Cada consulta consume créditos según su tipo y complejidad

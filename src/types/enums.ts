@@ -560,7 +560,7 @@ export const NAVBAR_CONFIG = {
   NAVIGATION: [
     { name: 'Inicio', href: '/' },
     { name: 'Generar informe', href: '/consultar' },
-    { name: 'Buscar dirección', href: '/buscar' },
+    { name: 'Buscar Datos básicos', href: '/buscar' },
     { name: 'Registros', href: '/informes' },
     { name: 'Precios', href: '/suscripciones' },
   ],

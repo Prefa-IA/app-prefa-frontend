@@ -27,7 +27,7 @@ export const TUTORIAL_STEPS: TutorialStepContent[] = [
     highlightElement: '[data-tutorial="chatbot"]',
   },
   {
-    title: 'Buscar Dirección',
+    title: 'Buscar Datos básicos',
     description:
       'Utiliza esta herramienta para buscar direcciones y generar consultas de prefactibilidad. Cada consulta consume créditos según su tipo.',
     highlightElement: '[data-tutorial="buscar-direccion"]',

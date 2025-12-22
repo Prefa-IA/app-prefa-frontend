@@ -2,6 +2,7 @@ import React from 'react';
 
 import { TipoPrefa } from '../../types/consulta-direccion';
 import { Informe } from '../../types/enums';
+import ComingSoonAlert from '../generales/ComingSoonAlert';
 
 import ConsultaMainContent from './ConsultaMainContent';
 import ConsultaModalsContent from './ConsultaModalsContent';
@@ -71,6 +72,7 @@ const ConsultaDireccionContentWrapper: React.FC<ConsultaDireccionContentWrapperP
   isValidating,
 }) => (
   <div className={`flex flex-col w-full items-center ${className || ''}`}>
+    <ComingSoonAlert />
     <div className="w-full flex justify-center items-start mt-8">
       <div className="w-full max-w-6xl">
         <CreditCostsBox />

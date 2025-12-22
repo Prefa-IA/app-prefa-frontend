@@ -427,16 +427,16 @@ export const calculateTotalCapConstructiva = (
   return areaPlantasTipicas + areaPrimerRetiro + areaSegundoRetiro;
 };
 
-export const calculateA1 = (superficieParcela: number, fotMedanera: number): number => {
-  return superficieParcela * fotMedanera;
+export const calculateA1 = (totalCapConstructiva: number): number => {
+  return totalCapConstructiva * 0.8;
 };
 
-export const calculateA2 = (totalCapConstructivaAjustada: number, a1: number): number => {
-  return totalCapConstructivaAjustada - a1;
+export const calculateA2 = (superficieParcela: number, fotMedanera: number): number => {
+  return fotMedanera * superficieParcela;
 };
 
 export const calculateA = (a1: number, a2: number): number => {
-  return a1 + a2;
+  return a1 - a2;
 };
 
 export const calculateAxB = (a: number, b: number): number => {
@@ -642,17 +642,11 @@ const calculateCapacidadConstructiva = (
 const calculatePlusvaliaB = (informe: Informe): number => {
   if (!informe.edificabilidad?.plusvalia) return 0;
 
-  const { incidencia_uva, plusvalia_em, plusvalia_pl, plusvalia_sl, uvaPersonalizado } =
-    informe.edificabilidad.plusvalia;
+  const { incidencia_uva } = informe.edificabilidad.plusvalia;
+  const alicuotaValor = calculateAlicuota(informe);
+  const incidenciaUvaValor = Number(incidencia_uva) || 0;
 
-  if (uvaPersonalizado && uvaPersonalizado > 0) {
-    return Number(uvaPersonalizado);
-  }
-
-  const b = Number(incidencia_uva) || 0;
-  if (b) return b;
-
-  return Number(plusvalia_em) || Number(plusvalia_pl) || Number(plusvalia_sl) || 0;
+  return alicuotaValor * incidenciaUvaValor;
 };
 
 const calculateAlicuota = (informe: Informe): number => {
@@ -792,8 +786,8 @@ const calcularValoresAConCalculo = (
       ? m2TotalesDelCalculo
       : capacidadConstructiva.totalCapConstructivaAjustada;
 
-  const a1Final = calculateA1(superficieParcelaFinal, fotMedanera);
-  const a2Calculado = calculateA2(m2TotalesParaCalculo, a1Final);
+  const a1Final = calculateA1(m2TotalesParaCalculo);
+  const a2Calculado = calculateA2(superficieParcelaFinal, fotMedanera);
 
   if (tieneCalculoMotor) {
     const a = m2TotalesParaCalculo;
@@ -906,18 +900,14 @@ const calcularValoresPlusvalia = (
     lfiPercentFromStats
   );
 
-  const a2Recalculado = calculateA2(totalCapConstructivaFinal, valoresA.a1Final);
+  const superficieParcela = valoresCalculo.superficieParcela || informe.edificabilidad?.superficie_parcela || 0;
+  const fotMedanera = informe.edificabilidad?.fot?.fot_medianera || 0;
+  const a2Recalculado = calculateA2(superficieParcela, fotMedanera);
   const aRecalculado = calculateA(valoresA.a1Final, a2Recalculado);
 
-  const axbRecalculado =
-    tieneCalculoMotor && valoresCalculo.montoFinalPlusvalia > 0 && alicuotaValor > 0
-      ? valoresCalculo.montoFinalPlusvalia / alicuotaValor
-      : calculateAxB(aRecalculado, b);
+  const axbRecalculado = calculateAxB(aRecalculado, b);
 
-  const plusvaliaFinalFinal =
-    tieneCalculoMotor && valoresCalculo.montoFinalPlusvalia > 0
-      ? valoresCalculo.montoFinalPlusvalia
-      : calculatePlusvaliaFinal(axbRecalculado, alicuotaValor);
+  const plusvaliaFinalFinal = calculatePlusvaliaFinal(axbRecalculado, alicuotaValor);
 
   const lfiAfeccionPercentFinal = calcularLfiAfeccionPercent(
     valoresCalculo.lfiAplicada,
@@ -1237,8 +1227,8 @@ const calcularValoresPlusvaliaDesdeCapacidad = (
   totalCapConstructivaFinal: number,
   informe: Informe
 ) => {
-  const a1 = calculateA1(superficieParcela, fotMedanera);
-  const a2 = calculateA2(totalCapConstructivaFinal, a1);
+  const a1 = calculateA1(totalCapConstructivaFinal);
+  const a2 = calculateA2(superficieParcela, fotMedanera);
   const a = calculateA(a1, a2);
   const b = calculatePlusvaliaB(informe);
   const axb = calculateAxB(a, b);
