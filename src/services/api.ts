@@ -130,18 +130,37 @@ const obtenerCoordenadas = async (direccion: string) => {
     ? direccion
     : `${direccion}, Ciudad Autónoma de Buenos Aires, Argentina`;
 
+  console.log('[FRONTEND] 🔍 Obteniendo coordenadas de Google Maps:', {
+    direccionOriginal: direccion,
+    direccionCompleta,
+    tieneGoogleMapsKey: !!googleMapsKey,
+  });
+
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(direccionCompleta)}&key=${googleMapsKey}`;
   const response = await axios.get(url, { timeout: 20000 });
 
+  console.log('[FRONTEND] 📍 Respuesta Google Maps:', {
+    status: response.status,
+    resultsCount: response.data.results?.length || 0,
+    firstResult: response.data.results?.[0] ? {
+      formatted_address: response.data.results[0].formatted_address,
+      location: response.data.results[0].geometry.location,
+    } : null,
+  });
+
   if (!response.data.results || response.data.results.length === 0) {
+    console.error('[FRONTEND] ❌ Google Maps no devolvió resultados para:', direccionCompleta);
     throw new Error('No se pudieron obtener las coordenadas para la dirección especificada');
   }
 
   const location = response.data.results[0].geometry.location;
-  return {
+  const coordenadas = {
     lat: location.lat.toString(),
     lon: location.lng.toString(),
   };
+
+  console.log('[FRONTEND] ✅ Coordenadas obtenidas:', coordenadas);
+  return coordenadas;
 };
 
 export const auth = {
@@ -554,7 +573,7 @@ const executeConsultaRequest = async (
       coordenadas,
       ...opts,
     },
-    { timeout: 60000 }
+    { timeout: 120000 }
   );
   return response.data;
 };
