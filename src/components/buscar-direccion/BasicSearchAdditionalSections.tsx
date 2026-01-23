@@ -37,10 +37,13 @@ const getZonaDisplay = (
 ): string => {
   if (zonaEspecial) {
     if (Array.isArray(zonaEspecial)) {
-      const distritoEspecifico = zonaEspecial.find((d) => d?.distrito_especifico)?.distrito_especifico;
+      const distritoEspecifico = zonaEspecial.find(
+        (d) => d?.distrito_especifico
+      )?.distrito_especifico;
       if (distritoEspecifico) return distritoEspecifico;
     } else {
-      const distritoEspecifico = (zonaEspecial as { distrito_especifico?: string })?.distrito_especifico;
+      const distritoEspecifico = (zonaEspecial as { distrito_especifico?: string })
+        ?.distrito_especifico;
       if (distritoEspecifico) return distritoEspecifico;
     }
   }
@@ -228,7 +231,7 @@ const ZoningDataTable: React.FC<{
 
   const getCatalogacionValue = (): string => {
     if (!catalogacionData) return 'N/A';
-    
+
     const campos = [
       catalogacionData.catalogacion,
       catalogacionData.denominacion,
@@ -341,7 +344,9 @@ const PlanoIndiceSection: React.FC<{ planoIndice: string }> = ({ planoIndice }) 
   </div>
 );
 
-const extractCatalogacion = (catalogacionData: Informe['edificabilidad']['catalogacion']): string | null => {
+const extractCatalogacion = (
+  catalogacionData: Informe['edificabilidad']['catalogacion']
+): string | null => {
   return (
     catalogacionData?.catalogacion ||
     catalogacionData?.denominacion ||
@@ -471,4 +476,3 @@ const FacadeImagesSection: React.FC<{ images: string[] }> = ({ images }) => {
 };
 
 export default BasicSearchAdditionalSections;
-

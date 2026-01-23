@@ -4,7 +4,7 @@
   "description": "Plataforma de prefactibilidades urbanísticas para inmobiliarias. Consulta código urbanístico, normativas y regulaciones de desarrollo urbano.",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "faviconPrefa.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },

@@ -1,0 +1,29 @@
+{
+  "cookies": [
+    {
+      "name": "g_state",
+      "value": "{\"i_l\":0,\"i_ll\":1769201895715,\"i_b\":\"xRh72tlrzxlhbqL4d45pdPIsTutpWGJp+WT6djTM2AI\",\"i_e\":{\"enable_itp_optimization\":3}}",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1784753895,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "http://localhost:3000",
+      "localStorage": [
+        {
+          "name": "token",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjp7ImlkIjoiNjkzOGE3NTIyYzkxMDFiNDQ4MTJiN2ZiIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwicm9sZSI6InVzZXIifSwiaWF0IjoxNzY5MjAxODk3LCJleHAiOjE3NjkyMzA2OTd9.cN2DRlO_lYci5lBXe5mobVy9MiNXygfBd6mv1NnsZnE"
+        },
+        {
+          "name": "userProfile",
+          "value": "{\"_id\":\"6938a7522c9101b44812b7fb\",\"id\":\"6938a7522c9101b44812b7fb\",\"nombre\":\"Test User\",\"email\":\"test@example.com\",\"isVerified\":true,\"role\":\"user\",\"isSuperAdmin\":false,\"acceptedTerms\":false,\"googleId\":null,\"tutorialStatus\":null,\"personalizacion\":{},\"suscripcion\":{\"suscripcionInterna\":false},\"credits\":{\"fromSubscription\":0,\"fromOverages\":0,\"total\":0}}"
+        }
+      ]
+    }
+  ]
+}

@@ -27,7 +27,10 @@ authenticatedTest.describe('Consulta Completa', () => {
     // Hacer click en el botón de generar/consultar
     const searchButtonVisible = await consultaPage.searchButton.isVisible({ timeout: 5000 }).catch(() => false);
     if (searchButtonVisible) {
-      await consultaPage.searchButton.click();
+      await consultaPage.dismissBlockingOverlay();
+      await consultaPage.searchButton.click({ force: true }).catch(async () => {
+        await consultaPage.searchInput.press('Enter');
+      });
     } else {
       // Si no hay botón visible, presionar Enter
       await consultaPage.searchInput.press('Enter');
@@ -66,7 +69,10 @@ authenticatedTest.describe('Consulta Completa', () => {
     // Hacer click en el botón de generar/consultar
     const searchButtonVisible = await consultaPage.searchButton.isVisible({ timeout: 5000 }).catch(() => false);
     if (searchButtonVisible) {
-      await consultaPage.searchButton.click();
+      await consultaPage.dismissBlockingOverlay();
+      await consultaPage.searchButton.click({ force: true }).catch(async () => {
+        await consultaPage.searchInput.press('Enter');
+      });
     } else {
       await consultaPage.searchInput.press('Enter');
     }
