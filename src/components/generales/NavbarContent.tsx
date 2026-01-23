@@ -38,7 +38,7 @@ const NavbarContent: React.FC<NavbarContentProps> = ({
                 <BrandLogo {...navigationProps} />
                 <DesktopNavigation {...navigationProps} />
               </div>
-              <div className="hidden md:flex ml-auto md:ml-6 items-center space-x-4 md:space-x-6 mr-2">
+              <div className="hidden lg:flex ml-auto lg:ml-6 items-center space-x-4 lg:space-x-6 mr-2">
                 {usuario && <CreditsPill saldo={creditBalance} />}
                 <UserSection
                   usuario={usuario}
@@ -48,10 +48,10 @@ const NavbarContent: React.FC<NavbarContentProps> = ({
                 />
                 <ThemeButton />
               </div>
-              <div className="flex md:hidden items-center justify-center flex-1">
+              <div className="flex lg:hidden items-center justify-center flex-1">
                 {usuario && <CreditsPill saldo={creditBalance} />}
               </div>
-              <div className="flex md:hidden items-center space-x-2 ml-2">
+              <div className="flex lg:hidden items-center space-x-2 ml-2">
                 <ThemeButton />
                 <MobileMenuButton open={open} />
               </div>

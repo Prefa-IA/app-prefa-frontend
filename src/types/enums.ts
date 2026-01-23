@@ -213,6 +213,7 @@ export interface Informe {
   entorno: Entorno;
   timestamp: string;
   tipoPrefa?: PrefaType;
+  basicSearch?: boolean;
   pdfUrl?: string;
   esUltimoInforme?: boolean;
   shareToken?: string;

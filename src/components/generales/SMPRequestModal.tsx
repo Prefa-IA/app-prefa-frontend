@@ -42,10 +42,13 @@ const SMPRequestModal: React.FC<SMPRequestModalProps> = ({ direccion, onConfirm,
         <div className="mb-4 text-sm space-y-2">
           <p>
             No se pudo obtener automáticamente el código SMP para la dirección:{' '}
-            <span className="font-semibold text-primary-600 dark:text-primary-400">{direccion}</span>
+            <span className="font-semibold text-primary-600 dark:text-primary-400">
+              {direccion}
+            </span>
           </p>
           <p className="text-gray-600 dark:text-gray-400">
-            El servicio del catastro no encontró la parcela por coordenadas. Ingrese el código SMP manualmente.
+            El servicio del catastro no encontró la parcela por coordenadas. Ingrese el código SMP
+            manualmente.
           </p>
         </div>
 

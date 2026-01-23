@@ -14,7 +14,7 @@ import SEO from './SEO';
 
 const CareerIcon: React.FC<{ tipo: Career['tipo'] }> = ({ tipo }) => {
   const iconClass = 'w-12 h-12 text-primary-600 dark:text-primary-400';
-  
+
   switch (tipo) {
     case 'developer':
       return <CodeIcon className={iconClass} />;
@@ -41,7 +41,6 @@ const CareerCard: React.FC<{ career: Career }> = ({ career }) => {
   const truncatedDescription = career.descripcion
     ? truncateText(career.descripcion, MAX_DESCRIPTION_LENGTH)
     : '';
-
   return (
     <a
       href={career.url}
@@ -50,35 +49,30 @@ const CareerCard: React.FC<{ career: Career }> = ({ career }) => {
       className="group bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-300 flex flex-col h-full overflow-hidden"
     >
       <div className="px-6 pt-6 pb-4">
-        <div className="flex items-center justify-center mb-4">
-          <div className="flex items-center justify-center w-16 h-16 bg-primary-50 dark:bg-primary-900/20 rounded-lg group-hover:bg-primary-100 dark:group-hover:bg-primary-900/30 transition-colors">
+        <div className="flex items-start justify-between mb-4">
+          <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wide">
+            {career.titulo}
+          </h3>
+          <div className="flex items-center justify-center w-12 h-12 bg-primary-50 dark:bg-primary-900/20 rounded-md border border-primary-100 dark:border-primary-900/40">
             <CareerIcon tipo={career.tipo} />
           </div>
         </div>
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors underline decoration-2 underline-offset-2">
-          {career.titulo}
-        </h3>
         {truncatedDescription && (
           <p className="text-gray-600 dark:text-gray-400 flex-grow mb-4 text-sm leading-relaxed">
             {truncatedDescription}
           </p>
         )}
       </div>
-      <div className="mt-auto px-6 py-4 bg-primary-50 dark:bg-primary-900/20 border-t border-gray-200 dark:border-gray-700 group-hover:bg-primary-100 dark:group-hover:bg-primary-900/30 transition-colors">
+      <div className="mt-auto px-6 py-4 bg-primary-50 dark:bg-primary-900/20 border-t border-gray-200 dark:border-gray-700 group-hover:bg-primary-100 dark:group-hover:bg-primary-900/30 transition-colors flex justify-end">
         <span className="text-primary-600 dark:text-primary-400 font-semibold text-sm flex items-center gap-2">
-          Ver más
+          Postularse
           <svg
             className="w-4 h-4 group-hover:translate-x-1 transition-transform"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </span>
       </div>
@@ -163,4 +157,3 @@ const CareersPage: React.FC = () => {
 };
 
 export default CareersPage;
-

@@ -163,17 +163,11 @@ const LegalLinks: React.FC<{
   onShowPrivacy: () => void;
 }> = ({ onShowTyC, onShowPrivacy }) => (
   <div className="flex items-center flex-wrap gap-3">
-    <Link
-      to="/career"
-      className="text-primary-600 dark:text-primary-400 hover:underline"
-    >
+    <Link to="/career" className="text-primary-600 dark:text-primary-400 hover:underline">
       Trabajá con Nosotros
     </Link>
     <span className="text-gray-400 dark:text-gray-500">|</span>
-    <button
-      onClick={onShowTyC}
-      className="text-primary-600 dark:text-primary-400 hover:underline"
-    >
+    <button onClick={onShowTyC} className="text-primary-600 dark:text-primary-400 hover:underline">
       Términos y Condiciones
     </button>
     <span className="text-gray-400 dark:text-gray-500">|</span>

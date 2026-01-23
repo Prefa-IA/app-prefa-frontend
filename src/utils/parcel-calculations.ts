@@ -900,7 +900,8 @@ const calcularValoresPlusvalia = (
     lfiPercentFromStats
   );
 
-  const superficieParcela = valoresCalculo.superficieParcela || informe.edificabilidad?.superficie_parcela || 0;
+  const superficieParcela =
+    valoresCalculo.superficieParcela || informe.edificabilidad?.superficie_parcela || 0;
   const fotMedanera = informe.edificabilidad?.fot?.fot_medianera || 0;
   const a2Recalculado = calculateA2(superficieParcela, fotMedanera);
   const aRecalculado = calculateA(valoresA.a1Final, a2Recalculado);

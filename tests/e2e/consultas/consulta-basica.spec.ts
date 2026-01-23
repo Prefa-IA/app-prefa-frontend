@@ -80,7 +80,10 @@ authenticatedTest.describe('Consulta Básica', () => {
       // Si no hay sugerencias, intentar hacer click en el botón de búsqueda si existe
       const searchButtonVisible = await consultaPage.searchButton.isVisible({ timeout: 2000 }).catch(() => false);
       if (searchButtonVisible) {
-        await consultaPage.searchButton.click();
+        await consultaPage.dismissBlockingOverlay();
+        await consultaPage.searchButton.click({ force: true }).catch(async () => {
+          await consultaPage.searchInput.press('Enter');
+        });
       } else {
         // Si no hay botón, presionar Enter en el input
         await consultaPage.searchInput.press('Enter');

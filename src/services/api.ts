@@ -142,10 +142,12 @@ const obtenerCoordenadas = async (direccion: string) => {
   console.log('[FRONTEND] 📍 Respuesta Google Maps:', {
     status: response.status,
     resultsCount: response.data.results?.length || 0,
-    firstResult: response.data.results?.[0] ? {
-      formatted_address: response.data.results[0].formatted_address,
-      location: response.data.results[0].geometry.location,
-    } : null,
+    firstResult: response.data.results?.[0]
+      ? {
+          formatted_address: response.data.results[0].formatted_address,
+          location: response.data.results[0].geometry.location,
+        }
+      : null,
   });
 
   if (!response.data.results || response.data.results.length === 0) {
