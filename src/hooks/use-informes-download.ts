@@ -35,16 +35,22 @@ const validarDatosCompletos = (informe: Informe): boolean => {
   return frenteValido && fondoValido && valoresCalculadosValidos;
 };
 
+const COOLDOWN_MS = 1500;
+
 export const useInformesDownload = () => {
   const [downloadingIds, setDownloadingIds] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [cooldownIds, setCooldownIds] = useState<string[]>([]);
 
   const handleDescargar = useCallback(
     async (informe: Informe) => {
       const id = informe._id as string;
-      if (!id || downloadingIds.includes(id)) return;
+      if (!id || downloadingIds.includes(id) || cooldownIds.includes(id)) return;
 
       setDownloadingIds((prev) => [...prev, id]);
+      setCooldownIds((prev) => [...prev, id]);
+      window.setTimeout(() => {
+        setCooldownIds((prev) => prev.filter((cid) => cid !== id));
+      }, COOLDOWN_MS);
       try {
         const blob = await prefactibilidad.descargarPDF(id);
         const filename = generateInformeFilename(informe);
@@ -62,13 +68,14 @@ export const useInformesDownload = () => {
         }
       } catch (error) {
         console.error('Error al descargar informe:', error);
-        setError('Error al descargar el informe PDF.');
+        toast.error('Error al descargar el informe PDF. Por favor, intenta nuevamente.');
       } finally {
         setDownloadingIds((prev) => prev.filter((did) => did !== id));
       }
     },
-    [downloadingIds]
+    [downloadingIds, cooldownIds]
   );
 
-  return { handleDescargar, downloadingIds, error, setError };
+  const disabledIds = Array.from(new Set([...downloadingIds, ...cooldownIds]));
+  return { handleDescargar, downloadingIds: disabledIds };
 };
