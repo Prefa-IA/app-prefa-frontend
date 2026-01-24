@@ -74,26 +74,16 @@ export const useInformesList = () => {
   const {
     handleDescargar,
     downloadingIds,
-    error: downloadError,
-    setError: setDownloadError,
   } = useInformesDownload();
 
-  const {
-    handleCompartir,
-    sharingIds,
-    error: shareError,
-    setError: setShareError,
-  } = useInformesShare();
+  const { handleCompartir, sharingIds } = useInformesShare();
 
   const { informes, loading, error, totalPages, cargarInformes } = useInformesData(
     page,
     search,
     itemsPerPage,
-    downloadError || shareError,
-    (error) => {
-      setDownloadError(error);
-      setShareError(error);
-    }
+    null,
+    () => {}
   );
 
   const handlePrevPage = useCallback(() => {

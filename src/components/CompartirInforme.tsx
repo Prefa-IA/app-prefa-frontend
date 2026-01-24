@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import axios from 'axios';
 
 import { useTheme } from '../contexts/ThemeContext';
 import { prefactibilidad } from '../services/api';
@@ -88,6 +89,74 @@ const necesitaRecalcular = (informe: Informe): boolean => {
   return false;
 };
 
+const SHARE_CACHE_TTL_MS = 2000;
+const sharedInformeCache = new Map<string, { data: Informe; expiresAt: number }>();
+const sharedInformeInFlight = new Map<string, Promise<Informe>>();
+
+const getCachedSharedInforme = (token: string) => {
+  const cached = sharedInformeCache.get(token);
+  if (!cached) return null;
+  if (cached.expiresAt < Date.now()) {
+    sharedInformeCache.delete(token);
+    return null;
+  }
+  return cached.data;
+};
+
+const loadSharedInforme = async (token: string) => {
+  const cached = getCachedSharedInforme(token);
+  if (cached) return cached;
+
+  const existing = sharedInformeInFlight.get(token);
+  if (existing) {
+    return existing;
+  }
+
+  const inFlight = (async () => {
+    const dataInicial = await prefactibilidad.obtenerInformeCompartido(token);
+
+    const dataFinal = necesitaRecalcular(dataInicial)
+      ? await (async () => {
+          try {
+            const parcelaParaCalcular = { ...dataInicial } as Record<string, unknown>;
+            const respuestaCalculo = await prefactibilidad.calcular(parcelaParaCalcular);
+
+            if (respuestaCalculo && isValidProcessingResponse(respuestaCalculo)) {
+              const calculoFromResponse = respuestaCalculo['calculo'] as
+                | Record<string, unknown>
+                | undefined;
+              return {
+                ...dataInicial,
+                ...respuestaCalculo,
+                calculo: calculoFromResponse || dataInicial.calculo,
+              } as Informe;
+            }
+            return dataInicial;
+          } catch (calcError) {
+            console.warn(
+              '[CompartirInforme] Error al recalcular, usando datos guardados',
+              calcError
+            );
+            return dataInicial;
+          }
+        })()
+      : dataInicial;
+
+    sharedInformeCache.set(token, {
+      data: dataFinal,
+      expiresAt: Date.now() + SHARE_CACHE_TTL_MS,
+    });
+    return dataFinal;
+  })();
+
+  sharedInformeInFlight.set(token, inFlight);
+  try {
+    return await inFlight;
+  } finally {
+    sharedInformeInFlight.delete(token);
+  }
+};
+
 const useInformeCompartido = (token: string | undefined) => {
   const [informe, setInforme] = useState<Informe | null>(null);
   const [loading, setLoading] = useState(true);
@@ -104,42 +173,20 @@ const useInformeCompartido = (token: string | undefined) => {
       try {
         setLoading(true);
         setError(null);
-        const dataInicial = await prefactibilidad.obtenerInformeCompartido(token);
-
-        const dataFinal = necesitaRecalcular(dataInicial)
-          ? await (async () => {
-              try {
-                const parcelaParaCalcular = { ...dataInicial } as Record<string, unknown>;
-                const respuestaCalculo = await prefactibilidad.calcular(parcelaParaCalcular);
-
-                if (respuestaCalculo && isValidProcessingResponse(respuestaCalculo)) {
-                  const calculoFromResponse = respuestaCalculo['calculo'] as
-                    | Record<string, unknown>
-                    | undefined;
-                  return {
-                    ...dataInicial,
-                    ...respuestaCalculo,
-                    calculo: calculoFromResponse || dataInicial.calculo,
-                  } as Informe;
-                }
-                return dataInicial;
-              } catch (calcError) {
-                console.warn(
-                  '[CompartirInforme] Error al recalcular, usando datos guardados',
-                  calcError
-                );
-                return dataInicial;
-              }
-            })()
-          : dataInicial;
-
+        const dataFinal = await loadSharedInforme(token);
         setInforme(dataFinal);
       } catch (err: unknown) {
         console.error('[CompartirInforme] Error cargando informe', err);
-        const errorMessage =
-          err instanceof Error
-            ? err.message
-            : 'Error al cargar el informe compartido. El enlace puede ser inválido o haber expirado.';
+        const errorMessage = (() => {
+          const fallbackMessage =
+            err instanceof Error
+              ? err.message
+              : 'Error al cargar el informe compartido. El enlace puede ser inválido o haber expirado.';
+          if (axios.isAxiosError(err) && err.response?.status === 410) {
+            return 'Este enlace ya fue utilizado. Genera un nuevo link para compartir.';
+          }
+          return fallbackMessage;
+        })();
         setError(errorMessage);
       } finally {
         setLoading(false);
